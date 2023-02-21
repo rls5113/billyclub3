@@ -58,12 +58,18 @@ public class AuthController {
             model.addAttribute("user", user);
             return "register";
         }
-        userService.saveUser(user);
+        model.addAttribute("user", userService.addUser(user));
         return "redirect:/login?success";
     }
-
     @GetMapping("/users")
     public String listRegisteredUsers(Model model){
+        List<UserDto> users = userService.findAllUsers();
+        model.addAttribute("users", users);
+        return "users";
+    }
+
+    @GetMapping("/events")
+    public String listCurrentEvents(Model model){
         List<UserDto> users = userService.findAllUsers();
         model.addAttribute("users", users);
         return "users";

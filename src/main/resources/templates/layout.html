@@ -28,9 +28,9 @@
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/clubs}">Profile</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/events}">Events</a></li>
-        <li sec:authorize="!isAuthenticated()" class="nav-item"><a class="nav-link btn btn-primary" th:href="@{/login}">Login</a></li>
-        <li sec:authorize="!isAuthenticated()"  class="nav-item"><a class="nav-link btn btn-primary" th:href="@{/register}">Register</a></li>
-        <li sec:authorize="isAuthenticated()"  class="nav-item"><a class="nav-link btn btn-primary" th:href="@{/logout}">Logout</a></li>
+        <li sec:authorize="!isAuthenticated()" class="nav-item"><a class="nav-link btn btn-primary text-light" th:href="@{/login}">Login</a></li>
+        <li sec:authorize="!isAuthenticated()"  class="nav-item"><a class="nav-link btn btn-primary text-light" th:href="@{/register}">Register</a></li>
+        <li sec:authorize="isAuthenticated()"  class="nav-item"><a class="nav-link btn btn-primary text-light" th:href="@{/logout}">Logout</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" id="navbarDropdownPortfolio" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Welcome</a>
           <ul  class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownPortfolio">
@@ -55,7 +55,7 @@
 <footer class="bg-dark py-4 mt-auto">
   <div class="container px-5">
     <div class="row align-items-center justify-content-between flex-column flex-sm-row">
-      <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; Wehby-Stuart Ent.</div></div>
+      <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; NearPerfectSoftware</div></div>
       <div class="col-auto">
         <a class="link-light small" href="#!">Privacy</a>
         <span class="text-white mx-1">&middot;</span>

@@ -7,7 +7,9 @@ import com.billyclub.points.model.User;
 import java.util.List;
 
 public interface UserService {
-    void saveUser(UserDto userDto);
+    User saveUser(UserDto userDto);
+
+    UserDto addUser(UserDto userDto);
 
     User findByEmail(String email);
 
