@@ -68,11 +68,4 @@ public class AuthController {
         return "users";
     }
 
-    @GetMapping("/events")
-    public String listCurrentEvents(Model model){
-        List<UserDto> users = userService.findAllUsers();
-        model.addAttribute("users", users);
-        return "users";
-    }
-
   }

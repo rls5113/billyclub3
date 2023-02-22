@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        layout:decorate="~{layout}">
+<head>
+    <title>Users</title>
+</head>
+<body layout:fragment="body">
+<style>
+    .main {
+        padding: 125px 150px;
+    }
+
+</style>
+<div class="main">
+    <div class="card">
+        <div class="card-header  bg-primary">
+            <h3 class="text-center text-light">Profile</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-bordered table-hover table-light">
+                <tr>
+                    <td>Username</td>
+                    <td><span sec:authentication="name"></span></td>
+                </tr>
+                <tr>
+                    <td>Authorities</td>
+                    <td><span sec:authentication="principal.authorities"></span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
