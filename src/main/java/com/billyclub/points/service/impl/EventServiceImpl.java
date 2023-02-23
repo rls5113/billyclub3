@@ -69,6 +69,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
+    @Override
     public Event addPlayerToEvent(Long eventId, Long playerId) {
         Event event = findById(eventId);
         Player player = playerService.findById(playerId);
@@ -76,6 +77,7 @@ public class EventServiceImpl implements EventService {
         event.addPlayer(player);
         return eventRepository.save(event);
     }
+    @Override
     public Event removePlayerFromEvent(Long eventId, Long playerId) {
         Event event = findById(eventId);
         Player player = playerService.findById(playerId);
@@ -83,20 +85,28 @@ public class EventServiceImpl implements EventService {
         playerService.deleteById(playerId);
         return eventRepository.save(event);
     }
-
     @Override
     public List<EventDto> findAllEvents() {
         List<Event> events = eventRepository.findAll();
-        List<EventDto> list = events.stream().map((event)-> convertEntityToDto(event))
+        List<EventDto> list = events.stream().map((event)-> toDto(event))
                 .collect(Collectors.toList());
         list.sort((e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
 //        Collections.sort(list, (e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
         return list;
     }
-    public EventDto convertEntityToDto(Event event){
+
+    @Override
+    public EventDto toDto(Event event) {
         EventDto eventDto = new EventDto();
         BeanUtils.copyProperties(event, eventDto);
         return eventDto;
+    }
+
+    @Override
+    public Event toEntity(EventDto dto) {
+        Event event = new Event();
+        BeanUtils.copyProperties(event, dto);
+        return event;
     }
 
 }

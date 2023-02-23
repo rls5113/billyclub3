@@ -80,12 +80,12 @@ class LoadDatabase {
             log.info("Preloading " + event2 );
             log.info("Preloading " + event3 );
             log.info("Preloading " + event4 );
-            Player player1 = playerService.add(new Player("Herman Munster", 25,0));
-            Player player2 = playerService.add(new Player("Lilly Munster", 20,0));
-            Player player3 = playerService.add(new Player("Eddie Munster", 15,0));
-            log.info("Preloading " + player1);
-            log.info("Preloading " + player2);
-            log.info("Preloading " + player3);
+//            Player player1 = playerService.add(new Player("Herman Munster", 25,0));
+//            Player player2 = playerService.add(new Player("Lilly Munster", 20,0));
+//            Player player3 = playerService.add(new Player("Eddie Munster", 15,0));
+//            log.info("Preloading " + player1);
+//            log.info("Preloading " + player2);
+//            log.info("Preloading " + player3);
 
 //            event1.getPlayers().add(player1);
 //            log.info("Saving event after adding players  "+ eventService.addPlayerToEvent(event1.getId(),player1.getId()));

@@ -25,7 +25,21 @@
                 <h2 class="text-center">Registration</h2>
             </div>
             <div class="card-body">
-                <form method="post" role="form" th:action="@{/register/save}" th:object="${user}">
+                <form method="post" role="form" th:action="@{/register/save}" th:object="${userDto}">
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Username</label>
+                        <input class="form-control"
+                               id="username"
+                               name="username"
+                               placeholder="Enter username"
+                               th:field="*{username}"
+                               type="text"
+                        />
+                        <p th:errors="*{firstName}" class="text-danger"
+                           th:if="${#fields.hasErrors('firstName')}">
+                        </p>
+                    </div>
 
                     <div class="form-group mb-3">
                         <label class="form-label">First Name</label>

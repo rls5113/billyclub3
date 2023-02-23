@@ -2,6 +2,7 @@
 <html
         xmlns:th="http://thymeleaf.org"
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
         layout:decorate="~{layout}">
 <head>
     <title>Event Detail</title>
@@ -38,7 +39,7 @@
                         <div class="col-6">
                             <form
                                     method="post"
-                                    th:action="@{/}" th:object="${event}"
+                                    th:action="@{/events/{id}/addMe(id=${event.id})}" th:object="${event}"
                                     class="form-horizontal"
                                     role="form"
                             >
@@ -75,6 +76,9 @@
                                            readonly
                                            th:field="*{numOfTimes}"
                                     />
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">Add me this event</button>
                                 </div>
 
                             </form>

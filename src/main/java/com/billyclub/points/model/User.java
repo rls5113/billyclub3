@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "users")
+@ToString
 public class User {
 
     private static final long serialVersionUID = -2637520971624666329L;
@@ -21,6 +23,8 @@ public class User {
     @Column(name="id",updatable = false, nullable = false)
     private Long id;
 
+    private String username;
+
     @Column(nullable=false)
     private String name;
 
@@ -29,6 +33,8 @@ public class User {
 
     @Column(nullable=false)
     private String password;
+
+    private Integer points;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(

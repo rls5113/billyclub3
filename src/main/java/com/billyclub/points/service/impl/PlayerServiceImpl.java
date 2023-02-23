@@ -1,10 +1,13 @@
 package com.billyclub.points.service.impl;
 
+import com.billyclub.points.dto.PlayerDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.Player;
+import com.billyclub.points.model.User;
 import com.billyclub.points.repository.PlayerRepository;
-import com.billyclub.points.service.IService;
+import com.billyclub.points.service.PlayerService;
 import jakarta.transaction.Transactional;
+import org.hibernate.boot.model.source.spi.PluralAttributeNature;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class PlayerServiceImpl implements IService<Player> {
+public class PlayerServiceImpl implements PlayerService {
     @Autowired
     private final PlayerRepository repo;
 
@@ -65,4 +68,24 @@ public class PlayerServiceImpl implements IService<Player> {
         return repo.save(entity);
     }
 
+    @Override
+    public PlayerDto toDto(Player entity) {
+        PlayerDto dto = new PlayerDto();
+        BeanUtils.copyProperties(entity, dto);
+        return dto;
+    }
+
+    @Override
+    public Player toEntity(PlayerDto dto) {
+        Player entity = new Player();
+        BeanUtils.copyProperties(dto, entity);
+        return entity;
+    }
+
+    @Override
+    public Player create(User user) {
+        Player player = new Player(user.getName(), 20, 0);
+
+        return repo.save(player);
+    }
 }

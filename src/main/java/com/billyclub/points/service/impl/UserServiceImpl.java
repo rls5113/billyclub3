@@ -32,6 +32,8 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setName(userDto.getFirstName() + " " + userDto.getLastName());
         user.setEmail(userDto.getEmail());
+        user.setUsername(userDto.getUsername());
+        user.setPoints(0);
 
         //encrypt the password once we integrate spring security
         //user.setPassword(userDto.getPassword());
@@ -45,20 +47,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserDto addUser(UserDto userDto) {
-        User user = new User();
-//        user.set
-        user.setName(userDto.getFirstName() + " " + userDto.getLastName());
-        user.setEmail(userDto.getEmail());
-
-        //encrypt the password once we integrate spring security
-        //user.setPassword(userDto.getPassword());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        Role role = roleRepository.findByName("ROLE_USER");
-        if(role == null){
-            role = checkRoleExist();
-        }
-        user.setRoles(Arrays.asList(role));
-        return convertEntityToDto(userRepository.save(user));
+        return toDto(saveUser(userDto));
     }
 
     @Override
@@ -67,18 +56,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
     public List<UserDto> findAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.stream().map((user) -> convertEntityToDto(user))
+        return users.stream().map((user) -> toDto(user))
                 .collect(Collectors.toList());
     }
 
-    private UserDto convertEntityToDto(User user){
+    private UserDto toDto(User user){
         UserDto userDto = new UserDto();
         String[] name = user.getName().split(" ");
          userDto.setFirstName(name[0]);
         userDto.setLastName(name[1]);
         userDto.setEmail(user.getEmail());
+        userDto.setPoints(user.getPoints());
+        userDto.setUsername(user.getUsername());
         return userDto;
     }
 

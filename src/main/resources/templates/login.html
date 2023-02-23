@@ -11,6 +11,9 @@
     .main {
         padding: 125px 10px;
     }
+    .red {
+        color:red;
+    }
 
 </style>
 
@@ -39,17 +42,17 @@
                             role="form"
                     >
                         <div class="mb-3">
-                            <label for="username" class="control-label">Email *</label>
+                            <label for="username">Username <span class="red">*</span></label>
                             <input type="text"
                                    id="username"
                                    name="username"
                                    class="form-control"
-                                   placeholder="Email"
+                                   placeholder="Username"
                             />
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="control-label">Password *</label>
+                            <label for="password" class="control-label">Password <span class="red">*</span></label>
                             <input type="password"
                                    id="password"
                                    name="password"
