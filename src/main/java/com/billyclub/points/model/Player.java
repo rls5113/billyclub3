@@ -1,6 +1,7 @@
 package com.billyclub.points.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -33,9 +34,10 @@ public class Player {
     @Column(name = "timeEntered", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime timeEntered;
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-            @JoinColumn(name = "event_id")
+//    @JsonBackReference
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+            @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
     public Player(String name, Integer pointsToPull, Integer pointsThisEvent) {

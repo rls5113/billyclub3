@@ -51,10 +51,10 @@ class LoadDatabase {
         return args -> {
 
             log.debug("Running load DATA");
-//            Role role1 = roleRepo.save(new Role(null, "ROLE_USER",null));
-//            Role role2 = roleRepo.save(new Role(null, "ROLE_ADMIN",null));
-//            log.info(role1.toString());
-//            log.info(role2.toString());
+            Role role1 = roleRepo.save(new Role(null, "ROLE_USER",null));
+            Role role2 = roleRepo.save(new Role(null, "ROLE_ADMIN",null));
+            log.info(role1.toString());
+            log.info(role2.toString());
 //            Role admin = userService.addRole("ADMIN");
 //            Role user = userService.addRole("USER");
 //
