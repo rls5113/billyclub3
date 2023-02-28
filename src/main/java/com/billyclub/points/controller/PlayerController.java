@@ -29,7 +29,6 @@ public class PlayerController {
 
     //hasRole('ROLE_') hasAnyRole('ROLE_') hasAuthority('permission') hasAnyAuthority('permission')
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
 //    public CollectionModel<PlayerModel> getAllPlayers() {
     public List<Player> getAllPlayers() {
 //        return assembler.toCollectionModel(playerService.findAll());
@@ -43,7 +42,6 @@ public class PlayerController {
         return new ResponseEntity<>(player, HttpStatus.OK);
     }
     @PostMapping
-    @PreAuthorize("hasAuthority('player:write')")
 //    public ResponseEntity<PlayerModel> addPlayer(@RequestBody Player player) {
     public ResponseEntity<Player> addPlayer(@RequestBody Player player) {
         Player addedPlayer = playerService.add(player);
