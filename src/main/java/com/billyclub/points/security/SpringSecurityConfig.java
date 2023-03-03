@@ -28,16 +28,20 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests((authorize) ->
-                        authorize.requestMatchers("/register/**","/console/**","/login/**","/js/**","/css/**","/assets/**","/layout/**").permitAll()
-                                .requestMatchers("/index").permitAll()
-                                .requestMatchers("/users").hasAnyRole("ADMIN","USER")
+                        authorize.requestMatchers("/register/**",
+                                        "/console/**","/login/**","/js/**","/css/**",
+                                        "/assets/**","/layout/**","/api/v1/**","/index").permitAll()
+//                                .anyRequest().authenticated()
                                 .requestMatchers("/events/**").hasAnyRole("ADMIN","USER")
-                                .requestMatchers("/player/**").hasAnyRole("ADMIN","USER")
-                                .requestMatchers("/profile/**").hasAnyRole("ADMIN","USER")
+//                                .requestMatchers("/players/**").hasAnyRole("ADMIN","USER")
+//                                .requestMatchers("/profile/**").hasAnyRole("ADMIN","USER")
+                                .requestMatchers("/users/**").hasRole("ADMIN")
+//                              .requestMatchers("/api/v1/**").hasAnyRole("ADMIN","USER")
                 ).formLogin(
                         form -> form
                                 .loginPage("/login")
                                 .loginProcessingUrl("/login")
+//                                .defaultSuccessUrl("/users")
                                 .defaultSuccessUrl("/events/current")
                                 .permitAll()
                 ).logout(

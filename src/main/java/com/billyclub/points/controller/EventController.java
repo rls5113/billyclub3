@@ -71,7 +71,7 @@ public class EventController {
 //                                                               @PathVariable Long playerId) {
     public ResponseEntity<Event> addPlayerToEvent(@PathVariable final Long eventId,
                                                                @PathVariable Long playerId) {
-        Event event = eventService.addPlayerToEvent(eventId,playerId);
+            Event event = eventService.addPlayerToEvent(eventId,playerId);
 //        EventModel eventModel = assembler.toModel(event);
         return new ResponseEntity<>(event, HttpStatus.OK);
     }

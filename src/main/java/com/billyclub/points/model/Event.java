@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @ToString
@@ -53,6 +54,14 @@ public class Event {
     public void removePlayer(Player player) {
         players.remove(player);
         player.setEvent(null);
+    }
+    public boolean isPlayerInEvent(String name) {
+        for (Player p : players) {
+            if(p.getName().equals(name)){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

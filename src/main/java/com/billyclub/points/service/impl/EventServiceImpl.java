@@ -1,11 +1,9 @@
 package com.billyclub.points.service.impl;
 
 import com.billyclub.points.dto.EventDto;
-import com.billyclub.points.dto.UserDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.Event;
 import com.billyclub.points.model.Player;
-import com.billyclub.points.model.User;
 import com.billyclub.points.repository.EventRepository;
 import com.billyclub.points.service.EventService;
 import org.springframework.beans.BeanUtils;
@@ -13,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,8 +69,9 @@ public class EventServiceImpl implements EventService {
     public Event addPlayerToEvent(Long eventId, Long playerId) {
         Event event = findById(eventId);
         Player player = playerService.findById(playerId);
-        event.getPlayers().add(player);
-        event.addPlayer(player);
+        if(!event.isPlayerInEvent(player.getName())) {
+            event.addPlayer(player);
+        }
         return eventRepository.save(event);
     }
     @Override
