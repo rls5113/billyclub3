@@ -26,14 +26,16 @@
                         <th>Date</th>
                         <th>Start</th>
                         <th># times</th>
+                        <th># players</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="event: ${events}">
-                        <td th:text="${event.eventDate}"></td>
+                        <td th:text="${{event.eventDate}}"></td>
                         <td th:text="${event.startTime}"></td>
                         <td th:text="${event.numOfTimes}"></td>
+                        <td th:text="${event.players.size}"></td>
                         <td><a class="nav-link btn btn-primary text-light" th:href="@{/events/{id}(id=${event.id})}">Details</a></td>
                     </tr>
                 </tbody>

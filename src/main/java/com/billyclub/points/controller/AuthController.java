@@ -50,9 +50,13 @@ public class AuthController {
     public String registration(@Valid @ModelAttribute("user") UserDto user,
                                BindingResult result,
                                Model model){
-        User existing = userService.findByEmail(user.getEmail());
-        if (existing != null) {
+        User existingEmail = userService.findByEmail(user.getEmail());
+        if (existingEmail != null) {
             result.rejectValue("email", null, "There is already an account registered with that email");
+        }
+        User existingUser = userService.findByUsername(user.getUsername());
+        if (existingUser != null) {
+            result.rejectValue("email", null, "There is already an account registered with that username");
         }
         if (result.hasErrors()) {
             model.addAttribute("user", user);

@@ -5,7 +5,7 @@
         xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
         layout:decorate="~{layout}">
 <head>
-    <title>Users</title>
+    <title>Event Detail</title>
 </head>
 <body layout:fragment="body">
 <style>
@@ -13,25 +13,138 @@
         padding: 125px 150px;
     }
 
+    .playerPanel {
+        font-size: small;
+    }
+
+    .btn-sml {
+        text-align-all: inherit;
+        font-size: small;
+    }
+
 </style>
-<div class="main">
-    <div class="card">
-        <div class="card-header  bg-primary">
-            <h3 class="text-center text-light">Profile</h3>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped table-bordered table-hover table-light">
-                <tr>
-                    <td>Username</td>
-                    <td><span sec:authentication="name"></span></td>
-                </tr>
-                <tr>
-                    <td>Authorities</td>
-                    <td><span sec:authentication="principal.authorities"></span></td>
-                </tr>
-            </table>
-        </div>
+
+<div class="container">
+    <div class="main">
+        <form
+                method="post"
+                th:action="@{/profile/edit" th:object="${loginUser}"
+                class="form-horizontal"
+                role="form"
+        >
+
+            <div class="row">
+
+                <div class="col-md-12">
+                    <div th:if="${param.error}">
+                        <div class="alert alert-danger">Invalid Email and Password.</div>
+                    </div>
+                    <div th:if="${param.logout}">
+                        <div class="alert alert-success">You have been logged out.</div>
+                    </div>
+                    <div th:if="${param.success}">
+                        <div class="alert alert-info">You've successfully created a user account! Now login.</div>
+                    </div>
+                    <div>
+                        <div class="card">
+                            <div class="card-header  bg-primary">
+                                <h3 class="text-center text-light">Event Detail</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-4">
+
+                                        <div class="mb-3">
+                                            <i>
+                                                <div th:text="*{id}"></div>
+                                            </i>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="username" class="control-label">Event Date</label>
+                                            <input type="text"
+                                                   id="username"
+                                                   name="username"
+                                                   class="form-control"
+                                                   placeholder="Username"
+                                                   readonly
+                                                   th:field="*{username}"
+                                            />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="name" class="control-label">Event Date</label>
+                                            <input type="text"
+                                                   id="name"
+                                                   name="name"
+                                                   class="form-control"
+                                                   placeholder="Name"
+                                                   readonly
+                                                   th:field="*{name}"
+                                            />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="control-label">Event Date</label>
+                                            <input type="text"
+                                                   id="email"
+                                                   name="email"
+                                                   class="form-control"
+                                                   placeholder="Email"
+                                                   readonly
+                                                   th:field="*{email}"
+                                            />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="points" class="control-label">Current Points</label>
+                                            <input type="text"
+                                                   id="points"
+                                                   name="points"
+                                                   class="form-control"
+                                                   placeholder="Current Points"
+                                                   readonly
+                                                   th:field="*{points}"
+                                            />
+                                        </div>
+
+
+                                        <div>
+                                            <!--  th:if="${event.isPlayerInEvent(loggedInUser.name)} "-->
+                                            <button style="margin: 5px" sec:authorize="!hasRole('ROLE_ADMIN')"
+                                                    th:if="${! #lists.contains(names, loginUser.name)} "
+                                                    type="#" class="btn btn-primary">Add me this event
+                                            </button>
+                                            <a sec:authorize="hasRole('ROLE_ADMIN') and false" data-bs-toggle="modal" data-bs-target="#userPickListModal"
+                                               class="btn btn-primary">Add Players to this event</a>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-8">
+                                        <table class="table table-striped table-bordered table-hover table-light">
+                                            <thead class="table-header">
+                                            <tr>
+                                                <th>Role</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody class="playerPanel">
+                                            <tr th:each="role : *{roles}">
+
+
+                                                <td th:text="${role.name}"/>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end row -->
+        </form>
     </div>
 </div>
 </body>
-</html>

@@ -6,7 +6,7 @@ import com.billyclub.points.model.User;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserService extends IService<User, UserDto>{
     User saveUser(UserDto userDto);
 
     UserDto addUser(UserDto userDto);
@@ -15,4 +15,6 @@ public interface UserService {
     User findByUsername(String username);
 
     List<UserDto> findAllUsers();
+
+    User findById(Long id);
 }

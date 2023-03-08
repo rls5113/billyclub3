@@ -1,72 +1,44 @@
-<!DOCTYPE html>
 <html
         xmlns:th="http://thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-        layout:decorate="~{layout}">
-<head>
-    <title>Users</title>
-</head>
-<body layout:fragment="body">
-<div class="modal-footer">
-</div>
-<form>
-    <style>
-        .main {
-            padding: 125px 150px;
-        }
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-    </style>
-    <div class="main">
+<body layout:fragment="userPickList">
+<form th:action="@{/events/{id}/addPlayersToEvent(id=${event.id})}" method="post" th:object="${userPickList}">
 
-        <div class="card">
-            <div class="card-header  bg-primary">
-                <h3 class="text-center text-light">User List</h3>
+<div class="modal fade" id="userPickListModal" tabindex="-1" aria-labelledby="userPickListModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="userPickListModalLabel">User Pick List</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
+            <div class="modal-body">
 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Open modal for @mdo</button>
+                <div class="mb-3">
 
-                <table class="table table-striped table-bordered table-hover table-light">
-                    <thead class="table-header">
-                    <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
+                    <tr th:each="user: ${userPickList}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" th:value="${user.id}"
+                                   id="userList" name="userList" th:field="${selectedUsers.multiUsersCheckboxes}">
+                            <label class="form-check-label" for="userList" th:text="${user.name}"/>
+<!--                            <div th:text="${userStat.index}"/>-->
+                        </div>
                     </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="user: ${users}">
-                        <td th:text="${user.firstName}"></td>
-                        <td th:text="${user.lastName}"></td>
-                        <td th:text="${user.email}"></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">New message</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+
+
                 </div>
-                <div class="modal-body">
-
-                    <div class="mb-3">
-                        <label for="recipient-name" class="col-form-label">Recipient:</label>
-                        <input type="text" class="form-control" id="recipient-name">
-                    </div>
-                 </div>
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary" fo>Add Selected</button>
             </div>
         </div>
     </div>
+</div>
 </form>
-
 </body>
 </html>

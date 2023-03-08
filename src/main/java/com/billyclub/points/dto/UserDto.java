@@ -3,10 +3,7 @@ package com.billyclub.points.dto;
 import com.billyclub.points.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,5 +26,11 @@ public class UserDto {
         private String password;
         private Integer points;
         private List<Role> roles;
+
+        public String getName() {
+                String name = (getFirstName()==null) ? "" : getFirstName();
+                name += (getLastName()==null) ? "" : " "+ getLastName();
+                return name;
+        }
 
 }

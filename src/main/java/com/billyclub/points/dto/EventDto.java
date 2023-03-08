@@ -1,5 +1,6 @@
 package com.billyclub.points.dto;
 
+import com.billyclub.points.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,5 +24,5 @@ public class EventDto {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime startTime;
     private Integer numOfTimes;
-    private List<PlayerDto> players;
+    private List<Player> players;
 }

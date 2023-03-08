@@ -84,7 +84,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player create(User user) {
-        Player player = new Player(user.getName(), 20, 0);
+        Player player = new Player(user.getName(), user.getPoints(), 0);
 
         return repo.save(player);
     }
