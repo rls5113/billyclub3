@@ -1,6 +1,7 @@
 package com.billyclub.points.config;
 
 import com.billyclub.points.model.Event;
+import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import com.billyclub.points.model.Role;
 import com.billyclub.points.repository.RoleRepository;
@@ -47,7 +48,7 @@ class LoadDatabase {
 //    @Autowired
     CommandLineRunner initAddPlayersToEventRecords(RoleRepository roleRepo, EventServiceImpl eventService,
                                                    PlayerServiceImpl playerService) {
-        System.out.println("loading data: PLAYER");
+        System.out.println("loading data: ROLES");
         return args -> {
 
             log.debug("Running load DATA");
@@ -72,10 +73,10 @@ class LoadDatabase {
 
 
             List<Player> players = Collections.emptyList();
-            Event event1 = eventService.add(new Event(null, LocalDate.now().plusDays(7), LocalTime.of(6,30,0) ,2, players));
-            Event event2 = eventService.add(new Event(null,LocalDate.now().plusDays(8), LocalTime.of(6,30,0) ,3, players));
-            Event event3 = eventService.add(new Event(null,LocalDate.now().plusDays(14), LocalTime.of(6,30,0) ,4, players));
-            Event event4 = eventService.add(new Event(null,LocalDate.now().plusDays(15), LocalTime.of(6,30,0) ,3, players));
+            Event event1 = eventService.add(new Event(null, LocalDate.now().plusDays(7), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players));
+            Event event2 = eventService.add(new Event(null,LocalDate.now().plusDays(8), LocalTime.of(6,30,0) ,2, EventStatus.OPEN, players));
+            Event event3 = eventService.add(new Event(null,LocalDate.now().plusDays(14), LocalTime.of(6,30,0) ,3,  EventStatus.OPEN,players));
+            Event event4 = eventService.add(new Event(null,LocalDate.now().plusDays(15), LocalTime.of(6,30,0) ,4,  EventStatus.OPEN,players));
             log.info("Preloading " + event1 );
             log.info("Preloading " + event2 );
             log.info("Preloading " + event3 );

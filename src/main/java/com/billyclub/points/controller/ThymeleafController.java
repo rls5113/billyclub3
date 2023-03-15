@@ -1,25 +1,26 @@
 package com.billyclub.points.controller;
 
-import com.billyclub.points.dto.EventDto;
-import com.billyclub.points.dto.FormValuesDto;
-import com.billyclub.points.dto.UserDto;
+import com.billyclub.points.dto.*;
 import com.billyclub.points.model.Event;
+import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import com.billyclub.points.model.User;
 import com.billyclub.points.service.EventService;
 import com.billyclub.points.service.PlayerService;
 import com.billyclub.points.service.UserService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -27,6 +28,7 @@ public class ThymeleafController {
     private final EventService eventService;
     private final UserService userService;
     private final PlayerService playerService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ThymeleafController.class);
     public ThymeleafController(EventService eventService, UserService userService, PlayerService playerService) {
         this.eventService = eventService;
@@ -55,6 +57,18 @@ public class ThymeleafController {
                 .collect(Collectors.toList());
         model.addAttribute("names",names);
 
+        List<PlayerDto> eventPlayers = players.stream()
+                .map( p -> playerService.toDto(p))
+                .filter( p -> !p.getIsWaiting())
+                .collect(Collectors.toList());
+        model.addAttribute("eventPlayers", eventPlayers);
+
+        List<PlayerDto> waitList = players.stream()
+                .map( p -> playerService.toDto(p))
+                .filter( p -> p.getIsWaiting())
+                .collect(Collectors.toList());
+        model.addAttribute("waitList", waitList);
+
         //create list of users not in this event
         List<UserDto> eventUsers = userService.findAllUsers();
         List<UserDto> filtered = eventUsers.stream().filter( u -> players.stream()
@@ -62,10 +76,26 @@ public class ThymeleafController {
                     p.getName().equals(u.getName())))
                         .collect(Collectors.toList());
 
-        List<UserDto> others = userService.findAllUsers();
-        others.removeAll(filtered);
-        model.addAttribute("userPickList", others);
-        model.addAttribute("selectedUsers", new FormValuesDto());
+        List<UserDto> usersNotInEvent = new ArrayList<>();
+        usersNotInEvent.addAll(eventUsers);
+        usersNotInEvent.removeAll(filtered);
+        model.addAttribute("userPickList", usersNotInEvent);
+        //model object for multi user checkbox values
+        model.addAttribute("selectedUsers", new MultiUserValuesDto());
+        model.addAttribute("modalValues", new PlayerScoresHolderDto());
+
+        List<Integer> holes = new ArrayList<>();
+        for(int i = 1; i <=18;i++){
+            holes.add(i);
+        }
+        model.addAttribute("HOLES", holes);
+
+        Map<String,PlayerScoresHolderDto> scoreHolders = new HashMap<>();
+        for(PlayerDto player : eventPlayers) {
+            PlayerScoresHolderDto v = new PlayerScoresHolderDto(player.getId(),0, null);
+            scoreHolders.put(player.getName(),v);
+        }
+        model.addAttribute("multiScoresHolder", scoreHolders);
 
         return "event-detail";
     }
@@ -81,7 +111,8 @@ public class ThymeleafController {
 
         model.addAttribute("event", eventService.toDto(event));
         model.addAttribute("players", event.getPlayers().stream()
-                .map((p)-> playerService.toDto(p))
+                .map(p-> playerService.toDto(p))
+//                        .filter(p -> p.is)
                 .collect(Collectors.toList()));
         return "redirect:/events/"+eventId;
     }
@@ -93,7 +124,7 @@ public class ThymeleafController {
     }
     @PostMapping("/events/{eventId}/addPlayersToEvent")
     public String addPlayersToEvent(@PathVariable("eventId") Long eventId,
-                                    @ModelAttribute("selectedUsers") FormValuesDto selected) {
+                                    @ModelAttribute("selectedUsers") MultiUserValuesDto selected) {
         Event event = eventService.findById(eventId);
         if(selected.getMultiUsersCheckboxes().length > 0){
             for(String s : selected.getMultiUsersCheckboxes()){
@@ -106,26 +137,76 @@ public class ThymeleafController {
         return "redirect:/events/"+eventId;
     }
 
+    @PostMapping("/events/{eventId}/postScore/{playerId}")
+    @Transactional
+    public String postScoreToEvent(@PathVariable("eventId") Long eventId, @PathVariable("playerId") Long playerId,
+                                    @ModelAttribute("playerScore") MultiUserValuesDto playerScore) {
+        Event event = changeEventStatus(eventId, EventStatus.POST_SCORES);
+        Player player = playerService.findById(playerId);
+        player.setScoreForEvent(playerScore.getScoreForEvent());
+        player.setScats(Arrays.asList(playerScore.getScats()));
+        playerService.save(player);
+
+        return "redirect:/events/"+event.getId();
+    }
+
+    @PostMapping("/events/{eventId}/postMultiScores")
+    @Transactional
+    public String postScoresToEvent(@PathVariable("eventId") Long eventId,
+                                    @ModelAttribute("multiScoresHolder")  Map<String,PlayerScoresHolderDto> multiScoresHolder,
+                                    @ModelAttribute("eventPlayers")  List<PlayerDto> eventPlayers,
+                                    BindingResult result
+    ) {
+        if(result.hasErrors()){
+            System.out.println(result);
+            return "redirect:/login";
+        }
+        Event event = eventService.findById(eventId);
+        for (PlayerDto player : eventPlayers){
+            //get the scoreholder for player
+            PlayerScoresHolderDto holder = multiScoresHolder.get(player.getName());
+            player.setScoreForEvent(holder.getScoreForEvent());
+            player.setScats(Arrays.asList(holder.getScats()));
+            playerService.save(playerService.toEntity(player));
+
+            //update future events for this player and save
+        }
+//        Player player = playerService.findById(playerId);
+//        Integer score = playerScore.getScoreForEvent();
+//        player.setPointsThisEvent(score);
+//        playerService.save(player);
+
+        return "redirect:/events/"+eventId;
+    }
 
 
-    @GetMapping("/profile")
+
+    @GetMapping("/profiles")
     public String getProfile(Model model){
         model.addAttribute("loginUser", getLoggedInUser());
         return "profile";
     }
-    @PostMapping("/profile/edit")
-    public String editProfile(Model model){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findByUsername(username);
-        model.addAttribute("loginUser", getLoggedInUser());
-        return "redirect:/profile";
+    @PostMapping("/profiles/edit")
+    public String editProfile(@ModelAttribute("user") UserDto user,
+                              BindingResult result,
+                              Model model){
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        User user = userService.findByUsername(username);
+//        model.addAttribute("loginUser", getLoggedInUser());
+        return "redirect:/users";
     }
 
     private User getLoggedInUser(){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userService.findByUsername(username);
-
-
+    }
+    private Event changeEventStatus(Long eventId, EventStatus eventStatus) {
+        Event event = eventService.findById(eventId);
+        if(event.getStatus() != eventStatus) {
+            event.setStatus(eventStatus);
+            eventService.save(event);
+        }
+        return event;
     }
 
 }

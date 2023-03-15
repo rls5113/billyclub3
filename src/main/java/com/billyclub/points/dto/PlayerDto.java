@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,8 +18,10 @@ public class PlayerDto {
     private Long id;
     private String name;
     private Integer pointsToPull;
-    private Integer pointsThisEvent;
     private LocalDateTime timeEntered;
     private Event event;
+    private Boolean isWaiting;
+    private Integer scoreForEvent;
+    private List<String> scats;
 
 }

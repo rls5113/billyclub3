@@ -14,10 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 public class UserDto {
         private Long id;
+        @NotEmpty(message = "Username should not be empty")
         private String username;
-        @NotEmpty
+        @NotEmpty(message = "First Name should not be empty")
         private String firstName;
-        @NotEmpty
+        @NotEmpty(message = "Last Name should not be empty")
         private String lastName;
         @NotEmpty(message = "Email should not be empty")
         @Email

@@ -1,0 +1,42 @@
+<div class="modal fade" id="postScoreModal" tabindex="-1" aria-labelledby="postScoreModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="postScoreModalLabel">Post Score</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div th:each="player : ${eventPlayers}">
+                <div th:if="${loginUser.name == player.name}">
+                    <div class="modal-body">
+                        <div class="mb-auto">
+                            <form th:action="@{/events/{id}/postScore/{playerId}(id=${event.id},playerId=${player.id})}"
+                                  method="post">
+
+                                <input class="form-control-lg" type="text"
+                                       id="score" name="score" th:field="${modalValues.scoreForEvent}" maxlength="2" size="2"/>
+                                <label class="form-label" for="score" th:text="${player.name}">Points for </label>
+                        </div>
+                        <div class="mb-auto" >
+                            <div class="form-check-inline" th:each="hole : ${HOLES}">
+                                <input class="form-check-input" type="checkbox" th:value="${hole}"
+                                       id="scatList" name="userList" th:field="${modalValues.scats}">
+                                <label class="form-check-label" for="scatList" th:text="${hole}"/>
+                                <br th:if="${holeStat.index == 9}">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Post Score</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

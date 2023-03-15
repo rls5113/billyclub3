@@ -7,7 +7,6 @@ import com.billyclub.points.model.User;
 import com.billyclub.points.repository.PlayerRepository;
 import com.billyclub.points.service.PlayerService;
 import jakarta.transaction.Transactional;
-import org.hibernate.boot.model.source.spi.PluralAttributeNature;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,8 +83,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player create(User user) {
-        Player player = new Player(user.getName(), user.getPoints(), 0);
-
+        Player player = new Player(null, user.getName(), user.getPoints(), 0, LocalDateTime.now(), Boolean.FALSE, null,null);
         return repo.save(player);
     }
 }

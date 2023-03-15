@@ -1,5 +1,6 @@
 package com.billyclub.points.dto;
 
+import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +26,5 @@ public class EventDto {
     private LocalTime startTime;
     private Integer numOfTimes;
     private List<Player> players;
+    private EventStatus status;
 }

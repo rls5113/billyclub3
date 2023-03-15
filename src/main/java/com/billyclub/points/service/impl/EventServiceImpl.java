@@ -79,6 +79,9 @@ public class EventServiceImpl implements EventService {
         Event event = findById(eventId);
         Player player = playerService.findById(playerId);
         event.removePlayer(player);
+        Player nextPlayer = event.getNextPlayerWaiting();
+        if(nextPlayer != null)
+            event.addPlayer(nextPlayer);
         playerService.deleteById(playerId);
         return eventRepository.save(event);
     }

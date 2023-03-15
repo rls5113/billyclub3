@@ -31,17 +31,16 @@ public class SpringSecurityConfig {
                         authorize.requestMatchers("/register/**",
                                         "/console/**","/login/**","/js/**","/css/**",
                                         "/assets/**","/layout/**","/api/v1/**","/index").permitAll()
-//                                .anyRequest().authenticated()
                                 .requestMatchers("/events/**").hasAnyRole("ADMIN","USER")
-//                                .requestMatchers("/players/**").hasAnyRole("ADMIN","USER")
                                 .requestMatchers("/profile/**").hasAnyRole("ADMIN","USER")
                                 .requestMatchers("/users/**").hasRole("ADMIN")
+//                                .requestMatchers("/players/**").hasAnyRole("ADMIN","USER")
 //                              .requestMatchers("/api/v1/**").hasAnyRole("ADMIN","USER")
+                                .anyRequest().authenticated()
                 ).formLogin(
                         form -> form
                                 .loginPage("/login")
                                 .loginProcessingUrl("/login")
-//                                .defaultSuccessUrl("/users")
                                 .defaultSuccessUrl("/events/current")
                                 .permitAll()
                 ).logout(

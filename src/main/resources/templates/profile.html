@@ -5,7 +5,7 @@
         xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
         layout:decorate="~{layout}">
 <head>
-    <title>Event Detail</title>
+    <title>Profile</title>
 </head>
 <body layout:fragment="body">
 <style>
@@ -28,7 +28,7 @@
     <div class="main">
         <form
                 method="post"
-                th:action="@{/profile/edit" th:object="${loginUser}"
+                th:action="@{/profiles/edit}" th:object="${loginUser}"
                 class="form-horizontal"
                 role="form"
         >
@@ -48,7 +48,7 @@
                     <div>
                         <div class="card">
                             <div class="card-header  bg-primary">
-                                <h3 class="text-center text-light">Event Detail</h3>
+                                <h3 class="text-center text-light">Profile</h3>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -111,8 +111,7 @@
                                         <div>
                                             <!--  th:if="${event.isPlayerInEvent(loggedInUser.name)} "-->
                                             <button style="margin: 5px" sec:authorize="!hasRole('ROLE_ADMIN')"
-                                                    th:if="${! #lists.contains(names, loginUser.name)} "
-                                                    type="#" class="btn btn-primary">Add me this event
+                                                   type="#" class="btn btn-primary">Add me this event
                                             </button>
                                             <a sec:authorize="hasRole('ROLE_ADMIN') and false" data-bs-toggle="modal" data-bs-target="#userPickListModal"
                                                class="btn btn-primary">Add Players to this event</a>

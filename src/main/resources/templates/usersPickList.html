@@ -1,8 +1,3 @@
-<html
-        xmlns:th="http://thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
-<body layout:fragment="userPickList">
 <form th:action="@{/events/{id}/addPlayersToEvent(id=${event.id})}" method="post" th:object="${userPickList}">
 
 <div class="modal fade" id="userPickListModal" tabindex="-1" aria-labelledby="userPickListModalLabel"
@@ -16,7 +11,7 @@
             <div class="modal-body">
 
                 <div class="mb-3">
-
+                    <div th:if="${userPickList.size lt 1}"><p>All active players already in this Event!!</p></div>
                     <tr th:each="user: ${userPickList}">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" th:value="${user.id}"
@@ -25,20 +20,13 @@
 <!--                            <div th:text="${userStat.index}"/>-->
                         </div>
                     </tr>
-
-
-
-
-
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary" fo>Add Selected</button>
+                <button type="submit" class="btn btn-primary">Add Selected</button>
             </div>
         </div>
     </div>
 </div>
 </form>
-</body>
-</html>

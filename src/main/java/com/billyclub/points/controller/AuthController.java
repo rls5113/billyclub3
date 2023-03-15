@@ -41,7 +41,7 @@ public class AuthController {
     @GetMapping("register")
     public String showRegistrationForm(Model model){
         UserDto user = new UserDto();
-        model.addAttribute("userDto", user);
+        model.addAttribute("user", user);
         return "register";
     }
 
@@ -56,9 +56,10 @@ public class AuthController {
         }
         User existingUser = userService.findByUsername(user.getUsername());
         if (existingUser != null) {
-            result.rejectValue("email", null, "There is already an account registered with that username");
+            result.rejectValue("username", null, "There is already an account registered with that username");
         }
         if (result.hasErrors()) {
+
             model.addAttribute("user", user);
             return "register";
         }

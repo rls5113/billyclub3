@@ -23,6 +23,7 @@ public class User {
     @Column(name="id",updatable = false, nullable = false)
     private Long id;
 
+    @Column(nullable=false, unique=true)
     private String username;
 
     @Column(nullable=false)

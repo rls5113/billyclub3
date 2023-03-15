@@ -3,6 +3,7 @@ package com.billyclub.points.service.impl;
 
 import com.billyclub.points.dto.UserDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
+import com.billyclub.points.model.Player;
 import com.billyclub.points.model.Role;
 import com.billyclub.points.model.User;
 import com.billyclub.points.repository.RoleRepository;
@@ -72,12 +73,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAll() {
-        return null;
+        return userRepository.findAll();
     }
 
     @Override
     public User add(User entity) {
-        return null;
+        return userRepository.save(entity);
     }
 
     @Override
@@ -88,7 +89,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long id, User entity) {
-        return null;
+        User userEdit = findById(id);
+        BeanUtils.copyProperties(entity, userEdit);
+        return userRepository.save(userEdit);
     }
 
     @Override
@@ -98,7 +101,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(User entity) {
-        return null;
+        return userRepository.save(entity);
     }
 
     public UserDto toDto(User user){
@@ -117,7 +120,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User toEntity(UserDto dto) {
-        return null;
+        User user = new User();
+        BeanUtils.copyProperties(dto, user);
+        return user;
     }
 
 //    private Role checkRoleExist() {

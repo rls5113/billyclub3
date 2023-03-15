@@ -15,17 +15,25 @@
 </style>
 <section>
     <div class="main">
+        <form method="post" role="form" th:action="@{/register/save}" th:object="${user}">
+
         <div class="row col-md-8 offset-md-2">
             <div class="card">
             <div th:if="${param.success}">
                 <div class="alert alert-info">You've successfully registered
                     to our app!</div>
             </div>
+            <div th:if="${#fields.hasAnyErrors()}">
+                <div class="alert alert-danger">
+                    <ul>
+                        <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+                    </ul>
+                </div>
+            </div>
             <div class="card-header">
                 <h2 class="text-center">Registration</h2>
             </div>
             <div class="card-body">
-                <form method="post" role="form" th:action="@{/register/save}" th:object="${userDto}">
 
                     <div class="form-group mb-3">
                         <label class="form-label">Username</label>
@@ -36,8 +44,8 @@
                                th:field="*{username}"
                                type="text"
                         />
-                        <p th:errors="*{firstName}" class="text-danger"
-                           th:if="${#fields.hasErrors('firstName')}">
+                        <p th:errors="*{username}" class="text-danger"
+                           th:if="${#fields.hasErrors('username')}">
                         </p>
                     </div>
 
@@ -97,13 +105,14 @@
 
                     <div class="form-group mb-3">
                         <button class="btn btn-primary" type="submit">Register</button>
-                        <span>Already registered? <a href="/" th:href="@{/login}">Login
+                        <span>Already registered? <a th:href="@{/login}">Login
                              here</a></span>
                     </div>
-                </form>
+
             </div>
         </div>
         </div>
+        </form>
     </div>
 </section>
 </body>
