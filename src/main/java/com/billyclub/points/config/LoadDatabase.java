@@ -1,10 +1,10 @@
 package com.billyclub.points.config;
 
-import com.billyclub.points.model.Event;
-import com.billyclub.points.model.EventStatus;
-import com.billyclub.points.model.Player;
-import com.billyclub.points.model.Role;
+import com.billyclub.points.dto.UserDto;
+import com.billyclub.points.model.*;
 import com.billyclub.points.repository.RoleRepository;
+import com.billyclub.points.service.EventService;
+import com.billyclub.points.service.UserService;
 import com.billyclub.points.service.impl.EventServiceImpl;
 import com.billyclub.points.service.impl.PlayerServiceImpl;
 import org.slf4j.Logger;
@@ -19,8 +19,8 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
-//@Configuration
-//@Profile("dev")
+@Configuration
+@Profile("dev")
 class LoadDatabase {
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
@@ -46,24 +46,38 @@ class LoadDatabase {
 //    }
     @Bean
 //    @Autowired
-    CommandLineRunner initAddPlayersToEventRecords(RoleRepository roleRepo, EventServiceImpl eventService,
-                                                   PlayerServiceImpl playerService) {
+    CommandLineRunner initAddPlayersToEventRecords(RoleRepository roleRepo, EventService eventService,
+                                                   UserService userService) {
         System.out.println("loading data: ROLES");
         return args -> {
 
             log.debug("Running load DATA");
             Role role1 = roleRepo.save(new Role(null, "ROLE_USER",null));
             Role role2 = roleRepo.save(new Role(null, "ROLE_ADMIN",null));
-            log.info(role1.toString());
-            log.info(role2.toString());
-//            Role admin = userService.addRole("ADMIN");
+//            log.info(role1.toString());
+//            log.info(role2.toString());
+////            Role admin = userService.addRole("ADMIN");
 //            Role user = userService.addRole("USER");
-//
-//            UserEntity rstuart = userService.saveUser(new RegistrationDto(null,"rstuart","stuartrl@comcast.net","pass"));
-//            UserEntity hmunster = userService.saveUser(new RegistrationDto(null,"hmunster","hmunster@gmail.com","pass"));
-//
-//            rstuart.getRoles().add(admin);
-//            userService.save(rstuart);
+//  ADMIN
+            User rstuart = userService.saveUser(new UserDto(null,"rstuart","Robert","Stuart","stuartrl@comcast.net","password",0,null));
+            rstuart.getRoles().add(userService.findByName("ROLE_ADMIN"));
+            userService.save(rstuart);
+
+//  ALL THE REST WILL BE USERS
+            User hmunster = userService.saveUser(new UserDto(null,"hmunster","Herman","Munster","hmunster@gmail.com","password",0,null));
+            User lmunster = userService.saveUser(new UserDto(null,"lmunster","Lilly","Munster","lmunster@gmail.com","password",0,null));
+            User emunster = userService.saveUser(new UserDto(null,"emunster","Eddie","Munster","emunster@gmail.com","password",0,null));
+            User gmunster = userService.saveUser(new UserDto(null,"gmunster","Grandpa","Munster","gmunster@gmail.com","password",0,null));
+            User hsimpson = userService.saveUser(new UserDto(null,"hsimpson","Homer","Simpson","hsimpson@gmail.com","password",0,null));
+            User bsimpson = userService.saveUser(new UserDto(null,"bsimpson","Bart","Simpson","bsimpson@gmail.com","password",0,null));
+            User lsimpson = userService.saveUser(new UserDto(null,"lsimpson","Lisa","Simpson","lsimpson@gmail.com","password",0,null));
+            User msimpson = userService.saveUser(new UserDto(null,"msimpson","Marge","Simpson","msimpson@gmail.com","password",0,null));
+            User gaddams = userService.saveUser(new UserDto(null,"gaddams","Gomez","Addams","gaddams@gmail.com","password",0,null));
+            User maddams = userService.saveUser(new UserDto(null,"maddams","Morticia","Addams","maddams@gmail.com","password",0,null));
+            User fester = userService.saveUser(new UserDto(null,"faddams","Uncle","Fester","faddams@gmail.com","password",0,null));
+            User pugsly = userService.saveUser(new UserDto(null,"paddams","Pugsly","Addams","paddams@gmail.com","password",0,null));
+            User wed = userService.saveUser(new UserDto(null,"waddams","Wednesday","Addams","waddams@gmail.com","password",0,null));
+
 //
 //            log.info("user1 " + rstuart );
 //            log.info("user2 " + hmunster );

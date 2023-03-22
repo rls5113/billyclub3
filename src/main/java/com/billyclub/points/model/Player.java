@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
@@ -37,8 +36,9 @@ public class Player {
 
     @Value("false")
     private Boolean isWaiting;
+    private String team;
 
-    private List<String> scats = new ArrayList<>();
+    private List<String> birdies = new ArrayList<>();
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)

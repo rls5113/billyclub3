@@ -9,4 +9,6 @@ public interface EventService extends IService<Event, EventDto> {
     List<EventDto> findAllEvents();
     Event addPlayerToEvent(Long eventId, Long playerId);
     Event removePlayerFromEvent(Long eventId, Long playerId);
+
+    List<EventDto> findOpenEvents();
 }

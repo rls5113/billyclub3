@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,6 +86,17 @@ public class EventServiceImpl implements EventService {
         playerService.deleteById(playerId);
         return eventRepository.save(event);
     }
+
+    @Override
+    public List<EventDto> findOpenEvents() {
+        List<Event> events = eventRepository.findEventsByEventDateGreaterThanEqual(LocalDate.now());
+        List<EventDto> list = events.stream().map((event)-> toDto(event))
+                .collect(Collectors.toList());
+        list.sort((e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
+//        Collections.sort(list, (e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
+        return list;
+    }
+
     @Override
     public List<EventDto> findAllEvents() {
         List<Event> events = eventRepository.findAll();

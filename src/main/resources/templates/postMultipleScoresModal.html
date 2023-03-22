@@ -1,37 +1,31 @@
-<form th:action="@{/events/{id}/postMultiScores(id=${event.id})}" method="post" th:object="${multiScoresHolder}">
-    <div class="modal fade" id="postMultipleScoresModal" tabindex="-1" aria-labelledby="postMultipleScoresModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+<div class="modal" id="postMultipleScoresModal" tabindex="-1" aria-labelledby="postMultipleScoresModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="postMultipleScoresModalLabel">Post Multiple Scores</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    <ul>
-                                        <li th:each="key: ${multiScoresHolder.keySet()}">
-                                            <span th:text="${key}"></span> =
-                                            <span th:text="${multiScoresHolder.get(key).scoreForEvent}"></span>
-                                            <span th:text="${multiScoresHolder.get(key).scats}"></span>
-                                        </li>
-                                    </ul>
                 </div>
+                <form th:action="@{/events/{id}/postMultiScores (id=${event.id})}" method="post">
 
                 <div th:each=" player : ${eventPlayers}">
-                     <div class="modal-body" th:object="${player}">
-                            <span th:text="${holder}"></span>
-                            <div class="mb-auto">
-                                <input class="form-control-lg" type="text"
-                                       id="score" name="score" th:text="${multiScoresHolder.get('__${player.name}__').scoreForEvent}" maxlength="2"
-                                       size="2"/>
-                                <label class="form-label" for="score" th:text="${player.name}"></label>
+                    <div class="modal-body">
+                        <div class="mb-auto">
+                            <input class="form-control-lg" type="text"
+                                   id="score" name="score" th:field="*{scores['__${player.name}__'].scoreForEvent}"
+                                   maxlength="2"
+                                   size="2"/>
+                            <label class="form-label" for="score" th:text="${player.name}"></label>
+                        </div>
+                        <div class="mb-auto">
+                            <div class="form-check-inline" th:each="hole : ${HOLES}">
+                                <input class="form-check-input" type="checkbox" th:value="${hole}"
+                                       id="birds" th:field="*{scores['__${player.name}__'].birdies}">
+                                <label class="form-check-label" for="birds" th:text="${hole}"/>
+
                             </div>
-                            <div class="mb-auto">
-                                <div class="form-check-inline" th:each="hole : ${HOLES}">
-                                    <input class="form-check-input" type="checkbox" th:value="${hole}"
-                                           id="scatList" name="userList" th:text="${multiScoresHolder['__${player.name}__'].scats}">
-                                    <label class="form-check-label" for="scatList" th:text="${hole}"/>
-                                    <br th:if="${holeStat.index == 9}">
-                                </div>
-                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -41,9 +35,10 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="submit" class="btn btn-primary">Post All Scores</button>
             </div>
-        </div>
+        </form>
     </div>
-    </div>
-</form>
+</div>
+</div>
+
 
 

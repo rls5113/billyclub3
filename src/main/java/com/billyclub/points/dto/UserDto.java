@@ -18,7 +18,7 @@ public class UserDto {
         private String username;
         @NotEmpty(message = "First Name should not be empty")
         private String firstName;
-        @NotEmpty(message = "Last Name should not be empty")
+//        @NotEmpty(message = "Last Name should not be empty")
         private String lastName;
         @NotEmpty(message = "Email should not be empty")
         @Email

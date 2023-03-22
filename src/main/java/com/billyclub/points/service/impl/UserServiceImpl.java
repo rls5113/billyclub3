@@ -88,6 +88,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Role findByName(String name) {
+        return roleRepository.findByName(name);
+    }
+
+    @Override
     public User update(Long id, User entity) {
         User userEdit = findById(id);
         BeanUtils.copyProperties(entity, userEdit);

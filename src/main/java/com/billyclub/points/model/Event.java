@@ -37,6 +37,10 @@ public class Event {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
     List<Player> players = new ArrayList<>();
 
+    @Transient
+    public boolean isDayOf() {
+        return eventDate.isEqual(LocalDate.now());
+    }
     public Event(Long id, LocalDate eventDate, LocalTime startTime, Integer numOfTimes) {
         this.id = id;
         this.eventDate = eventDate;

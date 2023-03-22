@@ -16,6 +16,9 @@
     .playerPanel {
         font-size: small;
     }
+    .btn-modal-postscore {
+        margin: 2px;
+    }
 
     .btn-sml {
         text-align-all: inherit;
@@ -54,16 +57,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-4">
-
-                                        <div class="mb-3">
-                                            <i>
-                                                <div th:text="${event.id}"></div>
-                                                <select name="status" th:field="*{status}" disabled class="form-control">
-                                                    <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
-                                                            th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
-                                                </select>
-                                            </i>
-                                        </div>
+<!--                                        <div th:text="${event.id}" style="font-style: italic"/>-->
                                         <div class="mb-3">
                                             <label for="eventDate" class="control-label">Event Date</label>
                                             <input type="text"
@@ -98,17 +92,30 @@
                                                    th:field="*{numOfTimes}"
                                             />
                                         </div>
+                                        <div class="mb-3">
+                                            <label for="status" class="control-label">Status</label>
+                                            <div class="mb-3">
+                                                    <select name="status" id="status" th:field="*{status}" disabled class="form-control ">
+                                                        <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
+                                                                th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
+                                                    </select>
+                                                </i>
+                                            </div>
+                                        </div>
                                         <div>
                                             <!--  th:if="${event.isPlayerInEvent(loggedInUser.name)} "-->
                                             <button style="margin: 5px" sec:authorize="!hasRole('ROLE_ADMIN')"
-                                                    th:if="${! lists.contains(names, loginUser.name)} "
+                                                    th:if="${! #lists.contains(names, loginUser.name)} "
                                                     type="submit" class="btn btn-primary">Add me this event
                                             </button>
+
                                             <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
                                                th:if="${event.status.name().equals('OPEN')}"
                                                data-bs-target="#userPickListModal" class="btn-sml btn btn-primary ">Add Players to this event</a>
-                                            <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
+
+                                            <a sec:authorize="false and hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
                                                data-bs-target="#postMultipleScoresModal" class="btn-sml btn btn-primary">Post for All in Event</a>
+
                                         </div>
                                     </div>
 
@@ -132,16 +139,16 @@
                                                 <td th:text="${player.name}"><span th:text="${player.id}"></span></td>
                                                 <td th:text="${player.pointsToPull}"/>
                                                 <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.scoreForEvent}"/>
-                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.scats}"/>
+                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.birdies}"/>
                                                 <td th:if="${event.status.name().equals('OPEN')}" th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a) ss:SS')}"/>
                                                 <td>
                                                     <a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id}}"
                                                        th:if="${event.status.name().equals('OPEN')} and (${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
-                                                       class="btn-sml btn btn-danger">Delete</a>
+                                                       class="btn-sml btn btn-danger"><span class="glyphicon glyphicon-remove"></span>Delete</a>
 
-                                                    <a th:if="${loginUser.name == player.name}"
-                                                            data-bs-toggle="modal" data-bs-target="#postScoreModal" class="btn-sml btn btn-success"
-                                                            th:attr="data-player-id=${player.id}">Post Points/Birds</a>
+                                                    <a th:if="${!event.status.name().equals('OPEN')} and (${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
+                                                            data-bs-toggle="modal" data-bs-target="#postScoreModal" class="btn-sml btn btn-success btn-modal-postscore"
+                                                            th:attr="data-player-id=${player.id}" >Post Points/Birds</a>
 
                                                 </td>
 <!--                                                <td sec:authentication="principal"></td>-->
@@ -152,7 +159,7 @@
                                         </table>
                                     </div>
 <br>
-                                    <div class="col-10 alert alert-danger" style="float: right" th:if="${waitList.size gt 0} and ${event.status.equals('OPEN')}">
+                                    <div class="col-10 alert alert-danger" style="float: right" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN')}">
                                         <table class="table table-striped table-bordered table-hover table-light">
                                             <thead class="table-header">
                                             <tr>
@@ -164,7 +171,6 @@
                                             </thead>
                                             <tbody class="playerPanel">
                                             <tr th:each="player : ${waitList}">
-
 
                                                 <td th:text="${player.name}"/>
                                                 <td th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a) ss:SS')}"/>
@@ -191,9 +197,18 @@
 
         <div layout:insert="~{postScoreModal}"></div>
 
-        <div layout:insert="~{postMultipleScoresModal}" th:object="${eventPlayers}"></div>
+<!--        <div layout:insert="~{postMultipleScoresModal}"></div>-->
 
 
     </div>
 </div>
+<script>
+    $(document).on("click",".btn-modal-postscore", function(){
+        var playerid = $(this).data('player-id');
+        alert('playerid: '+playerid);
+        $('.modal-postscore-row form')
+            .filter(':not(form[action$='+playerid+'])')
+            .parent().parent().parent().remove();
+    });
+</script>
 </body>

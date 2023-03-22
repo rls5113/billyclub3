@@ -7,7 +7,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div th:each="player : ${eventPlayers}">
-                <div th:if="${loginUser.name == player.name}">
+                <div th:if="${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+<!--                <div th:if="${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">-->
+                    <div class="modal-postscore-row">
                     <div class="modal-body">
                         <div class="mb-auto">
                             <form th:action="@{/events/{id}/postScore/{playerId}(id=${event.id},playerId=${player.id})}"
@@ -20,8 +22,8 @@
                         <div class="mb-auto" >
                             <div class="form-check-inline" th:each="hole : ${HOLES}">
                                 <input class="form-check-input" type="checkbox" th:value="${hole}"
-                                       id="scatList" name="userList" th:field="${modalValues.scats}">
-                                <label class="form-check-label" for="scatList" th:text="${hole}"/>
+                                       id="birds" th:field="${modalValues.birdies}">
+                                <label class="form-check-label" for="birds" th:text="${hole}"/>
                                 <br th:if="${holeStat.index == 9}">
                             </div>
                         </div>
@@ -33,10 +35,12 @@
                     </div>
                     </form>
                 </div>
+                </div>
             </div>
         </div>
 
     </div>
 
 </div>
+
 

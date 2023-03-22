@@ -5,12 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerScoresHolderDto {
-    Long playerId;
-    Integer scoreForEvent;
-    String[] birdies;
+public class MultiPlayerScoresMapDto {
+
+    private Map<String,PlayerScoresHolderDto> scores = new HashMap<>();
 }

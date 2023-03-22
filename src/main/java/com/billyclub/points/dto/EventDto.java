@@ -27,4 +27,5 @@ public class EventDto {
     private Integer numOfTimes;
     private List<Player> players;
     private EventStatus status;
+    private boolean isDayOf;
 }

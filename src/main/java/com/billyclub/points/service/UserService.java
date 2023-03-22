@@ -2,6 +2,7 @@ package com.billyclub.points.service;
 
 
 import com.billyclub.points.dto.UserDto;
+import com.billyclub.points.model.Role;
 import com.billyclub.points.model.User;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface UserService extends IService<User, UserDto>{
     List<UserDto> findAllUsers();
 
     User findById(Long id);
+
+    Role findByName(String rolename);
 }

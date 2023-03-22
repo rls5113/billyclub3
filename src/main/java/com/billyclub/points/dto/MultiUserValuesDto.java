@@ -1,10 +1,14 @@
 package com.billyclub.points.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MultiUserValuesDto {
-    String[] multiUsersCheckboxes;
-    Integer scoreForEvent;
-    String[] scats;
+    private String[] multiUsersCheckboxes;
 }
