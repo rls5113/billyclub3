@@ -10,7 +10,6 @@ public interface IService<T, S>{
     public T update(Long id, T entity);
     public T deleteById(Long eventId);
     public T save(T entity);
-
     public S toDto(T entity);
     public T toEntity(S dto);
 }

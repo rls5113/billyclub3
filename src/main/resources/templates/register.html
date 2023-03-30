@@ -42,8 +42,7 @@
                                name="username"
                                placeholder="Enter username"
                                th:field="*{username}"
-                               type="text"
-                        />
+                               type="text" autofocus/>
                         <p th:errors="*{username}" class="text-danger"
                            th:if="${#fields.hasErrors('username')}">
                         </p>
@@ -104,9 +103,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <button class="btn btn-primary" type="submit">Register</button>
-                        <span>Already registered? <a th:href="@{/login}">Login
-                             here</a></span>
+                        <button class="btn btn-primary" type="submit">Click to Register</button>
                     </div>
 
             </div>

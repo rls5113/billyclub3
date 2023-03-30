@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        layout:decorate="~{layout}">
+<head>
+    <title>Profile</title>
+</head>
+<body layout:fragment="body">
+<style>
+    .main {
+        padding: 125px 150px;
+    }
+    .panel {
+        float: left;
+        width: 50%;
+        padding: 5px;
+    }
+    .playerPanel {
+        font-size: small;
+    }
+
+    .btn-sml {
+        text-align-all: inherit;
+        font-size: small;
+    }
+
+</style>
+
+<div class="container">
+    <div class="main">
+        <form
+                method="post"
+                th:action="@{/events/add}" th:object="${event}"
+                class="form-horizontal"
+                role="form">
+
+            <div class="row">
+
+                <div class="col-md-7">
+                    <div th:if="${param.error}">
+                        <div class="alert alert-danger">Insert failed!</div>
+                    </div>
+                    <div th:if="${param.success}">
+                        <div class="alert alert-info">You've created a new Event.</div>
+                    </div>
+                    <div>
+
+                        <div class="card">
+                            <div class="card-header  bg-primary">
+                                <h3 class="text-center text-light">Add New Event</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+
+                                        <div class="mb-3">
+                                            <i>
+                                                <div th:text="*{id}"></div>
+                                            </i>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="eventdate" class="control-label">Event Date</label>
+                                            <input type="date" autofocus
+                                                   id="eventdate"
+                                                   name="eventdate"
+                                                   class="form-control"
+                                                   placeholder="Event Date"
+                                                   th:field="*{eventDate}"
+                                            />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="starttime" class="control-label">Start Time</label>
+                                            <input type="time"
+                                                   id="starttime"
+                                                   name="startime"
+                                                   class="form-control"
+                                                   placeholder="Starting Time"
+                                                   th:field="*{startTime}"
+                                            />
+                                         </div>
+
+                                        <div class="mb-3">
+                                            <label for="numOfTimes" class="control-label"># of Tee Times</label>
+                                            <input list="numberList"
+                                                   id="numOfTimes"
+                                                   name="numOfTimes"
+                                                   class="form-control"
+                                                   placeholder="Number of Tee Times"
+                                                   th:field="*{numOfTimes}"
+                                            />
+                                            <datalist id="numberList">
+                                                <option value="1"/>
+                                                <option value="2"/>
+                                                <option value="3"/>
+                                                <option value="4"/>
+                                                <option value="5"/>
+                                                <option value="6"/>
+                                                <option value="7"/>
+                                                <option value="8"/>
+                                            </datalist>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="status" class="control-label">Event Status</label>
+                                            <select name="status" id="status" th:field="*{status}" class="form-control ">
+                                                <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
+                                                        th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
+                                            </select>
+                                        </div>
+
+
+                                        <div>
+                                            <button type="button" class="btn btn-secondary">Close</button>
+                                            <button type="submit" class="btn btn-primary">Add Event</button>                                        </div>
+                                        </div>
+
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div><!-- end row -->
+        </form>
+    </div>
+</div>
+<script>
+    $(function() {
+        $('#eventdate').datepicker({maxDate : new Date()});
+    });
+
+</script>
+</body>

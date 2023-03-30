@@ -32,19 +32,19 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-1">
-        <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+        <li sec:authorize="isAuthenticated()" class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="navbarDropdownPortfolio" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Events</a>
+          <ul  class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownPortfolio">
+            <li><a class="dropdown-item" th:href="@{/events/current}">Current Events</a></li>
+            <li><a class="dropdown-item" th:href="@{/events/past}">Past Events</a></li>
+            <li sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"><a class="dropdown-item" th:href="@{/events/add}">Add Event</a></li>
+          </ul>
+        </li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/profiles}">Profile</a></li>
-        <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/events/current}">Events</a></li>
+        <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/users}">User List</a></li>
         <li sec:authorize="!isAuthenticated()" class="nav-item"><a class="nav-link btn btn-primary text-light" th:href="@{/login}">Login</a></li>
         <li sec:authorize="!isAuthenticated()"  class="nav-item"><a class="nav-link btn btn-primary text-light" th:href="@{/register}">Register</a></li>
         <li sec:authorize="isAuthenticated()"  class="nav-item"><a class="nav-link btn btn-primary text-light" th:href="@{/logout}">Logout</a></li>
-        <li sec:authorize="isAuthenticated()" class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" id="navbarDropdownPortfolio" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Welcome</a>
-          <ul  class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownPortfolio">
-            <li><a class="dropdown-item" th:href="@{/users}">User List</a></li>
-            <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
-          </ul>
-        </li>
       </ul>
     </div>
     <img src="/assets/smailsHat.jpg" width="80px" height="80px" class="img-thumbnail">
@@ -60,7 +60,7 @@
 <footer class="bg-dark py-4 mt-auto">
   <div class="container px-5">
     <div class="row align-items-center justify-content-between flex-column flex-sm-row">
-      <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; NearPerfectSoftware</div></div>
+      <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; NearPerfect Software Solutions</div></div>
       <div class="col-auto">
         <a class="link-light small" href="#!">Privacy</a>
         <span class="text-white mx-1">&middot;</span>

@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -28,4 +29,9 @@ public class EventDto {
     private List<Player> players;
     private EventStatus status;
     private boolean isDayOf;
+    private boolean isAllScoresIn;
+    private List<String> eventWinners;
+    private List<String> scatWinners;
+    private List<String> scatSummary;
+
 }

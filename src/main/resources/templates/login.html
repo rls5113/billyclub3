@@ -29,6 +29,9 @@
             <div th:if="${param.success}">
                 <div class="alert alert-info">You've successfully created a user account! Now login.</div>
             </div>
+            <div th:if="${param.changepass}">
+                <div class="alert alert-info">You've successfully changed your password.</div>
+            </div>
             <div class="login-form">
                 <div class="card">
                 <div class="card-header">
@@ -39,16 +42,14 @@
                             method="post"
                             th:action="@{/login}" th:object="${user}"
                             class="form-horizontal"
-                            role="form"
-                    >
+                            role="form">
                         <div class="mb-3">
                             <label for="username">Username <span class="red">*</span></label>
                             <input type="text"
                                    id="username"
                                    name="username"
                                    class="form-control"
-                                   placeholder="Username"
-                            />
+                                   placeholder="Username" autofocus />
                         </div>
 
                         <div class="mb-3">
@@ -57,15 +58,13 @@
                                    id="password"
                                    name="password"
                                    class="form-control"
-                                   placeholder="Password"
-                            />
+                                   placeholder="Password"/>
                         </div>
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">Login</button>
-                            <span> Not registered?
-                            <a th:href="@{/register}"> Register/SignUp Here</a>
-                        </span>
+                            <a class="btn btn-primary" th:href="@{/register}">Register/SignUp Here</a>
+                            <a class="btn btn-primary" th:href="@{/forgot-password}" style="float: right">Forgot password?</a>
                         </div>
                     </form>
                 </div>

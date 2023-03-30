@@ -1,6 +1,7 @@
 package com.billyclub.points.service.impl;
 
 import com.billyclub.points.dto.PlayerDto;
+import com.billyclub.points.dto.PlayerScoresHolderDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.Player;
 import com.billyclub.points.model.User;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -83,7 +85,43 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player create(User user) {
-        Player player = new Player(null, user.getName(), user.getPoints(), 0, LocalDateTime.now(), Boolean.FALSE, null,null);
+        Player player = new Player(null, user.getName(), user.getPoints(), 0, 0, 0, LocalDateTime.now(), Boolean.FALSE, null,null,null,null);
         return repo.save(player);
+    }
+
+    @Override
+    public void setScoring(Player player, PlayerScoresHolderDto holder) {
+        player.setScoreForEvent(holder.getScoreForEvent());
+        player.setEagles(Arrays.asList(holder.getEagles()));
+        player.setBirdies(Arrays.asList(holder.getBirdies()));
+        //for first timers, set todays score as total
+        player.setTotal((player.getQuota()==0)? player.getQuota() : holder.getScoreForEvent() - player.getQuota() );
+        player.setAdjustment(calcAdjustment(player.getTotal()));
+        this.save(player);
+    }
+    private int calcAdjustment(int total) {
+        int adjustment = 0;
+        switch(total){
+            case 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 -> {
+                adjustment = 3;
+            }
+            case 4,5 -> {
+                adjustment = 2;
+            }
+            case 2,3 -> {
+                adjustment = 1;
+            }
+            case -2,-3 -> {
+                adjustment = -1;
+            }
+            case -4,-5 -> {
+                adjustment = -2;
+            }
+            case -6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20 -> {
+                adjustment = -3;
+            }
+
+        }
+        return adjustment;
     }
 }
