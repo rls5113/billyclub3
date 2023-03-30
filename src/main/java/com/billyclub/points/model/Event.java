@@ -35,11 +35,31 @@ public class Event {
     private EventStatus status;
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
-    List<Player> players = new ArrayList<>();
+    private List<Player> players = new ArrayList<>();
+
+    @ElementCollection
+    private List<String> eventWinners = new ArrayList<>();
+    @ElementCollection
+    private List<String> scatWinners = new ArrayList<>();
+    @ElementCollection
+    private List<String> scatSummary = new ArrayList<>();
 
     @Transient
+    public boolean isAllScoresIn() {
+        if(players.isEmpty()) return false;
+        List<Player> haveNotPosted = players.stream()
+                .filter(p -> !p.getIsWaiting() && p.getScoreForEvent() < 1)
+                .collect(Collectors.toList());
+        return haveNotPosted.isEmpty();
+    }
+    @Transient
     public boolean isDayOf() {
-        return eventDate.isEqual(LocalDate.now());
+        if(eventDate == null) return false;
+        boolean isUnderway = eventDate.isEqual(LocalDate.now()) && startTime.isBefore(LocalTime.now());
+        if(isUnderway && (status != EventStatus.STARTED && status != EventStatus.POSTING && status != EventStatus.COMPLETED)){
+            this.setStatus(EventStatus.STARTED);
+        }
+        return isUnderway;
     }
     public Event(Long id, LocalDate eventDate, LocalTime startTime, Integer numOfTimes) {
         this.id = id;
@@ -87,4 +107,6 @@ public class Event {
         }
         return player;
     }
+
+
 }

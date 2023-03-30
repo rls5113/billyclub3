@@ -25,10 +25,11 @@ public class Player {
     private Long id;
     @NotNull(message = "Name is required.")
     private String name;
-    @NotNull(message = "Points to pull for this event is required.")
-    private Integer pointsToPull;
-
+    @NotNull(message = "Quota for this event is required.")
+    private Integer quota;
     private Integer scoreForEvent;
+    private Integer total;
+    private Integer adjustment;
 
     @NotNull(message = "Time of entry for this player is required.")
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", updatable = false)
@@ -38,6 +39,7 @@ public class Player {
     private Boolean isWaiting;
     private String team;
 
+    private List<String> eagles = new ArrayList<>();
     private List<String> birdies = new ArrayList<>();
 
     @JsonBackReference

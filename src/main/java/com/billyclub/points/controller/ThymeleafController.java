@@ -44,15 +44,24 @@ public class ThymeleafController {
     public String listEvents(Model model) {
         List<EventDto> events = eventService.findOpenEvents();
         model.addAttribute("events", events);
+        model.addAttribute("current", true);
+        return "event-list";
+    }
+    @GetMapping("/events/past")
+    public String listPastEvents(Model model) {
+        List<EventDto> events = eventService.findPastEvents();
+        model.addAttribute("events", events);
+        model.addAttribute("current", false);
         return "event-list";
     }
 
     @GetMapping("/events/{id}")
     public String getEventDetails(@PathVariable("id") Long id, Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User loggedInUser = userService.findByUsername(username);
         model.addAttribute("loginUser", getLoggedInUser());
         Event event = eventService.findById(id);
+        if(event.isDayOf() && event.getStatus()==EventStatus.OPEN){
+            event = changeEventStatus(id, EventStatus.STARTED);
+        }
         model.addAttribute("event", eventService.toDto(event));
 
         List<Player> players = event.getPlayers();
@@ -66,6 +75,7 @@ public class ThymeleafController {
                 .map(p -> playerService.toDto(p))
                 .filter(p -> !p.getIsWaiting())
                 .collect(Collectors.toList());
+        eventPlayers.sort(Comparator.comparing(PlayerDto::getTotal,Comparator.nullsFirst(Comparator.reverseOrder())));
         model.addAttribute("eventPlayers", eventPlayers);
 
         MultiPlayerScoresMapDto scores = new MultiPlayerScoresMapDto();
@@ -123,7 +133,6 @@ public class ThymeleafController {
         model.addAttribute("event", eventService.toDto(event));
         model.addAttribute("players", event.getPlayers().stream()
                 .map(p -> playerService.toDto(p))
-//                        .filter(p -> p.is)
                 .collect(Collectors.toList()));
         return "redirect:/events/" + eventId;
     }
@@ -156,11 +165,9 @@ public class ThymeleafController {
                                    @PathVariable("playerId") Long playerId,
                                    @ModelAttribute("playerScore") PlayerScoresHolderDto playerScore
     ) {
-        Event event = changeEventStatus(eventId, EventStatus.POST_SCORES);
+        Event event = changeEventStatus(eventId, EventStatus.POSTING);
         Player player = playerService.findById(playerId);
-        player.setScoreForEvent(playerScore.getScoreForEvent());
-        player.setBirdies(Arrays.asList(playerScore.getBirdies()));
-        playerService.save(player);
+        playerService.setScoring(player, playerScore );
 
         return "redirect:/events/" + event.getId();
     }
@@ -207,6 +214,25 @@ public class ThymeleafController {
         return "redirect:/users";
     }
 
+    @GetMapping("/events/{eventId}/calc-scoring")
+    @Transactional
+    public String processEventScoreboard(@PathVariable("eventId") Long eventId) {
+        Event event = eventService.calculateEventScoreboard(eventId);
+
+        return "redirect:/events/" + eventId;
+    }
+
+    @GetMapping("/events/add")
+    public String addEvent(Model model) {
+        model.addAttribute("event", new EventDto());
+        return "event-add";
+    }
+    @PostMapping("/events/add")
+    public String postNewEvent(@ModelAttribute("event") @Valid EventDto eventDto){
+        eventService.add(eventService.toEntity(eventDto));
+        return "redirect:/events/current";
+    }
+
     private User getLoggedInUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userService.findByUsername(username);
@@ -214,7 +240,8 @@ public class ThymeleafController {
 
     private Event changeEventStatus(Long eventId, EventStatus eventStatus) {
         Event event = eventService.findById(eventId);
-        if (event.getStatus() != eventStatus) {
+        if (event.getStatus() != eventStatus && event.getStatus() != EventStatus.COMPLETED) {
+            if(event.isAllScoresIn())   eventStatus = EventStatus.COMPLETED;
             event.setStatus(eventStatus);
             eventService.save(event);
         }

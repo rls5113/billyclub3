@@ -27,7 +27,7 @@ public class UserDto {
         private String password;
         private Integer points;
         private List<Role> roles;
-
+        private String resetPasswordToken;
         public String getName() {
                 String name = (getFirstName()==null) ? "" : getFirstName();
                 name += (getLastName()==null) ? "" : " "+ getLastName();

@@ -16,12 +16,15 @@ import java.util.List;
 public class PlayerDto {
     private Long id;
     private String name;
-    private Integer pointsToPull;
+    private Integer quota;
     private LocalDateTime timeEntered;
     private Event event;
     private Boolean isWaiting;
     private Integer scoreForEvent;
+    private List<String> eagles;
     private List<String> birdies;
     private String team;
+    private Integer total;
+    private Integer adjustment;
 
 }

@@ -3,19 +3,19 @@ package com.billyclub.points.service.impl;
 
 import com.billyclub.points.dto.UserDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
-import com.billyclub.points.model.Player;
 import com.billyclub.points.model.Role;
 import com.billyclub.points.model.User;
 import com.billyclub.points.repository.RoleRepository;
 import com.billyclub.points.repository.UserRepository;
 import com.billyclub.points.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,21 +32,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User saveUser(UserDto userDto) {
         User user = new User();
         user.setName(userDto.getFirstName() + " " + userDto.getLastName());
-        user.setEmail(userDto.getEmail());
-        user.setUsername(userDto.getUsername());
-        user.setPoints(0);
+        BeanUtils.copyProperties(userDto, user);
 
         //encrypt the password once we integrate spring security
         //user.setPassword(userDto.getPassword());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        Role role = roleRepository.findByName("ROLE_USER");
-//        if(role == null){
-//            role = checkRoleExist();
-//        }
-        user.setRoles(Arrays.asList(role));
+        if(user.getRoles().isEmpty()){
+            Role role = roleRepository.findByName("ROLE_USER");
+            if(role == null){
+                role = checkRoleExist();
+            }
+            user.setRoles(Arrays.asList(role));
+        }
+
         return userRepository.save(user);
     }
     @Override
@@ -56,7 +58,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email)
+                .orElseThrow(()->new ResourceNotFoundException("User","email",email));
     }
 
     @Override
@@ -90,6 +93,32 @@ public class UserServiceImpl implements UserService {
     @Override
     public Role findByName(String name) {
         return roleRepository.findByName(name);
+    }
+
+    @Override
+    public User findByFullname(String fullname) {
+        return userRepository.findUserByName(fullname);
+    }
+
+    @Override
+    public void updateResetPasswordToken(String token, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new ResourceNotFoundException("User","email",email));
+        user.setResetPasswordToken(token);
+        userRepository.save(user);
+    }
+
+    @Override
+    public User findByResetPasswordToken(String token) {
+        return userRepository.findByResetPasswordToken(token)
+                .orElseThrow(()->new ResourceNotFoundException("User","ResetPasswordToken","Value does not match."));
+    }
+
+    @Override
+    public void updatePassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetPasswordToken(null);
+        userRepository.save(user);
     }
 
     @Override
@@ -130,10 +159,10 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-//    private Role checkRoleExist() {
-//        Role role = new Role();
-//        role.setName("ROLE_USER");
-//        return roleRepository.save(role);
-//    }
+    private Role checkRoleExist() {
+        Role role = new Role();
+        role.setName("ROLE_USER");
+        return roleRepository.save(role);
+    }
 
 }

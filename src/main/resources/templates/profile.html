@@ -109,12 +109,9 @@
 
 
                                         <div>
-                                            <!--  th:if="${event.isPlayerInEvent(loggedInUser.name)} "-->
-                                            <button style="margin: 5px" sec:authorize="!hasRole('ROLE_ADMIN')"
-                                                   type="#" class="btn btn-primary">Add me this event
-                                            </button>
-                                            <a sec:authorize="hasRole('ROLE_ADMIN') and false" data-bs-toggle="modal" data-bs-target="#userPickListModal"
-                                               class="btn btn-primary">Add Players to this event</a>
+                                            <a th:href="@{/reset-password}" class="btn-sml btn btn-primary">Change Password</a>
+<!--                                            <a data-bs-toggle="modal"-->
+<!--                                               data-bs-target="#userPickListModal" class="btn-sml btn btn-primary ">Change Password</a>-->
 
                                         </div>
                                     </div>

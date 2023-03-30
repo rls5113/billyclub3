@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class PlayerScoresHolderDto {
     Long playerId;
     Integer scoreForEvent;
+    String[] eagles;
     String[] birdies;
 }

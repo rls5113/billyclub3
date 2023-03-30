@@ -3,7 +3,7 @@ package com.billyclub.points.model;
 public enum EventStatus {
     OPEN,
     STARTED,
-    POST_SCORES,
+    POSTING,
     COMPLETED,
     FROST_DELAY,
     RAIN_DELAY,
