@@ -1,4 +1,4 @@
-package thymeleafexamples.springmail.business;
+package com.billyclub.points.config;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
@@ -24,12 +24,12 @@ import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 
 @Configuration
-@PropertySource("classpath:mail/emailconfig.properties")
+@PropertySource("classpath:templates/mail/emailconfig.properties")
 public class SpringMailConfig implements ApplicationContextAware, EnvironmentAware {
 
     public static final String EMAIL_TEMPLATE_ENCODING = "UTF-8";
 
-    private static final String JAVA_MAIL_FILE = "classpath:mail/javamail.properties";
+    private static final String JAVA_MAIL_FILE = "classpath:templates/mail/javamail.properties";
 
     private static final String HOST = "mail.server.host";
     private static final String PORT = "mail.server.port";
@@ -95,7 +95,7 @@ public class SpringMailConfig implements ApplicationContextAware, EnvironmentAwa
     @Bean
     public ResourceBundleMessageSource emailMessageSource() {
         final ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("mail/MailMessages");
+        messageSource.setBasename("/templates/mail/MailMessages");
         return messageSource;
     }
 
@@ -123,7 +123,7 @@ public class SpringMailConfig implements ApplicationContextAware, EnvironmentAwa
         final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setOrder(Integer.valueOf(1));
         templateResolver.setResolvablePatterns(Collections.singleton("text/*"));
-        templateResolver.setPrefix("/mail/");
+        templateResolver.setPrefix("/templates/mail/");
         templateResolver.setSuffix(".txt");
         templateResolver.setTemplateMode(TemplateMode.TEXT);
         templateResolver.setCharacterEncoding(EMAIL_TEMPLATE_ENCODING);
@@ -135,7 +135,7 @@ public class SpringMailConfig implements ApplicationContextAware, EnvironmentAwa
         final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setOrder(Integer.valueOf(2));
         templateResolver.setResolvablePatterns(Collections.singleton("html/*"));
-        templateResolver.setPrefix("/mail/");
+        templateResolver.setPrefix("/templates/mail/");
         templateResolver.setSuffix(".html");
         templateResolver.setTemplateMode(TemplateMode.HTML);
         templateResolver.setCharacterEncoding(EMAIL_TEMPLATE_ENCODING);

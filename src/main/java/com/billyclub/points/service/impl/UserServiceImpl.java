@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
@@ -101,11 +100,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateResetPasswordToken(String token, String email) {
+    public User updateResetPasswordToken(String token, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()->new ResourceNotFoundException("User","email",email));
         user.setResetPasswordToken(token);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override

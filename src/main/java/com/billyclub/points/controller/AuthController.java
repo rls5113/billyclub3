@@ -3,17 +3,16 @@ package com.billyclub.points.controller;
 import com.billyclub.points.dto.UserDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.User;
+import com.billyclub.points.service.EmailService;
 import com.billyclub.points.service.UserService;
 import com.billyclub.points.util.ServletUtility;
 import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -26,17 +25,18 @@ import org.thymeleaf.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 public class AuthController {
 
     private UserService userService;
-    private JavaMailSender mailSender;
+    private EmailService emailService;
 
     @Autowired
-    public AuthController(UserService userService, JavaMailSender mailSender) {
+    public AuthController(UserService userService, EmailService emailService) {
         this.userService = userService;
-        this.mailSender = mailSender;
+        this.emailService = emailService;
     }
 
     @GetMapping("index")
@@ -98,11 +98,11 @@ public class AuthController {
         String email = request.getParameter("email");
         String token = RandomString.make(45);
         try {
-            userService.updateResetPasswordToken(token,email);
+            User user = userService.updateResetPasswordToken(token,email);
             //generate pw reset link
             String link = ServletUtility.getSiteURL(request)+"/reset-password?token="+ token;
             //send email
-            sendForgotPasswordEmail(email, link);
+            sendForgotPasswordEmail(user.getName(), email, link, request.getLocale());
         } catch (ResourceNotFoundException e) {
             model.addAttribute("error",e.getMessage());
             return "forgot-password";
@@ -114,22 +114,24 @@ public class AuthController {
         return "redirect:/forgot-password?success";
     }
 
-    private void sendForgotPasswordEmail(String email, String link) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
+    private void sendForgotPasswordEmail(String name, String email, String link, Locale locale) throws MessagingException, UnsupportedEncodingException {
 
-        helper.setFrom("rls1893@yahoo.com","System Automation");
-        helper.setTo(email);
-        String subject = "Billy Club Points System: password reset link";
-        String content = "<p>Hello,</p>"
-                + "<p>You have requested to reset your password.</p>"
-                + "<p>Click the link below to change your password:</p>"
-                + "<p><b><a href=\""+link+"\">Change my Password</a></b></p>"
-                + "<p>Ignore if you remember your password, or did not make the request.</p>"
-                ;
-        helper.setSubject(subject);
-        helper.setText(content, true);
-        mailSender.send(message);
+        emailService.sendForgotPasswordEmail(name, email, link, locale );
+//        MimeMessage message = mailSender.createMimeMessage();
+//        MimeMessageHelper helper = new MimeMessageHelper(message);
+//
+//        helper.setFrom("rls1893@yahoo.com","System Automation");
+//        helper.setTo(email);
+//        String subject = "Billy Club Points System: password reset link";
+//        String content = "<p>Hello,</p>"
+//                + "<p>You have requested to reset your password.</p>"
+//                + "<p>Click the link below to change your password:</p>"
+//                + "<p><b><a href=\""+link+"\">Change my Password</a></b></p>"
+//                + "<p>Ignore if you remember your password, or did not make the request.</p>"
+//                ;
+//        helper.setSubject(subject);
+//        helper.setText(content, true);
+//        mailSender.send(message);
     }
     @GetMapping("/reset-password")
     public String showResetPasswordForm(@Param("token") String token, Model model) {
@@ -154,10 +156,12 @@ public class AuthController {
         String token =  request.getParameter("token");
         String loggedInUsername =  request.getParameter("logged-in-username");
 
+
         if(!StringUtils.isEmpty(token)){
             try {
                 User userToReset = userService.findByResetPasswordToken(token);
                 userService.updatePassword(userToReset, password);
+                model.addAttribute("name", userToReset.getName());
             }catch (ResourceNotFoundException e) {
                 model.addAttribute("error", "Invalid reset password token");
                 return "reset-password?error";
