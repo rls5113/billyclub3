@@ -115,23 +115,7 @@ public class AuthController {
     }
 
     private void sendForgotPasswordEmail(String name, String email, String link, Locale locale) throws MessagingException, UnsupportedEncodingException {
-
         emailService.sendForgotPasswordEmail(name, email, link, locale );
-//        MimeMessage message = mailSender.createMimeMessage();
-//        MimeMessageHelper helper = new MimeMessageHelper(message);
-//
-//        helper.setFrom("rls1893@yahoo.com","System Automation");
-//        helper.setTo(email);
-//        String subject = "Billy Club Points System: password reset link";
-//        String content = "<p>Hello,</p>"
-//                + "<p>You have requested to reset your password.</p>"
-//                + "<p>Click the link below to change your password:</p>"
-//                + "<p><b><a href=\""+link+"\">Change my Password</a></b></p>"
-//                + "<p>Ignore if you remember your password, or did not make the request.</p>"
-//                ;
-//        helper.setSubject(subject);
-//        helper.setText(content, true);
-//        mailSender.send(message);
     }
     @GetMapping("/reset-password")
     public String showResetPasswordForm(@Param("token") String token, Model model) {

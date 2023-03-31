@@ -89,14 +89,14 @@ class LoadDatabase {
 
 
             List<Player> players = Collections.emptyList();
-            Event event0 = eventService.add(new Event(null, LocalDate.now(), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null));
-            Event event5 = eventService.add(new Event(null, LocalDate.now(), LocalTime.of(12,30,0) ,1, EventStatus.OPEN, players,null,null,null));
-            Event event6 = eventService.add(new Event(null, LocalDate.now().plusDays(1), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null));
-            Event event7 = eventService.add(new Event(null, LocalDate.now().plusDays(2), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null));
-            Event event1 = eventService.add(new Event(null, LocalDate.now().plusDays(7), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null));
-            Event event2 = eventService.add(new Event(null,LocalDate.now().plusDays(8), LocalTime.of(6,30,0) ,2, EventStatus.OPEN, players,null,null,null));
-            Event event3 = eventService.add(new Event(null,LocalDate.now().plusDays(14), LocalTime.of(6,30,0) ,3,  EventStatus.OPEN,players,null,null,null));
-            Event event4 = eventService.add(new Event(null,LocalDate.now().plusDays(15), LocalTime.of(6,30,0) ,4,  EventStatus.OPEN,players,null,null,null));
+            Event event0 = eventService.add(new Event(null, LocalDate.now(), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null,null));
+            Event event5 = eventService.add(new Event(null, LocalDate.now(), LocalTime.of(12,30,0) ,1, EventStatus.OPEN, players,null,null,null,null));
+            Event event6 = eventService.add(new Event(null, LocalDate.now().plusDays(1), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null,null));
+            Event event7 = eventService.add(new Event(null, LocalDate.now().plusDays(2), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null,null));
+            Event event1 = eventService.add(new Event(null, LocalDate.now().plusDays(7), LocalTime.of(6,30,0) ,1, EventStatus.OPEN, players,null,null,null,null));
+            Event event2 = eventService.add(new Event(null,LocalDate.now().plusDays(8), LocalTime.of(6,30,0) ,2, EventStatus.OPEN, players,null,null,null,null));
+            Event event3 = eventService.add(new Event(null,LocalDate.now().plusDays(14), LocalTime.of(6,30,0) ,3,  EventStatus.OPEN,players,null,null,null,null));
+            Event event4 = eventService.add(new Event(null,LocalDate.now().plusDays(15), LocalTime.of(6,30,0) ,4,  EventStatus.OPEN,players,null,null,null,null));
             log.info("Preloading " + event1 );
             log.info("Preloading " + event2 );
             log.info("Preloading " + event3 );

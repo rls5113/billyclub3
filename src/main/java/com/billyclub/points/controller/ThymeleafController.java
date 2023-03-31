@@ -1,17 +1,17 @@
 package com.billyclub.points.controller;
 
 import com.billyclub.points.dto.*;
-import com.billyclub.points.model.Event;
-import com.billyclub.points.model.EventStatus;
-import com.billyclub.points.model.Player;
-import com.billyclub.points.model.User;
-import com.billyclub.points.service.EventService;
-import com.billyclub.points.service.PlayerService;
-import com.billyclub.points.service.UserService;
+import com.billyclub.points.model.*;
+import com.billyclub.points.service.*;
+import com.billyclub.points.util.ServletUtility;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,14 +31,20 @@ public class ThymeleafController {
     private final UserService userService;
     private final PlayerService playerService;
 
+    private EmailService emailService;
+    private final CourseService courseService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ThymeleafController.class);
     private Long eventId;
     private MultiPlayerScoresMapDto multiPlayerScores;
 
-    public ThymeleafController(EventService eventService, UserService userService, PlayerService playerService) {
+    @Autowired
+    public ThymeleafController(EventService eventService, UserService userService, PlayerService playerService, EmailService emailService, CourseService courseService) {
         this.eventService = eventService;
         this.userService = userService;
         this.playerService = playerService;
+        this.emailService = emailService;
+        this.courseService = courseService;
     }
 
     @GetMapping("/events/current")
@@ -228,8 +235,17 @@ public class ThymeleafController {
         return "event-add";
     }
     @PostMapping("/events/add")
-    public String postNewEvent(@ModelAttribute("event") @Valid EventDto eventDto){
-        eventService.add(eventService.toEntity(eventDto));
+    public String postNewEvent(@ModelAttribute("event") @Valid EventDto eventDto, HttpServletRequest request){
+        Event event = eventService.add(eventService.toEntity(eventDto));
+        //generate pw reset link
+        String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId();
+        List<User> recipients = userService.findAll();
+        //send email
+        try {
+            emailService.sendNewEventEmail(recipients, event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), link,request.getLocale());
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
         return "redirect:/events/current";
     }
 
@@ -246,6 +262,43 @@ public class ThymeleafController {
             eventService.save(event);
         }
         return event;
+    }
+    @GetMapping("/courses")
+    public String listCourses(Model model) {
+        List<CourseDto> courses = courseService.findAll().stream()
+                        .map(c -> courseService.toDto(c))
+                                .collect(Collectors.toList());
+        model.addAttribute("courses", courses);
+        return "course-list";
+    }
+    @GetMapping("/courses/add")
+    public String addCourse(Model model) {
+        model.addAttribute("course", new CourseDto());
+        model.addAttribute("mode", "add");
+        return "course-add-edit";
+    }
+
+    @PostMapping("/courses/add")
+    public String postAddCourse(@ModelAttribute("course") CourseDto course, BindingResult result, Model model) {
+        Course newCourse = courseService.save(courseService.toEntity(course));
+        return "redirect:/courses";
+    }
+    @GetMapping("/courses/{courseId}")
+    public String showEditCourse(
+            @PathVariable("courseId") Long courseId, Model model) {
+        Course courseToEdit = courseService.findById(courseId);
+        model.addAttribute("course", courseService.toDto(courseToEdit));
+        model.addAttribute("mode","edit");
+        return "course-add-edit";
+    }
+    @PostMapping("/courses/{courseId}/edit")
+    public String postEditCourse(
+            @PathVariable("courseId") Long courseId,
+            @ModelAttribute("course") CourseDto course) {
+        Course courseToEdit = courseService.findById(courseId);
+        BeanUtils.copyProperties(course, courseToEdit);
+        courseService.save(courseToEdit);
+        return "redirect:/courses";
     }
 
 }

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        layout:decorate="~{layout}">
+<head>
+    <title th:text="${(mode=='add')?'Add Course':'Save Course'}">Event Add</title>
+</head>
+<body layout:fragment="body">
+<style>
+    .main {
+        padding: 125px 150px;
+    }
+    .panel {
+        float: left;
+        width: 50%;
+        padding: 5px;
+    }
+    .playerPanel {
+        font-size: small;
+    }
+
+    .btn-sml {
+        text-align-all: inherit;
+        font-size: small;
+    }
+
+</style>
+
+<div class="container">
+    <div class="main" th:object="${course}">
+        <form method="post" th:action="${(mode == 'add')?'/courses/add':'/courses/'+course.id+'/edit'}" th:object="${course}" class="form-horizontal" role="form">
+            <div class="row">
+
+                <div class="col-md-7">
+                    <div th:if="${param.error}">
+                        <div class="alert alert-danger">Action failed!</div>
+                    </div>
+                    <div th:if="${param.success}">
+                        <div class="alert alert-info">Changes saved.</div>
+                    </div>
+                    <div>
+
+                        <div class="card">
+                            <div class="card-header  bg-primary">
+                                <h3 class="text-center text-light" th:text="${(mode =='add')?'Add Course':'Edit Course'}">Save</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+
+                                    <div class="mb-3">
+                                        <i>
+                                            <input type="hidden" th:field="*{id}" /><div th:text="*{id}"></div>
+                                        </i>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="name" class="control-label">Name</label>
+                                        <input type="text" autofocus
+                                               id="name"
+                                               name="name"
+                                               class="form-control"
+                                               placeholder="Course Name"
+                                               th:field="*{name}"
+                                        />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="phone" class="control-label">Phone</label>
+                                        <input type="text"
+                                               id="phone"
+                                               name="phone"
+                                               class="form-control"
+                                               placeholder="Phone #"
+                                               th:field="*{phone}"
+                                        />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="maxPlayersPerGroup" class="control-label">Max Players per Group</label>
+                                        <input type="text"
+                                               id="maxPlayersPerGroup"
+                                               name="maxPlayersPerGroup"
+                                               class="form-control"
+                                               placeholder="Max player per group"
+                                               th:field="*{maxPlayersPerGroup}"
+                                        />
+                                    </div>
+
+
+
+                                    <div>
+                                        <button type="button" class="btn btn-secondary" th:href="@{/courses}">Close</button>
+                                        <button type="submit" class="btn btn-primary" th:text="${(mode=='add')?'Add Course':'Save Course'}">Add</button>                                        </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end row -->
+        </form>
+    </div>
+</div>
+<script>
+    $(function() {
+        $('#eventdate').datepicker({maxDate : new Date()});
+    });
+
+</script>
+</body>

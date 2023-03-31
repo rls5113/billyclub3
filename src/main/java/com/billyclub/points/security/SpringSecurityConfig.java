@@ -34,6 +34,7 @@ public class SpringSecurityConfig {
                                 .requestMatchers("/events/**").hasAnyRole("ADMIN","USER")
                                 .requestMatchers("/profile/**").hasAnyRole("ADMIN","USER")
                                 .requestMatchers("/users/**").hasAnyRole("ADMIN","USER")
+                                .requestMatchers("/courses/**").hasAnyRole("ADMIN","USER")
 //                                .requestMatchers("/players/**").hasAnyRole("ADMIN","USER")
 //                              .requestMatchers("/api/v1/**").hasAnyRole("ADMIN","USER")
                                 .anyRequest().authenticated()

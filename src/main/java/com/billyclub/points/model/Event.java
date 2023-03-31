@@ -44,6 +44,10 @@ public class Event {
     @ElementCollection
     private List<String> scatSummary = new ArrayList<>();
 
+    @JsonManagedReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    private Course course;
     @Transient
     public boolean isAllScoresIn() {
         if(players.isEmpty()) return false;

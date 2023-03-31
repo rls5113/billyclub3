@@ -107,9 +107,9 @@
                                         </div>
                                         <div th:if="${! event.status.name().equals('COMPLETED')}">
                                             <!--  th:if="${event.isPlayerInEvent(loggedInUser.name)} "-->
-                                            <button style="margin: 5px" sec:authorize="!hasRole('ROLE_ADMIN')"
+                                            <button style="margin: 5px" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_USER')"
                                                     th:if="${! #lists.contains(names, loginUser.name)} "
-                                                    type="submit" class="btn btn-primary">Add me this event
+                                                    type="submit" class="btn-sml btn btn-primary">Add me this event
                                             </button>
                                             <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
                                                th:if="${event.isAllScoresIn}"
