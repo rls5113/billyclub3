@@ -5633,6 +5633,7 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: C:/developer/mya
 	at org.h2.mvstore.FileStore.open(FileStore.java:128)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:452)
 	... 62 more
+<<<<<<< HEAD
 2023-03-31 02:38:59 jdbc[3]: exception
 java.sql.SQLClientInfoException: Client info name 'ApplicationName' not supported.
 	at org.h2.jdbc.JdbcConnection.setClientInfo(JdbcConnection.java:1573)
@@ -6280,3 +6281,5 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: C:/developer/mya
 	at org.h2.mvstore.FileStore.open(FileStore.java:128)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:452)
 	... 62 more
+=======
+>>>>>>> c542373541ab14f559bea24477ce9d36fb3f90ac

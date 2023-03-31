@@ -7,13 +7,12 @@ import com.billyclub.points.service.EmailService;
 import com.billyclub.points.service.UserService;
 import com.billyclub.points.util.ServletUtility;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,6 +37,7 @@ public class AuthController {
         this.userService = userService;
         this.emailService = emailService;
     }
+    private JavaMailSender mailSender;
 
     @GetMapping("index")
     public String home(){
@@ -139,7 +139,6 @@ public class AuthController {
         String password = request.getParameter("password");
         String token =  request.getParameter("token");
         String loggedInUsername =  request.getParameter("logged-in-username");
-
 
         if(!StringUtils.isEmpty(token)){
             try {
