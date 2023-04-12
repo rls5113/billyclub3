@@ -25,9 +25,11 @@ public class UserDto {
         private String email;
         @NotEmpty(message = "Password should not be empty")
         private String password;
+        private String mobile;
         private Integer points;
         private List<Role> roles;
         private String resetPasswordToken;
+        private Boolean active;
         public String getName() {
                 String name = (getFirstName()==null) ? "" : getFirstName();
                 name += (getLastName()==null) ? "" : " "+ getLastName();

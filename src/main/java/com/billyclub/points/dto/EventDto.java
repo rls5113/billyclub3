@@ -1,5 +1,6 @@
 package com.billyclub.points.dto;
 
+import com.billyclub.points.model.Course;
 import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import lombok.AllArgsConstructor;
@@ -33,5 +34,6 @@ public class EventDto {
     private List<String> eventWinners;
     private List<String> scatWinners;
     private List<String> scatSummary;
+    private Course course;
 
 }

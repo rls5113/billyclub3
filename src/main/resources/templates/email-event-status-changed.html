@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Template for HTML email (status-changed)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<p th:text="#{greeting}">
+    Hello, Peter Static!
+</p>
+<p>
+    The status of this event is now <span th:text="${eventStatus}">delayed</span>.
+</p>
+<p>Click this link to go directly to the event...  after logging in. Make any necessary adjustments regarding you plans to remain
+entered in this event.</p>
+<p><b><a th:href="${link}">Event on <span th:text="${eventDate}">12/28/2012</span> status changed to <span th:text="${eventStatus}">delayed</span></a></b></p>
+
+<p>
+    Regards, <br />
+    &emsp; <em>Billy Club Support</em>
+
+</p>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+<head>
+    <title>Users</title>
+</head>
+<body layout:fragment="body">
+<style>
+    .main {
+        padding: 125px 150px;
+    }
+
+</style>
+<div class="main">
+
+    <div class="card">
+        <div class="card-header  bg-primary">
+            <h3 class="text-center text-light">User List</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-bordered table-hover table-light">
+                <thead class="table-header">
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Current Points</th>
+                        <th>Active ?</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user: ${users}">
+                        <td th:text="${user.name}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.points}"></td>
+                        <td th:text="${user.active}"></td>
+                        <td>
+                            <a th:href="@{/users/{userid}/edit(userid=${user.id})}"
+                               th:if="${loginUser.name == user.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                               class="btn-sml btn btn-primary btn-modal-edituser">Edit</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div layout:insert="~{user-edit-modal}"></div>
+<script>
+    $(document).on("click",".btn-modal-edituser", function() {
+        let user = $(this).data('user');
+        console.log('DATA: ' + user);
+        console.log('POINTS: ' + user['points']);
+        alert('DATA: ' + user);
+        // alert('POINT: ' + user.get('points'));
+        $(".modal-body input").each(function (i) {
+            alert('id: '+this.id);
+            // alert('value object: '+ $(this).val(user.points.value));
+            // if(this.id == "points")     $(this).val($(user).attr('points');
+            // if(this.id == 'email')      this.val(user.prop('email'));
+            // if(this.id == 'active')     this.val(user.prop('isActive'));
+            // alert('value: '+$(this).val() );
+        });
+    });
+</script>
+</body>
+</html>

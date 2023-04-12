@@ -52,16 +52,53 @@ public class EmailServiceImpl implements EmailService {
         ctx.setVariable("eventDate", eventDate);
         ctx.setVariable("link",link);
 
-
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-        message.setSubject("Billy Club Points System: password reset link");
+        message.setSubject("Billy Club Points System: new event created");
         message.setFrom("rls1893@yahoo.com");
 //        for(User user: recipients){
 //            message.addTo(new InternetAddress(user.getEmail()));
 //        }
-message.setTo("stuartrl@comcast.net");
+        message.setTo("stuartrl@comcast.net");
         final String content = this.templateEngine.process("email-new-event",ctx);
+        message.setText(content,true);
+        this.mailSender.send(mimeMessage);
+
+    }
+    @Override
+    public void sendMovedFromWaitlistEmail(List<User> recipients, String eventDate, String link, Locale locale) throws MessagingException {
+        final Context ctx = new Context(locale);
+        ctx.setVariable("eventDate", eventDate);
+        ctx.setVariable("link",link);
+
+        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+        message.setSubject("Billy Club Points System: new event created");
+        message.setFrom("rls1893@yahoo.com");
+//        for(User user: recipients){
+//            message.addTo(new InternetAddress(user.getEmail()));
+//        }
+        message.setTo("stuartrl@comcast.net");
+        final String content = this.templateEngine.process("email-player-from-waitlist",ctx);
+        message.setText(content,true);
+        this.mailSender.send(mimeMessage);
+
+    }
+    @Override
+    public void sendEventStatusChangedEmail(List<User> recipients, String eventStatus, String eventDate, String link, Locale locale) throws MessagingException {
+        final Context ctx = new Context(locale);
+        ctx.setVariable("eventDate", eventDate);
+        ctx.setVariable("link",link);
+
+        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+        message.setSubject("Billy Club Points System: Event status changed to "+eventStatus);
+        message.setFrom("rls1893@yahoo.com");
+//        for(User user: recipients){
+//            message.addTo(new InternetAddress(user.getEmail()));
+//        }
+        message.setTo("stuartrl@comcast.net");
+        final String content = this.templateEngine.process("email-event-status-changed",ctx);
         message.setText(content,true);
         this.mailSender.send(mimeMessage);
 

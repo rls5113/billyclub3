@@ -1,5 +1,6 @@
 package com.billyclub.points.controller;
 
+import com.billyclub.points.dto.ResetPasswordDto;
 import com.billyclub.points.dto.UserDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.User;
@@ -82,12 +83,6 @@ public class AuthController {
         model.addAttribute("user", userService.addUser(user));
         return "redirect:/login?success";
     }
-    @GetMapping("/users")
-    public String listRegisteredUsers(Model model){
-        List<UserDto> users = userService.findAllUsers();
-        model.addAttribute("users", users);
-        return "users";
-    }
 
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
@@ -130,13 +125,23 @@ public class AuthController {
             }
         }
         model.addAttribute("loggedInUsername", SecurityContextHolder.getContext().getAuthentication().getName());
+        ResetPasswordDto pwpair = new ResetPasswordDto();
+        model.addAttribute("pwpair", pwpair);
 
         return "reset-password";
     }
 
     @PostMapping("/reset-password")
-    public String postResetPassword(HttpServletRequest request, Model model) {
-        String password = request.getParameter("password");
+    public String postResetPassword(@Valid @ModelAttribute("pwpair") ResetPasswordDto dto,
+                                    BindingResult result, Model model, HttpServletRequest request
+                                    ) {
+//        String password = request.getParameter("password");
+        String password = dto.getPassword();
+        String confirmPassword = dto.getConfirmPassword();
+        if(! password.equals(confirmPassword)){
+            result.rejectValue("password", null, "Password does NOT match confirmation.");
+            return "reset-password";
+        }
         String token =  request.getParameter("token");
         String loggedInUsername =  request.getParameter("logged-in-username");
 
@@ -146,16 +151,18 @@ public class AuthController {
                 userService.updatePassword(userToReset, password);
                 model.addAttribute("name", userToReset.getName());
             }catch (ResourceNotFoundException e) {
-                model.addAttribute("error", "Invalid reset password token");
-                return "reset-password?error";
+                result.rejectValue("token",null,"Invalid reset password token.");
+//                model.addAttribute("error", "Invalid reset password token");
+                return "reset-password";
             }
         }else {
             try {
                 User userToReset = userService.findByUsername(loggedInUsername);
                 userService.updatePassword(userToReset, password);
             }catch (ResourceNotFoundException e) {
-                model.addAttribute("error", "Invalid account. "+ e.getMessage());
-                return "reset-password?error";
+                result.rejectValue("user",null,"User account could not be found.");
+//                model.addAttribute("error", "Invalid account. "+ e.getMessage());
+                return "reset-password";
             }
         }
 

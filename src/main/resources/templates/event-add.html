@@ -39,8 +39,12 @@
             <div class="row">
 
                 <div class="col-md-7">
-                    <div th:if="${param.error}">
-                        <div class="alert alert-danger">Insert failed!</div>
+                    <div th:if="${#fields.hasAnyErrors()}">
+                        <div class="alert alert-danger">
+                            <ul>
+                                <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+                            </ul>
+                        </div>
                     </div>
                     <div th:if="${param.success}">
                         <div class="alert alert-info">You've created a new Event.</div>
@@ -60,6 +64,20 @@
                                             </i>
                                         </div>
                                         <div class="mb-3">
+                                            <label for="course" class="control-label">Course</label>
+                                            <div class="mb-3">
+                                                <select name="course" id="course" th:field="*{course}" class="form-control ">
+                                                    <option th:each="courseOpt : ${courses}"
+                                                            th:value="${courseOpt.id}" th:text="${courseOpt.name}"></option>
+                                                </select>
+                                                <p th:errors="*{course}" class="text-danger"
+                                                   th:if="${#fields.hasErrors('course')}">
+                                                </p>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
                                             <label for="eventdate" class="control-label">Event Date</label>
                                             <input type="date" autofocus
                                                    id="eventdate"
@@ -68,6 +86,10 @@
                                                    placeholder="Event Date"
                                                    th:field="*{eventDate}"
                                             />
+                                            <p th:errors="*{eventDate}" class="text-danger"
+                                               th:if="${#fields.hasErrors('eventDate')}">
+                                            </p>
+
                                         </div>
 
                                         <div class="mb-3">
@@ -79,7 +101,11 @@
                                                    placeholder="Starting Time"
                                                    th:field="*{startTime}"
                                             />
-                                         </div>
+                                            <p th:errors="*{startTime}" class="text-danger"
+                                               th:if="${#fields.hasErrors('startTime')}">
+                                            </p>
+
+                                        </div>
 
                                         <div class="mb-3">
                                             <label for="numOfTimes" class="control-label"># of Tee Times</label>
@@ -100,6 +126,9 @@
                                                 <option value="7"/>
                                                 <option value="8"/>
                                             </datalist>
+                                            <p th:errors="*{numOfTimes}" class="text-danger"
+                                               th:if="${#fields.hasErrors('numOfTimes')}">
+                                            </p>
                                         </div>
 
                                         <div class="mb-3">
@@ -108,12 +137,16 @@
                                                 <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
                                                         th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
                                             </select>
+                                            <p th:errors="*{status}" class="text-danger"
+                                               th:if="${#fields.hasErrors('status')}">
+                                            </p>
+
                                         </div>
 
 
                                         <div>
                                             <button type="button" class="btn btn-secondary">Close</button>
-                                            <button type="submit" class="btn btn-primary">Add Event</button>                                        </div>
+                                            <button type="submit" style="float:right;" class="btn btn-primary">Add Event</button>                                        </div>
                                         </div>
 
                                 </div>

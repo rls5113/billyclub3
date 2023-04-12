@@ -20,6 +20,7 @@ public class PlayerDto {
     private LocalDateTime timeEntered;
     private Event event;
     private Boolean isWaiting;
+    private Boolean isWithdrawal;
     private Integer scoreForEvent;
     private List<String> eagles;
     private List<String> birdies;

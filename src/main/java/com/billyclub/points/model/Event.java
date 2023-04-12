@@ -1,5 +1,6 @@
 package com.billyclub.points.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,7 +45,8 @@ public class Event {
     @ElementCollection
     private List<String> scatSummary = new ArrayList<>();
 
-    @JsonManagedReference
+//    @JsonManagedReference
+@JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
@@ -75,7 +77,7 @@ public class Event {
     public void addPlayer(Player player) {
         if(player.getTimeEntered()==null)
             player.setTimeEntered(LocalDateTime.now());
-        boolean timesFull = players.size() >= numOfTimes * 5;
+        boolean timesFull = players.size() >= numOfTimes * course.getMaxPlayersPerGroup();
         boolean isIn = players.contains(player);
         if(timesFull && !isIn)
             player.setIsWaiting(Boolean.TRUE);

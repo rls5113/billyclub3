@@ -34,8 +34,12 @@
             <div class="row">
 
                 <div class="col-md-7">
-                    <div th:if="${param.error}">
-                        <div class="alert alert-danger">Action failed!</div>
+                    <div th:if="${#fields.hasAnyErrors()}">
+                        <div class="alert alert-danger">
+                            <ul>
+                                <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+                            </ul>
+                        </div>
                     </div>
                     <div th:if="${param.success}">
                         <div class="alert alert-info">Changes saved.</div>
@@ -63,6 +67,9 @@
                                                placeholder="Course Name"
                                                th:field="*{name}"
                                         />
+                                        <p th:errors="*{name}" class="text-danger"
+                                           th:if="${#fields.hasErrors('name')}">
+                                        </p>
                                     </div>
 
                                     <div class="mb-3">
@@ -74,6 +81,9 @@
                                                placeholder="Phone #"
                                                th:field="*{phone}"
                                         />
+                                        <p th:errors="*{phone}" class="text-danger"
+                                           th:if="${#fields.hasErrors('phone')}">
+                                        </p>
                                     </div>
 
                                     <div class="mb-3">
@@ -85,13 +95,16 @@
                                                placeholder="Max player per group"
                                                th:field="*{maxPlayersPerGroup}"
                                         />
+                                        <p th:errors="*{maxPlayersPerGroup}" class="text-danger"
+                                           th:if="${#fields.hasErrors('maxPlayersPerGroup')}">
+                                        </p>
                                     </div>
 
 
 
                                     <div>
-                                        <button type="button" class="btn btn-secondary" th:href="@{/courses}">Close</button>
-                                        <button type="submit" class="btn btn-primary" th:text="${(mode=='add')?'Add Course':'Save Course'}">Add</button>                                        </div>
+                                        <a class="btn btn-secondary" th:href="@{/courses}">Close</a>
+                                        <button type="submit" style="float:right;" class="btn btn-primary" th:text="${(mode=='add')?'Add Course':'Save Course'}">Add</button>                                        </div>
                                 </div>
 
                             </div>

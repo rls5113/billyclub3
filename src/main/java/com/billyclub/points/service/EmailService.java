@@ -9,4 +9,6 @@ import java.util.Locale;
 public interface EmailService {
     public void sendForgotPasswordEmail(final String recipientName, final String recipientEmail, String link, final Locale locale) throws MessagingException;
     public void sendNewEventEmail(List<User> recipients, String eventDate, String link, final Locale locale) throws MessagingException;
+    public void sendMovedFromWaitlistEmail(List<User> recipients, String eventDate, String link, final Locale locale) throws MessagingException;
+    public void sendEventStatusChangedEmail(List<User> recipients, String eventStatus, String eventDate, String link, final Locale locale) throws MessagingException;
 }

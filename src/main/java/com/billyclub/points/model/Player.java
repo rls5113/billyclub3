@@ -37,6 +37,8 @@ public class Player {
 
     @Value("false")
     private Boolean isWaiting;
+    @Value("false")
+    private Boolean isWithdrawal;
     private String team;
 
     private List<String> eagles = new ArrayList<>();

@@ -60,25 +60,25 @@ class LoadDatabase {
 ////            Role admin = userService.addRole("ADMIN");
 //            Role user = userService.addRole("USER");
 //  ADMIN
-            User rstuart = userService.saveUser(new UserDto(null,"rstuart","Robert","Stuart","stuartrl@comcast.net","password",0, Arrays.asList(role1,role2),null));
+            User rstuart = userService.saveUser(new UserDto(null,"rstuart","Robert","Stuart","stuartrl@comcast.net","password","",0, Arrays.asList(role1,role2),null,true));
 //            rstuart.getRoles().add(role2);
 //            role2.getUsers().add(rstuart);
 //            userService.save(rstuart);
 
 //  ALL THE REST WILL BE USERS
-            User hmunster = userService.saveUser(new UserDto(null,"hmunster","Herman","Munster","hmunster@gmail.com","password",0,Arrays.asList(role1),null));
-            User lmunster = userService.saveUser(new UserDto(null,"lmunster","Lilly","Munster","lmunster@gmail.com","password",0,Arrays.asList(role1),null));
-            User emunster = userService.saveUser(new UserDto(null,"emunster","Eddie","Munster","emunster@gmail.com","password",0,Arrays.asList(role1),null));
-            User gmunster = userService.saveUser(new UserDto(null,"gmunster","Grandpa","Munster","gmunster@gmail.com","password",0,Arrays.asList(role1),null));
-            User hsimpson = userService.saveUser(new UserDto(null,"hsimpson","Homer","Simpson","hsimpson@gmail.com","password",0,Arrays.asList(role1),null));
-            User bsimpson = userService.saveUser(new UserDto(null,"bsimpson","Bart","Simpson","bsimpson@gmail.com","password",0,Arrays.asList(role1),null));
-            User lsimpson = userService.saveUser(new UserDto(null,"lsimpson","Lisa","Simpson","lsimpson@gmail.com","password",0,Arrays.asList(role1),null));
-            User msimpson = userService.saveUser(new UserDto(null,"msimpson","Marge","Simpson","msimpson@gmail.com","password",0,Arrays.asList(role1),null));
-            User gaddams = userService.saveUser(new UserDto(null,"gaddams","Gomez","Addams","gaddams@gmail.com","password",0,Arrays.asList(role1),null));
-            User maddams = userService.saveUser(new UserDto(null,"maddams","Morticia","Addams","maddams@gmail.com","password",0,Arrays.asList(role1),null));
-            User fester = userService.saveUser(new UserDto(null,"faddams","Uncle","Fester","faddams@gmail.com","password",0,Arrays.asList(role1),null));
-            User pugsly = userService.saveUser(new UserDto(null,"paddams","Pugsly","Addams","paddams@gmail.com","password",0,Arrays.asList(role1),null));
-            User wed = userService.saveUser(new UserDto(null,"waddams","Wednesday","Addams","waddams@gmail.com","password",0,Arrays.asList(role1),null));
+            User hmunster = userService.saveUser(new UserDto(null,"hmunster","Herman","Munster","hmunster@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User lmunster = userService.saveUser(new UserDto(null,"lmunster","Lilly","Munster","lmunster@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User emunster = userService.saveUser(new UserDto(null,"emunster","Eddie","Munster","emunster@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User gmunster = userService.saveUser(new UserDto(null,"gmunster","Grandpa","Munster","gmunster@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User hsimpson = userService.saveUser(new UserDto(null,"hsimpson","Homer","Simpson","hsimpson@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User bsimpson = userService.saveUser(new UserDto(null,"bsimpson","Bart","Simpson","bsimpson@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User lsimpson = userService.saveUser(new UserDto(null,"lsimpson","Lisa","Simpson","lsimpson@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User msimpson = userService.saveUser(new UserDto(null,"msimpson","Marge","Simpson","msimpson@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User gaddams = userService.saveUser(new UserDto(null,"gaddams","Gomez","Addams","gaddams@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User maddams = userService.saveUser(new UserDto(null,"maddams","Morticia","Addams","maddams@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User fester = userService.saveUser(new UserDto(null,"faddams","Uncle","Fester","faddams@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User pugsly = userService.saveUser(new UserDto(null,"paddams","Pugsly","Addams","paddams@gmail.com","password","",0,Arrays.asList(role1),null,true));
+            User wed = userService.saveUser(new UserDto(null,"waddams","Wednesday","Addams","waddams@gmail.com","password","",0,Arrays.asList(role1),null,true));
 
 //
 //            log.info("user1 " + rstuart );

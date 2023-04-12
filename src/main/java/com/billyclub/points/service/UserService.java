@@ -17,6 +17,7 @@ public interface UserService extends IService<User, UserDto>{
     User findByUsername(String username);
 
     List<UserDto> findAllUsers();
+    List<UserDto> findAllByActive();
 
     User findById(Long id);
 
@@ -27,4 +28,5 @@ public interface UserService extends IService<User, UserDto>{
     public User updateResetPasswordToken(String token, String email);
     public User findByResetPasswordToken(String token);
     public void updatePassword(User user, String newPassword);
+    public User transfer(UserDto source, User target);
 }

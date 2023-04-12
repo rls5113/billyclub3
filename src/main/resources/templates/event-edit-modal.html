@@ -1,0 +1,77 @@
+<form th:action="@{/events/{id}/edit(id=${event.id})}" method="post" th:object="${event}">
+
+<div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editEventModalLabel">Edit Event</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <div class="col-4">
+                        <div th:text="${event.id}" style="font-style: italic"/>
+                        <div class="mb-3">
+                            <label for="course" class="control-label">Course</label>
+                            <div class="mb-3">
+                                <select name="course" id="course" th:field="*{course}" class="form-control">
+                                    <option th:each="courseOpt : ${courses}"
+                                            th:value="${courseOpt.id}" th:text="${courseOpt.name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDate" class="control-label">Event Date</label>
+                            <input type="text"
+                                   id="eventDate"
+                                   name="eventDate"
+                                   class="form-control"
+                                   placeholder="Event Date"
+                                   th:field="*{eventDate}"
+                                   style="font-weight: bolder"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="startTime" class="control-label">Start Time</label>
+                            <input type="text"
+                                   id="startTime"
+                                   name="startTime"
+                                   class="form-control"
+                                   placeholder="Start Time"
+                                   th:field="*{startTime}"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="numOfTimes" class="control-label"># of Tee Times</label>
+                            <input type="text"
+                                   id="numOfTimes"
+                                   name="numOfTimes"
+                                   class="form-control"
+                                   placeholder="# of Times"
+                                   th:field="*{numOfTimes}"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="control-label">Status</label>
+                            <div class="mb-3">
+                                <select name="status" id="status" th:field="*{status}" class="form-control ">
+                                    <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
+                                            th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </tr>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="select-all-users" class="btn btn-secondary">Select All/None</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</form>

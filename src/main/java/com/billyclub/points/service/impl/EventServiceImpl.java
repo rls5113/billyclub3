@@ -9,6 +9,7 @@ import com.billyclub.points.model.Player;
 import com.billyclub.points.model.User;
 import com.billyclub.points.repository.EventRepository;
 import com.billyclub.points.service.EventService;
+import com.billyclub.points.service.PlayerService;
 import com.billyclub.points.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private final EventRepository eventRepository;
     @Autowired
-    private final PlayerServiceImpl playerService;
+    private final PlayerService playerService;
     @Autowired
     private final UserService userService;
 
@@ -123,13 +124,43 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findEventsPast(LocalDate.now());
         List<EventDto> list = events.stream().map((event)-> toDto(event))
                 .collect(Collectors.toList());
-        list.sort((e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
+        list.sort((e2, e1) -> (e1.getEventDate().compareTo(e2.getEventDate())));
 //        Collections.sort(list, (e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
         return list;    }
 
+    @Override
+    public Event transfer(EventDto source, Event target) {
+        target.setEventDate(source.getEventDate());
+        target.setStartTime(source.getStartTime());
+        target.setNumOfTimes(source.getNumOfTimes());
+        target.setStatus(source.getStatus());
+
+        return target;
+    }
+
+    @Override
+    public List<Player> recalculateWaitingList(Event event) {
+        List<Player> players = event.getPlayers();
+//        boolean timesFull = players.size() >= event.getNumOfTimes() * event.getCourse().getMaxPlayersPerGroup();
+        int maxPlayers = event.getNumOfTimes() * event.getCourse().getMaxPlayersPerGroup();
+        List<Player> movedFromWaitingList = new ArrayList<>();
+        for(int i=0;i<players.size();i++){
+            Player player = players.get(i);
+            Boolean onWaitlist = player.getIsWaiting();
+            if(i <= maxPlayers)     {
+                player.setIsWaiting(Boolean.FALSE);
+                if(onWaitlist)  movedFromWaitingList.add(player);
+            }
+            else  {
+                player.setIsWaiting(Boolean.TRUE);
+            }
+        }
+        return movedFromWaitingList;
+     }
+
     private void updateAdjustedScores(Event event) {
         List<Player> eventPlayers = event.getPlayers().stream()
-                .filter(p -> !p.getIsWaiting())
+                .filter(p -> !p.getIsWaiting() && !p.getIsWithdrawal())
                 .collect(Collectors.toList());
 
         for (Player p : eventPlayers) {
@@ -154,14 +185,23 @@ public class EventServiceImpl implements EventService {
 
     }
 
-    private Player getsMoneyBack(List<Player> eventPlayers){
-        Player player = null;
-        if (eventPlayers.size() > 7 && eventPlayers.size() % 2 != 0)
-            player = eventPlayers.stream()
-                .filter(p -> !p.getIsWaiting())
-                .min(Comparator.comparing(Player::getTotal))
-                .get();
-        return player;
+    private List<Player> getsMoneyBack(List<Player> eventPlayers){
+        List<Player> losers = new ArrayList<>();
+        if (eventPlayers.size() > 7 && eventPlayers.size() % 2 != 0) {
+            Player lowestScore = eventPlayers.stream()
+                    .filter(p -> !p.getIsWaiting() && !p.getIsWithdrawal())
+                    .min(Comparator.comparing(Player::getTotal))
+                    .get();
+            losers.add(lowestScore);
+            //check for ties
+            for(Player player : eventPlayers){
+                if(player.getTotal().equals(lowestScore.getTotal()) && !player.getName().equals(lowestScore.getName())){
+                    losers.add(player);
+                }
+            }
+
+        }
+        return losers;
     }
     private void calculateScats(Event event) {
         List<Player> players = event.getPlayers().stream()
@@ -178,6 +218,13 @@ public class EventServiceImpl implements EventService {
                     birds.add(holeNum + ": "+player.getName()+"  Birdie");
                 }
             }
+        }
+        //skip calcs if no birds or eagles
+        if(eagles.isEmpty() && birds.isEmpty())  {
+            List<String> list = new ArrayList<>();
+            list.add("No scats today! You guys suck.");
+            event.setScatWinners(list);
+            return;
         }
 
         if(!eagles.isEmpty()){
@@ -238,7 +285,7 @@ public class EventServiceImpl implements EventService {
                 .filter(s -> !s.contains("CUT"))
                 .collect(Collectors.toList()));
 
-        int scatWorth = players.size() * 5 / scats.size() ;
+        int scatWorth = (scats.size() == 0) ? 0 : players.size() * 5 / scats.size() ;
         for(int i = 0; i < scats.size();i++) {
             StringBuilder s = new StringBuilder(scats.get(i));
             s.append("  $"+ scatWorth);
@@ -256,15 +303,32 @@ public class EventServiceImpl implements EventService {
         event.setScatSummary(summary);
 
     }
-    private Player getWinnerTakesAll(List<Player> eventPlayers){
-        Player player = null;
+    private List<Player> getWinnerTakesAll(List<Player> eventPlayers){
+        List<Player> winners = new ArrayList<>();
         if (eventPlayers.size() < 8) {
-            player = eventPlayers.stream()
-                    .filter(p -> !p.getIsWaiting() || !(p.getQuota() == 0))
+            //code for more than one have same best score.
+
+           Player highestScore = eventPlayers.stream()
+                    .filter(p -> !p.getIsWaiting() || !(p.getQuota() == 0) || !p.getIsWithdrawal())
                     .max(Comparator.comparing(Player::getTotal))
                     .get();
+            winners.add(highestScore);
+            //find if more than one has this score
+
+            for(Player player : eventPlayers){
+                if(player.getTotal().equals(highestScore.getTotal()) && !player.getName().equals(highestScore.getName())){
+                    winners.add(player);
+                }
+            }
         }
-        return player;
+        return winners;
+    }
+    private int calculateWinnerTakesAllWinnings(List<Player> eventPlayers){
+
+            List<Player> players = eventPlayers.stream()
+                    .filter(p -> !p.getIsWaiting() || !(p.getQuota() == 0))
+                    .collect(Collectors.toList());
+        return 5 * players.size();
     }
     private void pickTeams(Event event, List<Player> eventPlayers){
         int MAX_TEAMS = 12;
@@ -329,10 +393,34 @@ public class EventServiceImpl implements EventService {
                         .filter(t -> !t.getTeam().isEmpty())
                                 .sorted((t1,t2)-> t2.getScore().compareTo(t1.getScore()))
                                         .collect(Collectors.toList());
+
+        List<TeamDto> winners = new ArrayList<>();
         List<String> results = new ArrayList<>();
+
+        TeamDto highestScore = filtered.stream()
+                .max(Comparator.comparing(TeamDto::getScore))
+                .get();
+        winners.add(highestScore);
+        //any ties
+        for(TeamDto t: filtered) {
+            if(highestScore.getScore() == t.getScore() && !highestScore.getName().equals(t.getName())){
+                winners.add(t);
+            }
+        }
+        if(winners.size()>1){
+            List<String> names = winners.stream().map(p->p.getName()).collect(Collectors.toList());
+            results.add("Tied for best score: " + names.toString());
+            for(int i =0;i<2;i++) {
+                Collections.shuffle(winners);
+            }
+        }
         int money = eventPlayers.size() * 5;
         results.add("Team money is $"+money+"    each person: $"+ money/2);
-        for(TeamDto team : filtered) {
+
+        TeamDto winner = winners.get(0);
+        results.add("WINNER!  "+winner.getName() + ":   "+winner.getTeam()+"   "+winner.getScore());
+        filtered.remove(winner);
+         for(TeamDto team : filtered) {
             results.add(team.getName() + ":   "+team.getTeam()+"   "+team.getScore());
         }
         results.addAll(event.getEventWinners());
@@ -341,25 +429,78 @@ public class EventServiceImpl implements EventService {
     private void calculateWinners(Event event) {
         //remove new players and still on waiting list
         List<Player> eventPlayers = event.getPlayers().stream()
-                .filter(p -> !p.getIsWaiting() && !(p.getQuota() == 0) )
+                .filter(p -> !p.getIsWaiting() && !(p.getQuota() == 0) && !p.getIsWithdrawal())
                 .collect(Collectors.toList());
 
-        Player getsMoneyBack = this.getsMoneyBack(eventPlayers);
-        if(getsMoneyBack != null) {
+        List<Player> losers = this.getsMoneyBack(eventPlayers);
+        if(!losers.isEmpty()){
+            //if more than one, pick the winner
+            List<String> moneyBackList = new ArrayList<>();
+            if(losers.size() > 1){
+                List<String> names = losers.stream().map(p->p.getName()).collect(Collectors.toList());
+                moneyBackList.add("Tied for worst score to get money back: " + names.toString());
+                for(int i =0;i<2;i++) {
+                    Collections.shuffle(losers);
+                }
+            }
+            Player getsMoneyBack = losers.get(0);
+
             getsMoneyBack.setTeam("Five dollars back");
-            event.getEventWinners().add(getsMoneyBack.getName()+ " - Five dollars back. Total: "+getsMoneyBack.getTotal());
+            moneyBackList.add(getsMoneyBack.getName()+ " - Five dollars back. Total: "+getsMoneyBack.getTotal());
+            event.getEventWinners().addAll(moneyBackList);
+            //remove from list for teams
             eventPlayers.remove(getsMoneyBack);
+
         }
 
         if(eventPlayers.size() < 8) {  //winner takes all
-            Player winner = this.getWinnerTakesAll(eventPlayers);
-            List<String> winnerList = new ArrayList<>();
-            winnerList.add(winner.getName()+"  Quota: "+winner.getQuota()+"  Points: "+winner.getScoreForEvent()+"   Total: "+winner.getTotal());
-            event.setEventWinners(winnerList);
+            List<String> winnerListing = new ArrayList<>();
+            List<Player> winners = this.getWinnerTakesAll(eventPlayers);
+            //if more than one, pick the winner
+            if(winners.size() > 1){
+                List<String> names = winners.stream().map(p->p.getName()).collect(Collectors.toList());
+                winnerListing.add("Tied for best score: " + names.toString());
+                for(int i =0;i<2;i++) {
+                    Collections.shuffle(winners);
+                }
+            }
+            Player winner = winners.get(0);
+
+
+            winnerListing.add("WINNER IS : "+winner.getName()
+                    +"!  Needed "+winner.getQuota()+" points, "
+                    + "pulled "+winner.getScoreForEvent() + " today, for a "+ ((winner.getTotal()>0)?"+ ":"- ")
+                    + winner.getTotal()+" total.");
+            winnerListing.add(" Pays : $"+calculateWinnerTakesAllWinnings(eventPlayers));
+            event.setEventWinners(winnerListing);
+
         } else {
+
             pickTeams(event, eventPlayers);
+
+        }
+        List<String> displayMessages = new ArrayList<>();
+        //first timers
+        List<Player> firstTimers =  event.getPlayers().stream()
+                .filter(p -> (p.getQuota() == 0) )
+                .collect(Collectors.toList());
+        if(!firstTimers.isEmpty()){
+            for(Player p: firstTimers){
+                displayMessages.add("FIRST TIMER (not included in team pairings): "+p.getName());
+            }
         }
 
+        //first timers
+        List<Player> withdrawn =  event.getPlayers().stream()
+                .filter(p -> (p.getIsWithdrawal()) )
+                .collect(Collectors.toList());
+        if(!withdrawn.isEmpty()){
+            for(Player p: withdrawn){
+                displayMessages.add("WITHREW FROM EVENT (not included in team pairings): "+p.getName());
+            }
+        }
+        if(!displayMessages.isEmpty())
+            event.getEventWinners().addAll(displayMessages);
     }
     @Override
     public List<EventDto> findAllEvents() {

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +35,17 @@ public class User {
 
     @Column(nullable=false)
     private String password;
+    private String mobile;
 
     private Integer points;
     private String resetPasswordToken;
+    @Value("true")
+    @Column(columnDefinition = "BOOLEAN default true")
+    private Boolean active;
+
 
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.MERGE)
+    @ToString.Exclude
     @JoinTable(
             name="users_roles",
             joinColumns={@JoinColumn(name="USER_ID", referencedColumnName="ID")},

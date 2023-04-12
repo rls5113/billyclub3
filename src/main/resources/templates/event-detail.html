@@ -44,14 +44,12 @@
             <div class="row" style="border: 0px solid green">
 
                 <div class="col-md-12" style="border: 0px solid red">
-                    <div th:if="${param.error}">
-                        <div class="alert alert-danger">Invalid Email and Password.</div>
-                    </div>
-                    <div th:if="${param.logout}">
-                        <div class="alert alert-success">You have been logged out.</div>
-                    </div>
-                    <div th:if="${param.success}">
-                        <div class="alert alert-info">You've successfully created a user account! Now login.</div>
+                    <div th:if="${#fields.hasAnyErrors()}">
+                        <div class="alert alert-danger">
+                            <ul>
+                                <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+                            </ul>
+                        </div>
                     </div>
                     <div>
                         <div class="card">
@@ -63,15 +61,23 @@
                                     <div class="col-4">
                                         <div th:text="${event.id}" style="font-style: italic"/>
                                         <div class="mb-3">
+                                            <label for="course" class="control-label">Course</label>
+                                            <div class="mb-3">
+                                                <select name="course" id="course" th:field="*{course}" class="form-control" disabled>
+                                                    <option th:each="courseOpt : ${courses}"
+                                                            th:value="${courseOpt.id}" th:text="${courseOpt.name}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
                                             <label for="eventDate" class="control-label">Event Date</label>
                                             <input type="text"
                                                    id="eventDate"
                                                    name="eventDate"
                                                    class="form-control"
                                                    placeholder="Event Date"
-                                                   readonly
                                                    th:field="*{eventDate}"
-                                                   style="font-weight: bolder"
+                                                   style="font-weight: bolder" readonly
                                             />
                                         </div>
                                         <div class="mb-3">
@@ -81,8 +87,8 @@
                                                    name="startTime"
                                                    class="form-control"
                                                    placeholder="Start Time"
-                                                   readonly
                                                    th:field="*{startTime}"
+                                                   readonly
                                             />
                                         </div>
                                         <div class="mb-3">
@@ -92,25 +98,29 @@
                                                    name="numOfTimes"
                                                    class="form-control"
                                                    placeholder="# of Times"
-                                                   readonly
                                                    th:field="*{numOfTimes}"
+                                                   readonly
                                             />
                                         </div>
                                         <div class="mb-3">
                                             <label for="status" class="control-label">Status</label>
                                             <div class="mb-3">
-                                                    <select name="status" id="status" th:field="*{status}" disabled class="form-control ">
+                                                    <select name="status" id="status" th:field="*{status}" class="form-control " disabled>
                                                         <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
                                                                 th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
                                                     </select>
                                             </div>
                                         </div>
                                         <div th:if="${! event.status.name().equals('COMPLETED')}">
-                                            <!--  th:if="${event.isPlayerInEvent(loggedInUser.name)} "-->
-                                            <button style="margin: 5px" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_USER')"
-                                                    th:if="${! #lists.contains(names, loginUser.name)} "
-                                                    type="submit" class="btn-sml btn btn-primary">Add me this event
-                                            </button>
+
+                                            <div th:if="${event.status.name().equals('OPEN') || event.status.name().equals('STARTED')}">
+                                                <button style="margin: 5px" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_USER')"
+                                                        th:if="${! #lists.contains(names, loginUser.name)} "
+                                                        type="submit" class="btn-sml btn btn-primary">Add me this event
+                                                </button>
+                                            </div>
+
+
                                             <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
                                                th:if="${event.isAllScoresIn}"
                                                class="btn-sml btn btn-primary">Calculate Scores</a>
@@ -122,9 +132,12 @@
 
                                             <a sec:authorize="false and hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
                                                data-bs-target="#postMultipleScoresModal" class="btn-sml btn btn-primary">Post for All in Event</a>
+                                            <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
+                                               data-bs-target="#editEventModal" class="btn-sml btn btn-primary ">Edit</a>
+
 
                                         </div>
-                                    </div>
+                                    </div> <!-- end row -->
 
                                     <div class="col-8 alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
                                         <table class="col-2 table table-striped table-bordered table-hover table-light">
@@ -248,6 +261,7 @@
         <div layout:insert="~{usersPickList}"></div>
 
         <div layout:insert="~{postScoreModal}"></div>
+        <div layout:insert="~{event-edit-modal}"></div>
 
 <!--        <div layout:insert="~{postMultipleScoresModal}"></div>-->
 
@@ -268,7 +282,6 @@
         }else{
             $('.form-check-input').prop('checked', false);
         }
-       // $('.form-check-input').prop('checked',true);
     });
 </script>
 </body>

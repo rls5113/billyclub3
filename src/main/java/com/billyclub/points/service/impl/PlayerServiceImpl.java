@@ -85,7 +85,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player create(User user) {
-        Player player = new Player(null, user.getName(), user.getPoints(), 0, 0, 0, LocalDateTime.now(), Boolean.FALSE, null,null,null,null);
+        Player player = new Player(null, user.getName(), user.getPoints(), 0, 0, 0, LocalDateTime.now(), Boolean.FALSE, Boolean.FALSE,null,null,null,null);
         return repo.save(player);
     }
 
@@ -95,8 +95,11 @@ public class PlayerServiceImpl implements PlayerService {
         player.setEagles(Arrays.asList(holder.getEagles()));
         player.setBirdies(Arrays.asList(holder.getBirdies()));
         //for first timers, set todays score as total
-        player.setTotal((player.getQuota()==0)? player.getQuota() : holder.getScoreForEvent() - player.getQuota() );
+        Boolean withdrawn = (holder.getWithdrawal() == null) ? Boolean.FALSE : holder.getWithdrawal();
+        player.setTotal((player.getQuota()==0 ) ? holder.getScoreForEvent() : holder.getScoreForEvent() - player.getQuota() );
+        player.setIsWithdrawal(withdrawn);
         player.setAdjustment(calcAdjustment(player.getTotal()));
+
         this.save(player);
     }
     private int calcAdjustment(int total) {

@@ -21,6 +21,9 @@
             <h3 class="text-center text-light" th:text="Courses"></h3>
         </div>
         <div class="card-body">
+            <div th:if="${param.success}">
+                <div class="alert alert-info">Changes saved.</div>
+            </div>
             <a class="nav-link btn btn-primary text-light" th:href="@{/courses/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add New Course</a>
             <table class="table table-striped table-bordered table-hover table-light">
                 <thead class="table-header">

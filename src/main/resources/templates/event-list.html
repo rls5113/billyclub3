@@ -10,7 +10,8 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 100px 10px;
+        /*padding: 20px 10px;*/
+        margin: 8%;
     }
 
 </style>
@@ -21,22 +22,24 @@
             <h3 class="text-center text-light" th:text="${current}?'Current Events':'Past Events'"></h3>
         </div>
         <div class="card-body">
-            <a class="nav-link btn btn-primary text-light" th:href="@{/events/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add Event</a>
+            <a class="nav-link btn btn-sm btn-primary text-light" th:href="@{/events/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add Event</a>
             <table class="table table-striped table-bordered table-hover table-light">
                 <thead class="table-header">
                     <tr>
                         <th>Date</th>
-                        <th>Start</th>
+                        <th>Start Time</th>
+                        <th>Course</th>
                         <th># Tee Times</th>
                         <th># Players</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th style="width: 5%;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="event: ${events}">
                         <td th:text="${{event.eventDate}}"></td>
-                        <td th:text="${event.startTime}"></td>
+                        <td th:text="${{event.startTime}}"></td>
+                        <td th:text="${{event.course.name}}"></td>
                         <td th:text="${event.numOfTimes}"></td>
                         <td th:text="${event.players.size}"></td>
                         <td th:text="${event.status}"></td>

@@ -85,15 +85,15 @@ public class ThymeleafController {
         eventPlayers.sort(Comparator.comparing(PlayerDto::getTotal,Comparator.nullsFirst(Comparator.reverseOrder())));
         model.addAttribute("eventPlayers", eventPlayers);
 
-        MultiPlayerScoresMapDto scores = new MultiPlayerScoresMapDto();
-        Map<String, PlayerScoresHolderDto> scoreHolders = new HashMap<>();
-        for (PlayerDto player : eventPlayers) {
-            PlayerScoresHolderDto v = new PlayerScoresHolderDto();
-            v.setPlayerId(player.getId());
-            scoreHolders.put(player.getName(), v);
-        }
-        scores.setScores(scoreHolders);
-        model.addAttribute("multiPlayerScores", scores);
+//        MultiPlayerScoresMapDto scores = new MultiPlayerScoresMapDto();
+//        Map<String, PlayerScoresHolderDto> scoreHolders = new HashMap<>();
+//        for (PlayerDto player : eventPlayers) {
+//            PlayerScoresHolderDto v = new PlayerScoresHolderDto();
+//            v.setPlayerId(player.getId());
+//            scoreHolders.put(player.getName(), v);
+//        }
+//        scores.setScores(scoreHolders);
+//        model.addAttribute("multiPlayerScores", scores);
 
         List<PlayerDto> waitList = players.stream()
                 .map(p -> playerService.toDto(p))
@@ -102,7 +102,7 @@ public class ThymeleafController {
         model.addAttribute("waitList", waitList);
 
         //create list of users not in this event
-        List<UserDto> eventUsers = userService.findAllUsers();
+        List<UserDto> eventUsers = userService.findAllByActive();
         List<UserDto> filtered = eventUsers.stream()
                 .filter(u -> players.stream()
                         .anyMatch(p -> p.getName().equals(u.getName())))
@@ -122,6 +122,8 @@ public class ThymeleafController {
             holes.add(i);
         }
         model.addAttribute("HOLES", holes);
+
+        model.addAttribute("courses",courseService.findAll());
 
 
         return "event-detail";
@@ -170,8 +172,13 @@ public class ThymeleafController {
     @Transactional
     public String postScoreToEvent(@PathVariable("eventId") Long eventId,
                                    @PathVariable("playerId") Long playerId,
-                                   @ModelAttribute("playerScore") PlayerScoresHolderDto playerScore
+                                   @Valid @ModelAttribute("playerScore") PlayerScoresHolderDto playerScore,
+                                   BindingResult result, Model model
     ) {
+        if (result.hasErrors()) {
+            return "postScoreModal";
+        }
+
         Event event = changeEventStatus(eventId, EventStatus.POSTING);
         Player player = playerService.findById(playerId);
         playerService.setScoring(player, playerScore );
@@ -228,10 +235,43 @@ public class ThymeleafController {
 
         return "redirect:/events/" + eventId;
     }
+    @PostMapping("/events/{eventId}/edit")
+    @Transactional
+    public String saveEventDetail(@PathVariable("eventId") Long eventId,@Valid @ModelAttribute("event") EventDto eventDto,
+                                  BindingResult result, Model model, HttpServletRequest request) {
+        Event eventToEdit = eventService.findById(eventId);
+        eventToEdit = eventService.transfer(eventDto, eventToEdit);
+        //reprocess waiting list if number of tee times changed
+        boolean numberOfTeeTimesChanged = eventDto.getNumOfTimes() == eventToEdit.getNumOfTimes();
+        List<User> recipients = null;
+        if(numberOfTeeTimesChanged){
+            List<Player> list = eventService.recalculateWaitingList(eventToEdit);
+            recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
+        } else {
+            recipients = userService.findAllByActive().stream().map(u -> userService.toEntity(u)).collect(Collectors.toList());
+        }
+        eventService.save(eventToEdit);
+        String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId();
+
+        if (eventToEdit.getStatus() != EventStatus.COMPLETED) {
+            switch (eventDto.getStatus()) {
+                case CANCELLED, FROST_DELAY, RAIN_DELAY -> {
+                    try {
+                        emailService.sendEventStatusChangedEmail(recipients, eventToEdit.getStatus().name(), eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), link, request.getLocale());
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return "redirect:/events/" + eventId;
+    }
 
     @GetMapping("/events/add")
     public String addEvent(Model model) {
         model.addAttribute("event", new EventDto());
+        model.addAttribute("courses",courseService.findAll());
+
         return "event-add";
     }
     @PostMapping("/events/add")
@@ -239,7 +279,7 @@ public class ThymeleafController {
         Event event = eventService.add(eventService.toEntity(eventDto));
         //generate pw reset link
         String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId();
-        List<User> recipients = userService.findAll();
+        List<User> recipients = userService.findAllByActive().stream().map(u -> userService.toEntity(u)).collect(Collectors.toList());
         //send email
         try {
             emailService.sendNewEventEmail(recipients, event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), link,request.getLocale());
@@ -279,7 +319,7 @@ public class ThymeleafController {
     }
 
     @PostMapping("/courses/add")
-    public String postAddCourse(@ModelAttribute("course") CourseDto course, BindingResult result, Model model) {
+    public String postAddCourse(@Valid @ModelAttribute("course") CourseDto course, BindingResult result, Model model) {
         Course newCourse = courseService.save(courseService.toEntity(course));
         return "redirect:/courses";
     }
@@ -294,11 +334,38 @@ public class ThymeleafController {
     @PostMapping("/courses/{courseId}/edit")
     public String postEditCourse(
             @PathVariable("courseId") Long courseId,
-            @ModelAttribute("course") CourseDto course) {
+            @Valid @ModelAttribute("course") CourseDto course,
+            BindingResult result, Model model) {
         Course courseToEdit = courseService.findById(courseId);
+        if (result.hasErrors()) {
+            return "course-add-edit";
+        }
         BeanUtils.copyProperties(course, courseToEdit);
         courseService.save(courseToEdit);
-        return "redirect:/courses";
+        return "redirect:/courses?success";
+    }
+    @GetMapping("/users")
+    public String listRegisteredUsers(Model model){
+        List<UserDto> users = userService.findAllUsers();
+        model.addAttribute("users", users);
+        model.addAttribute("loginUser", getLoggedInUser());
+
+        return "users-list";
+    }
+
+    @GetMapping("/users/{userid}/edit")
+    public String editUserChanges(@PathVariable("userid") Long userId, Model model){
+        User userToEdit = userService.findById(userId);
+        model.addAttribute("user", userService.toDto(userToEdit));
+        return "user-edit";
+    }
+
+    @PostMapping("/users/{userid}/edit")
+    public String postUserChanges(@PathVariable("userid") Long userId, @ModelAttribute("user") UserDto userDto){
+        User userToEdit = userService.findById(userId);
+        userToEdit = userService.transfer(userDto, userToEdit);
+        User me = userService.save(userToEdit);
+        return "redirect:/users";
     }
 
 }

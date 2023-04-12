@@ -14,8 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
@@ -78,6 +78,12 @@ public class UserServiceImpl implements UserService {
     public List<User> findAll() {
         return userRepository.findAll();
     }
+   @Override
+    public List<UserDto> findAllByActive() {
+        return userRepository.findAllByActiveIsTrue().stream()
+                .map(u -> toDto(u))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public User add(User entity) {
@@ -122,6 +128,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User transfer(UserDto source, User target) {
+        target.setPoints(source.getPoints());
+        target.setEmail(source.getEmail());
+        target.setActive(source.getActive());
+        target.setMobile(source.getMobile());
+        target.setName(source.getName());
+        return target;
+    }
+
+    @Override
     public User update(Long id, User entity) {
         User userEdit = findById(id);
         BeanUtils.copyProperties(entity, userEdit);
@@ -140,13 +156,15 @@ public class UserServiceImpl implements UserService {
 
     public UserDto toDto(User user){
         UserDto userDto = new UserDto();
-        if(user.getName().contains(" ")){
-            String[] name = user.getName().split(" ");
-            userDto.setFirstName(name[0]);
-            userDto.setLastName(name[1]);
-        }else {
-            userDto.setFirstName(user.getName());
+        String[] parts = user.getName().split(" ");
+        userDto.setLastName(parts[parts.length-1]);
+
+        StringBuilder b = new StringBuilder();
+        //skip last part, put rest in firstname
+        for(int i =0;i< parts.length-1; i++){
+                b.append(parts[i]+" ");
         }
+        userDto.setFirstName(b.toString());
 
         BeanUtils.copyProperties(user, userDto);
         return userDto;

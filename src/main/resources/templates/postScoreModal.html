@@ -15,10 +15,16 @@
 
                         <div class="modal-body">
                         <div class="mb-auto">
-
+                            <span>
                                 <input class="form-control-lg" type="text"
-                                       id="score" name="score" th:field="${modalValues.scoreForEvent}" maxlength="2" size="2"/>
-                                <label class="form-label" for="score" th:text="${player.name}">Points for </label>
+                                       id="score" name="score" th:field="${modalValues.scoreForEvent}" maxlength="2" size="2" required autofocus/>
+                                <label class="form-label" for="score" th:text="${player.name}"/>
+                            </span>
+                            <span>
+                                <input class="form-check-input" type="checkbox" id="withdraw" name="withdrawal" th:checked="${modalValues.withdrawal}"/>
+                                <label class="form-check-label" for="withdraw">IS WITHDRAWN ?</label>
+                            </span>
+
                         </div>
                         <div class="mb-auto" >
                             <div class="form-label">Eagles</div>
