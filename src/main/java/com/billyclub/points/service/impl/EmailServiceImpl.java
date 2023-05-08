@@ -1,6 +1,5 @@
 package com.billyclub.points.service.impl;
 
-import com.billyclub.points.controller.UserController;
 import com.billyclub.points.model.User;
 import com.billyclub.points.service.EmailService;
 import jakarta.mail.MessagingException;
@@ -90,7 +89,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendNewEventEmail(List<User> recipients, String eventDate, String startTime, Locale locale, String link) throws MessagingException {
+    public void sendNewEventEmail(List<User> recipients, String eventDate, String startTime, String course, String link, Locale locale) throws MessagingException {
         if(!sendMail)   {
             LOGGER.info("SEND EMAIL (new Event) is turned OFF!");
             return;
@@ -98,11 +97,12 @@ public class EmailServiceImpl implements EmailService {
         final Context ctx = new Context(locale);
         ctx.setVariable("eventDate", eventDate);
         ctx.setVariable("startTime", startTime);
+        ctx.setVariable("course", course);
         ctx.setVariable("link",link);
 
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-        message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" new event created");
+        message.setSubject("Billy Club Golf: "+course+" on "+eventDate+" @ "+startTime+"  new event created");
         message.setFrom(FROM_EMAIL_ADDRESS);
         for(User user: recipients){
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));

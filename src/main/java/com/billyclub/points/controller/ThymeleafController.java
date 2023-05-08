@@ -328,9 +328,8 @@ public class ThymeleafController {
         try {
             emailService.sendNewEventEmail(recipients,
                     event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
-                    event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")) ,
-                    request.getLocale(),
-                    link);
+                    event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
+                    event.getCourse().getName(), link, request.getLocale());
         } catch (MessagingException e) {
             System.out.println("Failed to send email. " + e.getMessage());
 //            throw new RuntimeException(e);
