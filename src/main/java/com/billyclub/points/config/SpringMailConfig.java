@@ -95,7 +95,7 @@ public class SpringMailConfig implements ApplicationContextAware, EnvironmentAwa
     @Bean
     public ResourceBundleMessageSource emailMessageSource() {
         final ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("/templates/mail/MailMessages");
+        messageSource.setBasename("/templates");
         return messageSource;
     }
 

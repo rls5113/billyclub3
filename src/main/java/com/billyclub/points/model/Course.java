@@ -32,12 +32,14 @@ public class Course {
     private String name;
     @NotEmpty(message = "Course phone number should not be empty")
     private String phone;
-    @NotEmpty(message = "Maximum Players per group, for this course, should not be empty")
+    @NotEmpty(message = "Course address should not be empty")
+    private String address;
+//    @NotEmpty(message = "Maximum Players per group, for this course, should not be empty")
     private Integer maxPlayersPerGroup;
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "course")
     @ToString.Exclude
     private List<Event> events = new ArrayList<>();
-
+//    private Integer order;
 
 }

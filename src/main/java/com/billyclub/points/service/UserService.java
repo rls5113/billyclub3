@@ -18,6 +18,7 @@ public interface UserService extends IService<User, UserDto>{
 
     List<UserDto> findAllUsers();
     List<UserDto> findAllByActive();
+    List<User> findAdminUsers();
 
     User findById(Long id);
 

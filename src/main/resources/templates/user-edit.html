@@ -2,6 +2,7 @@
 <html
         xmlns:th="http://thymeleaf.org"
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
         layout:decorate="~{layout}">
 <head>
     <title>User Edit</title>
@@ -9,9 +10,11 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 125px 200px;
+        padding: 80px 5px;
     }
-
+    .red {
+        color:red;
+    }
 </style>
 <section>
     <div class="main">
@@ -29,13 +32,14 @@
                     </ul>
                 </div>
             </div>
-            <div class="card-header">
+            <div class="card-header bg-primary">
                 <h2 class="text-center bg-primary text-light">User Edit</h2>
             </div>
             <div class="card-body">
+                <div th:text="${user.id}" style="font-style: italic"/>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">Username</label>
+                        <label class="form-label">Username<span class="red">*</span></label>
                         <input class="form-control"
                                id="username"
                                name="username"
@@ -48,7 +52,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">First Name</label>
+                        <label class="form-label">First Name<span class="red">*</span></label>
                         <input class="form-control"
                                id="firstName"
                                name="firstName"
@@ -62,7 +66,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">Last Name</label>
+                        <label class="form-label">Last Name<span class="red">*</span></label>
                         <input class="form-control"
                                id="lastName"
                                name="lastName"
@@ -75,7 +79,7 @@
                         </p>
                     </div>
                     <div class="form-group mb-3">
-                        <label class="form-label">Email</label>
+                        <label class="form-label">Email<span class="red">*</span></label>
                         <input class="form-control"
                                id="email"
                                name="email"
@@ -103,13 +107,14 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">Points</label>
+                        <label class="form-label">Points<span class="red">*</span></label>
                         <input class="form-control"
                                id="points"
                                name="points"
                                placeholder="Enter points"
                                th:field="*{points}"
                                type="text"
+                               th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
                         />
                         <p th:errors="*{points}" class="text-danger"
                            th:if="${#fields.hasErrors('points')}">
@@ -132,8 +137,12 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <button class="btn btn-primary" type="submit">Save</button>
-                        <a class="btn btn-primary" th:href="@{/users}" style="float:right;">Cancel</a>
+                        <a class="btn btn-secondary" th:href="@{/users}" >Cancel</a>
+                        <a sec:authorize="hasRole('ROLE_ADMIN')"
+                                th:href="@{/users/{userid}/addAsAdmin(userid=${user.id})}"
+                           class="btn-sml btn btn-primary">Add as ADMIN</a>
+
+                        <button class="btn btn-primary" type="submit" style="float:right;">Save</button>
                     </div>
 
             </div>

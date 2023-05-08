@@ -10,7 +10,7 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 100px 10px;
+        padding: 80px 5px;
     }
 
 </style>
@@ -24,13 +24,13 @@
             <div th:if="${param.success}">
                 <div class="alert alert-info">Changes saved.</div>
             </div>
-            <a class="nav-link btn btn-primary text-light" th:href="@{/courses/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add New Course</a>
+            <a class="nav-link btn btn-primary text-light" th:href="@{/courses/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add New Course  <i class="fa-solid fa-plus"></i></a>
             <table class="table table-striped table-bordered table-hover table-light">
                 <thead class="table-header">
                     <tr>
                         <th>Name</th>
                         <th>Telephone</th>
-                        <th>Max Players per Group Tee Times</th>
+                        <th>Max Players/Time</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -39,7 +39,7 @@
                         <td th:text="${{course.name}}"></td>
                         <td th:text="${course.phone}"></td>
                         <td th:text="${course.maxPlayersPerGroup}"></td>
-                        <td><a class="nav-link btn-sm btn-primary text-light" th:href="@{/courses/{id}(id=${course.id})}">Edit</a></td>
+                        <td><a class="nav-link btn-sm btn-primary text-light" th:href="@{/courses/{id}(id=${course.id})}">Edit  <i class="fa-solid fa-pen"></i></a></td>
                     </tr>
                 </tbody>
             </table>

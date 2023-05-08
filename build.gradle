@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.billyclub'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.1.0'
 sourceCompatibility = '17'
 
 configurations {
@@ -34,6 +34,12 @@ dependencies {
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.4.RELEASE'
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.0'
+//    implementation 'io.awspring.cloud:spring-cloud-aws-core:2.4.4'
+//    implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
+//    implementation 'io.awspring.cloud:spring-cloud-aws-ses:2.4.4'
+//    implementation 'com.amazonaws:aws-java-sdk:1.12.455'
+
+
     compileOnly 'net.bytebuddy:byte-buddy:1.14.2'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

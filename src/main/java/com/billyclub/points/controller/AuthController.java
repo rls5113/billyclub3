@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,9 +37,8 @@ public class AuthController {
         this.userService = userService;
         this.emailService = emailService;
     }
-    private JavaMailSender mailSender;
 
-    @GetMapping("index")
+    @GetMapping("/index")
     public String home(){
         return "index";
     }
@@ -55,7 +53,7 @@ public class AuthController {
     }
 
     // handler method to handle user registration request
-    @GetMapping("register")
+    @GetMapping("/register")
     public String showRegistrationForm(Model model){
         UserDto user = new UserDto();
         model.addAttribute("user", user);
@@ -65,22 +63,49 @@ public class AuthController {
     // handler method to handle register user form submit request
     @PostMapping("/register/save")
     public String registration(@Valid @ModelAttribute("user") UserDto user,
+                               HttpServletRequest request,
                                BindingResult result,
                                Model model){
-        User existingEmail = userService.findByEmail(user.getEmail());
-        if (existingEmail != null) {
-            result.rejectValue("email", null, "There is already an account registered with that email");
+        try {
+            User existingEmail = userService.findByEmail(user.getEmail());
+            if (existingEmail != null) {
+                result.rejectValue("email", null, "There is already an account registered with that email");
+            }
+
+        }catch (ResourceNotFoundException e) {
+            //expected
         }
-        User existingUser = userService.findByUsername(user.getUsername());
-        if (existingUser != null) {
-            result.rejectValue("username", null, "There is already an account registered with that username");
+        try {
+            User existingUser = userService.findByUsername(user.getUsername());
+            if (existingUser != null) {
+                result.rejectValue("username", null, "There is already an account registered with that username");
+            }
+
+        }catch (ResourceNotFoundException e) {
+            //expected
         }
         if (result.hasErrors()) {
 
             model.addAttribute("user", user);
-            return "register";
+            return "register?errors";
         }
-        model.addAttribute("user", userService.addUser(user));
+
+        try {
+            //generate pw reset link
+            String link = ServletUtility.getSiteURL(request)+"/login";
+            List<User> admins = userService.findAdminUsers();
+            //send email
+            emailService.sendRegistrationEmail(admins, user.getEmail(), link, request.getLocale(), user.getName());
+        } catch (ResourceNotFoundException e) {
+            model.addAttribute("error",e.getMessage());
+            return "redirect:/register?error";
+        } catch (MessagingException e) {
+            model.addAttribute("error","Error while sending email" + e.getMessage());
+            return "redirect:/register?error";
+        }
+
+        UserDto newUser = userService.addUser(user);
+        model.addAttribute("user", newUser);
         return "redirect:/login?success";
     }
 

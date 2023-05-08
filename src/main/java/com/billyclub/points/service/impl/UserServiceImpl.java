@@ -10,6 +10,7 @@ import com.billyclub.points.repository.UserRepository;
 import com.billyclub.points.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
-
+    @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder) {
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
         //encrypt the password once we integrate spring security
         //user.setPassword(userDto.getPassword());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        if(user.getRoles().isEmpty()){
+        if(user.getRoles()==null || user.getRoles().isEmpty()){
             Role role = roleRepository.findByName("ROLE_USER");
             if(role == null){
                 role = checkRoleExist();
@@ -53,7 +54,10 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserDto addUser(UserDto userDto) {
-        return toDto(saveUser(userDto));
+        userDto.setActive(Boolean.TRUE);
+        userDto.setPoints(0);
+        User user = saveUser(userDto);
+        return toDto(user);
     }
 
     @Override
@@ -83,6 +87,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAllByActiveIsTrue().stream()
                 .map(u -> toDto(u))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> findAdminUsers() {
+        return userRepository.findUsersByRoles();
     }
 
     @Override
@@ -156,15 +165,25 @@ public class UserServiceImpl implements UserService {
 
     public UserDto toDto(User user){
         UserDto userDto = new UserDto();
-        String[] parts = user.getName().split(" ");
-        userDto.setLastName(parts[parts.length-1]);
 
-        StringBuilder b = new StringBuilder();
-        //skip last part, put rest in firstname
-        for(int i =0;i< parts.length-1; i++){
-                b.append(parts[i]+" ");
+
+        if(user.getName().contains(" ")){
+            String[] name = user.getName().split(" ");
+            userDto.setFirstName(name[0]);
+            userDto.setLastName(name[1]);
+        }else {
+            userDto.setFirstName(user.getName());
         }
-        userDto.setFirstName(b.toString());
+// this code causes inaccurate filtering user picklist of users already in the event
+//        String[] parts = user.getName().split(" ");
+//        userDto.setLastName(parts[parts.length-1]);
+//
+//        StringBuilder b = new StringBuilder();
+//        //skip last part, put rest in firstname
+//        for(int i =0;i< parts.length-1; i++){
+//                b.append(parts[i]+" ");
+//        }
+//        userDto.setFirstName(b.toString());
 
         BeanUtils.copyProperties(user, userDto);
         return userDto;

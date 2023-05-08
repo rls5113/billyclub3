@@ -76,7 +76,7 @@
     --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
     --bs-body-font-family: var(--bs-font-sans-serif);
-    --bs-body-font-size: 1rem;
+    --bs-body-font-size: .75rem;
     --bs-body-font-weight: 400;
     --bs-body-line-height: 1.5;
     --bs-body-color: #212529;
@@ -202,7 +202,7 @@ hr {
     margin: 1rem 0;
     color: inherit;
     border: 0;
-    border-top: var(--bs-border-width) solid;
+    border-top: var(--bs-border-width) solid;F
     opacity: .25
 }
 
@@ -215,12 +215,12 @@ hr {
 }
 
 .h1, h1 {
-    font-size: calc(1.375rem + 1.5vw)
+    font-size: calc(1rem + 1.5vw)
 }
 
 @media (min-width: 1200px) {
     .h1, h1 {
-        font-size: 2.5rem
+        font-size: 2rem
     }
 }
 
@@ -235,12 +235,12 @@ hr {
 }
 
 .h3, h3 {
-    font-size: calc(1.3rem + .6vw)
+    font-size: calc(.75rem + .6vw)
 }
 
 @media (min-width: 1200px) {
     .h3, h3 {
-        font-size: 1.75rem
+        font-size: .75rem
     }
 }
 
@@ -3599,7 +3599,7 @@ textarea.form-control-lg {
     --bs-dropdown-padding-x: 0;
     --bs-dropdown-padding-y: 0.5rem;
     --bs-dropdown-spacer: 0.125rem;
-    --bs-dropdown-font-size: 1rem;
+    --bs-dropdown-font-size: 0.85rem;
     --bs-dropdown-color: var(--bs-body-color);
     --bs-dropdown-bg: var(--bs-body-bg);
     --bs-dropdown-border-color: var(--bs-border-color-translucent);
@@ -4636,7 +4636,7 @@ textarea.form-control-lg {
     --bs-card-box-shadow: ;
     --bs-card-inner-border-radius: calc(var(--bs-border-radius) - (var(--bs-border-width)));
     --bs-card-cap-padding-y: 0.5rem;
-    --bs-card-cap-padding-x: 1rem;
+    --bs-card-cap-padding-x: 0.5rem;
     --bs-card-cap-bg: rgba(var(--bs-body-color-rgb), 0.03);
     --bs-card-cap-color: ;
     --bs-card-height: ;
@@ -5982,7 +5982,7 @@ textarea.form-control-lg {
 }
 
 .modal-footer {
-    display: flex;
+    display: contents;
     flex-shrink: 0;
     flex-wrap: wrap;
     align-items: center;

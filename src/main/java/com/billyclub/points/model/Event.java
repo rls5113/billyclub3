@@ -3,10 +3,12 @@ package com.billyclub.points.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,8 +31,12 @@ public class Event {
     @Column(updatable = false, nullable = false)
     public Long id;
 
+    @DateTimeFormat(pattern = "MM/dd/yyyy")
+    @NotNull
     private LocalDate eventDate;
+    @NotNull
     private LocalTime startTime;
+    @NotNull
     private Integer numOfTimes;
 
     private EventStatus status;
@@ -59,13 +65,22 @@ public class Event {
         return haveNotPosted.isEmpty();
     }
     @Transient
+    private Player emailRecipient;
+    @Transient
     public boolean isDayOf() {
-        if(eventDate == null) return false;
-        boolean isUnderway = eventDate.isEqual(LocalDate.now()) && startTime.isBefore(LocalTime.now());
+        if(this.eventDate == null || this.startTime == null) return false;
+        boolean isUnderway = LocalDate.now().isEqual(eventDate) && LocalTime.now().isAfter(startTime);
         if(isUnderway && (status != EventStatus.STARTED && status != EventStatus.POSTING && status != EventStatus.COMPLETED)){
             this.setStatus(EventStatus.STARTED);
         }
         return isUnderway;
+    }
+    @Transient
+    public int getNumberWaitlist() {
+        List<Player> waitlist = players.stream()
+                .filter(p -> p.getIsWaiting())
+                .collect(Collectors.toList());
+        return waitlist.size();
     }
     public Event(Long id, LocalDate eventDate, LocalTime startTime, Integer numOfTimes) {
         this.id = id;

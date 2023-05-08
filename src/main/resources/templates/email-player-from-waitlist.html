@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:remove="all">Template for HTML email (new event)</title>
+    <title th:remove="all">Template for HTML email (moved from waitlist)</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-<p th:text="#{greeting}">
+<p th:text="#{greeting(${name})}">
     Hello, Peter Static!
 </p>
-<p>
-    A new event has been created for <span th:text="${eventDate}">12/28/2012</span>.
-    Follow this link and sign up now or risk going on the waiting list.
-</p>
+<blockquote>
+    More tee times have been added or someone has withdrawn.  You have moved from waiting list and into a playing entry for event on <span th:text="${eventDate}">12/28/2012</span>.
+    If you have made other plans, please DELETE yourself from the event, to make room for next in line.
+    Follow this link to check the changes.
+</blockquote>
 <p>Click this link to go directly to the event...  after logging in. </p>
-<p><b><a th:href="${link}">New Event on <span th:text="${eventDate}">12/28/2012</span></a></b></p>
+<p><b><a th:href="${link}">You are now off the waiting list and IN THE GAME on <span th:text="${eventDate}">12/28/2012</span> at <span th:text="${startTime}">06:00 AM</span>!</a></b></p>
 
 <p>
     Regards, <br />
-    &emsp; <em>Billy Club Support</em>
+    &emsp; <em>Billy</em>
 </p>
 </body>
 </html>

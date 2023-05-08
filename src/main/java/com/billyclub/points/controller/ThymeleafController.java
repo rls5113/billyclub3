@@ -16,10 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -63,7 +60,11 @@ public class ThymeleafController {
     }
 
     @GetMapping("/events/{id}")
-    public String getEventDetails(@PathVariable("id") Long id, Model model) {
+    public String getEventDetails(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
+        String currentParam = request.getParameter("current");
+        if(currentParam == null)    model.addAttribute("current", Boolean.TRUE);
+        else                        model.addAttribute("current", Boolean.valueOf(currentParam));
+
         model.addAttribute("loginUser", getLoggedInUser());
         Event event = eventService.findById(id);
         if(event.isDayOf() && event.getStatus()==EventStatus.OPEN){
@@ -82,7 +83,11 @@ public class ThymeleafController {
                 .map(p -> playerService.toDto(p))
                 .filter(p -> !p.getIsWaiting())
                 .collect(Collectors.toList());
-        eventPlayers.sort(Comparator.comparing(PlayerDto::getTotal,Comparator.nullsFirst(Comparator.reverseOrder())));
+        if(event.getStatus().equals(EventStatus.OPEN)){
+            eventPlayers.sort(Comparator.comparing(PlayerDto::getTimeEntered,Comparator.naturalOrder()));
+        }else{
+            eventPlayers.sort(Comparator.comparing(PlayerDto::getTotal,Comparator.nullsFirst(Comparator.reverseOrder())));
+        }
         model.addAttribute("eventPlayers", eventPlayers);
 
 //        MultiPlayerScoresMapDto scores = new MultiPlayerScoresMapDto();
@@ -98,6 +103,7 @@ public class ThymeleafController {
         List<PlayerDto> waitList = players.stream()
                 .map(p -> playerService.toDto(p))
                 .filter(p -> p.getIsWaiting())
+                .sorted(Comparator.comparing(PlayerDto::getTimeEntered,Comparator.naturalOrder()))
                 .collect(Collectors.toList());
         model.addAttribute("waitList", waitList);
 
@@ -105,7 +111,7 @@ public class ThymeleafController {
         List<UserDto> eventUsers = userService.findAllByActive();
         List<UserDto> filtered = eventUsers.stream()
                 .filter(u -> players.stream()
-                        .anyMatch(p -> p.getName().equals(u.getName())))
+                        .anyMatch(p1 -> p1.getName().equals(u.getName())))
                 .collect(Collectors.toList());
 
         List<UserDto> usersNotInEvent = new ArrayList<>();
@@ -148,8 +154,26 @@ public class ThymeleafController {
 
     @GetMapping("/events/{eventId}/removeMe/{playerId}")
     public String removeMeFromEvent(@PathVariable("eventId") Long eventId,
-                                    @PathVariable("playerId") Long playerId, Model model) {
+                                    @PathVariable("playerId") Long playerId, Model model, HttpServletRequest request) {
         Event event = eventService.removePlayerFromEvent(eventId, playerId);
+        String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
+
+        try {
+            List<User> recipients = new ArrayList<>();
+            if(event.getEmailRecipient()!=null) {
+                User user = userService.findByFullname(event.getEmailRecipient().getName());
+                recipients.add(user);
+                emailService.sendMovedFromWaitlistEmail(recipients,
+                        event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                        event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
+                        request.getLocale(),
+                        link);
+            }
+        } catch (MessagingException e) {
+            System.out.println("Failed to send email. " + e.getMessage());
+//            throw new RuntimeException(e);
+        }
+
         return "redirect:/events/" + event.getId();
     }
 
@@ -236,32 +260,50 @@ public class ThymeleafController {
         return "redirect:/events/" + eventId;
     }
     @PostMapping("/events/{eventId}/edit")
-    @Transactional
+//    @Transactional
     public String saveEventDetail(@PathVariable("eventId") Long eventId,@Valid @ModelAttribute("event") EventDto eventDto,
                                   BindingResult result, Model model, HttpServletRequest request) {
         Event eventToEdit = eventService.findById(eventId);
         eventToEdit = eventService.transfer(eventDto, eventToEdit);
-        //reprocess waiting list if number of tee times changed
-        boolean numberOfTeeTimesChanged = eventDto.getNumOfTimes() == eventToEdit.getNumOfTimes();
-        List<User> recipients = null;
-        if(numberOfTeeTimesChanged){
-            List<Player> list = eventService.recalculateWaitingList(eventToEdit);
-            recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
-        } else {
-            recipients = userService.findAllByActive().stream().map(u -> userService.toEntity(u)).collect(Collectors.toList());
-        }
-        eventService.save(eventToEdit);
-        String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId();
+        String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId()+"?current=true";
 
         if (eventToEdit.getStatus() != EventStatus.COMPLETED) {
+            //reprocess waiting list if number of tee times changed
+            boolean numberOfTeeTimesChanged = eventDto.getNumOfTimes() == eventToEdit.getNumOfTimes();
+            if(numberOfTeeTimesChanged){
+                List<Player> list = eventService.recalculateWaitingList(eventToEdit);
+                List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
+                try {
+                    emailService.sendMovedFromWaitlistEmail(recipients,
+                            eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                            eventToEdit.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
+                            request.getLocale(),
+                            link);
+                } catch (MessagingException e) {
+                    System.out.println("Failed to send email. " + e.getMessage());
+                }
+            }
+
+            eventToEdit = eventService.save(eventToEdit);
+
             switch (eventDto.getStatus()) {
                 case CANCELLED, FROST_DELAY, RAIN_DELAY -> {
                     try {
-                        emailService.sendEventStatusChangedEmail(recipients, eventToEdit.getStatus().name(), eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), link, request.getLocale());
+                        List<User> statusRecipients =  eventToEdit.getPlayers().stream()
+                                .map(p -> userService.findByFullname(p.getName()))
+                                .collect(Collectors.toList());
+                        emailService.sendEventStatusChangedEmail(statusRecipients,
+                                eventToEdit.getStatus().name(),
+                                eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                                link,
+                                request.getLocale());
                     } catch (MessagingException e) {
-                        throw new RuntimeException(e);
+                        System.out.println("Failed to send email. " + e.getMessage());
+//                        throw new RuntimeException(e);
                     }
+                    break;
                 }
+                default -> {break;}
             }
         }
         return "redirect:/events/" + eventId;
@@ -278,13 +320,20 @@ public class ThymeleafController {
     public String postNewEvent(@ModelAttribute("event") @Valid EventDto eventDto, HttpServletRequest request){
         Event event = eventService.add(eventService.toEntity(eventDto));
         //generate pw reset link
-        String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId();
-        List<User> recipients = userService.findAllByActive().stream().map(u -> userService.toEntity(u)).collect(Collectors.toList());
+        String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
+        List<User> recipients = userService.findAllByActive().stream()
+                .map(u -> userService.toEntity(u))
+                .collect(Collectors.toList());
         //send email
         try {
-            emailService.sendNewEventEmail(recipients, event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), link,request.getLocale());
+            emailService.sendNewEventEmail(recipients,
+                    event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                    event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")) ,
+                    request.getLocale(),
+                    link);
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            System.out.println("Failed to send email. " + e.getMessage());
+//            throw new RuntimeException(e);
         }
         return "redirect:/events/current";
     }
@@ -346,7 +395,11 @@ public class ThymeleafController {
     }
     @GetMapping("/users")
     public String listRegisteredUsers(Model model){
-        List<UserDto> users = userService.findAllUsers();
+        List<UserDto> users = userService.findAllUsers().stream()
+                .filter((t)-> t.getActive())
+                        .sorted((t1,t2)-> t1.getLastName().compareTo(t2.getLastName()))
+                                .collect(Collectors.toList());
+
         model.addAttribute("users", users);
         model.addAttribute("loginUser", getLoggedInUser());
 
@@ -367,5 +420,13 @@ public class ThymeleafController {
         User me = userService.save(userToEdit);
         return "redirect:/users";
     }
+    @GetMapping("/users/{userid}/addAsAdmin")
+    public String addToAdminRole(@PathVariable("userid") Long userId){
+        User userToEdit = userService.findById(userId);
+        userToEdit.getRoles().add( userService.findByName("ROLE_ADMIN"));
+        User me = userService.save(userToEdit);
+        return "redirect:/users/"+userId+"/edit";
+    }
+
 
 }

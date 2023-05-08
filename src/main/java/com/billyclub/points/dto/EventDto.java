@@ -24,7 +24,7 @@ public class EventDto {
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate eventDate;
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = "hh:mm a")
     private LocalTime startTime;
     private Integer numOfTimes;
     private List<Player> players;
@@ -35,5 +35,6 @@ public class EventDto {
     private List<String> scatWinners;
     private List<String> scatSummary;
     private Course course;
+    private int numberWaitlist;
 
 }

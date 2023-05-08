@@ -18,33 +18,31 @@
                             <span>
                                 <input class="form-control-lg" type="text"
                                        id="score" name="score" th:field="${modalValues.scoreForEvent}" maxlength="2" size="2" required autofocus/>
-                                <label class="form-label" for="score" th:text="${player.name}"/>
+                                <label class="form-label-bold" for="score" th:text="${player.name}"/>
                             </span>
                             <span>
                                 <input class="form-check-input" type="checkbox" id="withdraw" name="withdrawal" th:checked="${modalValues.withdrawal}"/>
-                                <label class="form-check-label" for="withdraw">IS WITHDRAWN ?</label>
+                                <label class="form-check-label form-label-bold" for="withdraw"> WITHDRAWN ?</label>
                             </span>
-
                         </div>
-                        <div class="mb-auto" >
-                            <div class="form-label">Eagles</div>
-                            <div class="form-check-inline" th:each="hole : ${HOLES}">
-                                <input class="form-check-input" type="checkbox" th:value="${hole}"
-                                       id="birds" th:field="${modalValues.eagles}">
-                                <label class="form-check-label" for="birds" th:text="${hole}"/>
-                                <br th:if="${holeStat.index == 9}">
-                            </div>
-                        </div>
-
-                        <div class="mb-auto" >
-                            <div class="form-label">Birdies</div>
+                            <hr>
+                            <div class="mb-auto" >
+                            <div class="form-label-bold">Birdies</div>
                             <div class="form-check-inline" th:each="hole : ${HOLES}">
                                 <input class="form-check-input" type="checkbox" th:value="${hole}"
                                        id="birds" th:field="${modalValues.birdies}">
                                 <label class="form-check-label" for="birds" th:text="${hole}"/>
-                                <br th:if="${holeStat.index == 9}">
                             </div>
                         </div>
+                            <hr>
+                            <div class="mb-auto" >
+                                <div class="form-label-bold">Eagles</div>
+                                <div class="form-check-inline" th:each="hole : ${HOLES}">
+                                    <input class="form-check-input" type="checkbox" th:value="${hole}"
+                                           id="birds" th:field="${modalValues.eagles}">
+                                    <label class="form-check-label" for="birds" th:text="${hole}"/>
+                                </div>
+                            </div>
 
                     </div>
                     <div class="modal-footer">

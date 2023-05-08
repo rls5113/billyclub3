@@ -8,15 +8,18 @@ import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import com.billyclub.points.model.User;
 import com.billyclub.points.repository.EventRepository;
+import com.billyclub.points.service.EmailService;
 import com.billyclub.points.service.EventService;
 import com.billyclub.points.service.PlayerService;
 import com.billyclub.points.service.UserService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,11 +32,14 @@ public class EventServiceImpl implements EventService {
     private final PlayerService playerService;
     @Autowired
     private final UserService userService;
+    @Autowired
+    private final EmailService emailService;
 
-    public EventServiceImpl(EventRepository eventRepository, PlayerServiceImpl playerService, UserService userService) {
+    public EventServiceImpl(EventRepository eventRepository, PlayerServiceImpl playerService, UserService userService, EmailService emailService) {
         this.eventRepository = eventRepository;
         this.playerService = playerService;
         this.userService = userService;
+        this.emailService = emailService;
     }
 
 
@@ -89,8 +95,11 @@ public class EventServiceImpl implements EventService {
         Player player = playerService.findById(playerId);
         event.removePlayer(player);
         Player nextPlayer = event.getNextPlayerWaiting();
-        if(nextPlayer != null)
+        if(nextPlayer != null) {
             event.addPlayer(nextPlayer);
+            event.setEmailRecipient(nextPlayer);
+            //send notification
+         }
         playerService.deleteById(playerId);
         return eventRepository.save(event);
     }
@@ -101,7 +110,9 @@ public class EventServiceImpl implements EventService {
         List<EventDto> list = events.stream().map((event)-> toDto(event))
                 .collect(Collectors.toList());
         list.sort((e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
-//        Collections.sort(list, (e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
+//        Collections.sort(list,
+//                Comparator.comparing(EventDto::getEventDate)
+//                        .thenComparing(EventDto::getStartTime));
         return list;
     }
 
@@ -130,10 +141,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event transfer(EventDto source, Event target) {
-        target.setEventDate(source.getEventDate());
+        if (source.getEventDate() != null)
+            target.setEventDate(source.getEventDate());
         target.setStartTime(source.getStartTime());
         target.setNumOfTimes(source.getNumOfTimes());
         target.setStatus(source.getStatus());
+        target.setCourse(source.getCourse());
 
         return target;
     }
@@ -147,7 +160,7 @@ public class EventServiceImpl implements EventService {
         for(int i=0;i<players.size();i++){
             Player player = players.get(i);
             Boolean onWaitlist = player.getIsWaiting();
-            if(i <= maxPlayers)     {
+            if(i < maxPlayers)     {
                 player.setIsWaiting(Boolean.FALSE);
                 if(onWaitlist)  movedFromWaitingList.add(player);
             }
@@ -164,12 +177,12 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
 
         for (Player p : eventPlayers) {
-            int updatedQuota = p.getQuota() + p.getAdjustment();
+            int updatedQuota = (p.getQuota() == 0) ? p.getTotal() : p.getQuota() + p.getAdjustment();
             User user = userService.findByFullname(p.getName());
             user.setPoints(updatedQuota);
             userService.save(user);
-
-            List<Event> playerEvents = eventRepository.findFutureEventsWithPlayerName(LocalDate.now(), p.getName());
+            List<Event> playerEvents = eventRepository.findFutureEventsWithPlayerName(event.getEventDate() , p.getName());
+            playerEvents.remove(event);
             if(!playerEvents.isEmpty()){
                 for(Event e : playerEvents) {
                     Player playerWithName = e.getPlayers().stream()
@@ -177,8 +190,9 @@ public class EventServiceImpl implements EventService {
                             .findAny().orElse(null);
                     if(playerWithName != null){
                         playerWithName.setQuota(updatedQuota);
-                        playerService.save(playerWithName);
+                        System.out.println("Updating quota for "+playerWithName.getName()+" for eventId: "+event.getId());
                     }
+                    this.save(e);
                 }
             }
         }
@@ -309,7 +323,7 @@ public class EventServiceImpl implements EventService {
             //code for more than one have same best score.
 
            Player highestScore = eventPlayers.stream()
-                    .filter(p -> !p.getIsWaiting() || !(p.getQuota() == 0) || !p.getIsWithdrawal())
+                    .filter(p -> !p.getIsWaiting() || !p.getIsWithdrawal())
                     .max(Comparator.comparing(Player::getTotal))
                     .get();
             winners.add(highestScore);
@@ -326,7 +340,7 @@ public class EventServiceImpl implements EventService {
     private int calculateWinnerTakesAllWinnings(List<Player> eventPlayers){
 
             List<Player> players = eventPlayers.stream()
-                    .filter(p -> !p.getIsWaiting() || !(p.getQuota() == 0))
+                    .filter(p -> !p.getIsWaiting())
                     .collect(Collectors.toList());
         return 5 * players.size();
     }
@@ -432,52 +446,54 @@ public class EventServiceImpl implements EventService {
                 .filter(p -> !p.getIsWaiting() && !(p.getQuota() == 0) && !p.getIsWithdrawal())
                 .collect(Collectors.toList());
 
-        List<Player> losers = this.getsMoneyBack(eventPlayers);
-        if(!losers.isEmpty()){
-            //if more than one, pick the winner
-            List<String> moneyBackList = new ArrayList<>();
-            if(losers.size() > 1){
-                List<String> names = losers.stream().map(p->p.getName()).collect(Collectors.toList());
-                moneyBackList.add("Tied for worst score to get money back: " + names.toString());
-                for(int i =0;i<2;i++) {
-                    Collections.shuffle(losers);
+        if(!eventPlayers.isEmpty()) {
+            List<Player> losers = this.getsMoneyBack(eventPlayers);
+            if (!losers.isEmpty()) {
+                //if more than one, pick the winner
+                List<String> moneyBackList = new ArrayList<>();
+                if (losers.size() > 1) {
+                    List<String> names = losers.stream().map(p -> p.getName()).collect(Collectors.toList());
+                    moneyBackList.add("Tied for worst score to get money back: " + names.toString());
+                    for (int i = 0; i < 2; i++) {
+                        Collections.shuffle(losers);
+                    }
                 }
+                Player getsMoneyBack = losers.get(0);
+
+                getsMoneyBack.setTeam("Five dollars back");
+                moneyBackList.add(getsMoneyBack.getName() + " - Five dollars back. Total: " + getsMoneyBack.getTotal());
+                event.getEventWinners().addAll(moneyBackList);
+                //remove from list for teams
+                eventPlayers.remove(getsMoneyBack);
+
             }
-            Player getsMoneyBack = losers.get(0);
 
-            getsMoneyBack.setTeam("Five dollars back");
-            moneyBackList.add(getsMoneyBack.getName()+ " - Five dollars back. Total: "+getsMoneyBack.getTotal());
-            event.getEventWinners().addAll(moneyBackList);
-            //remove from list for teams
-            eventPlayers.remove(getsMoneyBack);
-
-        }
-
-        if(eventPlayers.size() < 8) {  //winner takes all
-            List<String> winnerListing = new ArrayList<>();
-            List<Player> winners = this.getWinnerTakesAll(eventPlayers);
-            //if more than one, pick the winner
-            if(winners.size() > 1){
-                List<String> names = winners.stream().map(p->p.getName()).collect(Collectors.toList());
-                winnerListing.add("Tied for best score: " + names.toString());
-                for(int i =0;i<2;i++) {
-                    Collections.shuffle(winners);
+            if (eventPlayers.size() < 8) {  //winner takes all
+                List<String> winnerListing = new ArrayList<>();
+                List<Player> winners = this.getWinnerTakesAll(eventPlayers);
+                //if more than one, pick the winner
+                if (winners.size() > 1) {
+                    List<String> names = winners.stream().map(p -> p.getName()).collect(Collectors.toList());
+                    winnerListing.add("Tied for best score: " + names.toString());
+                    for (int i = 0; i < 2; i++) {
+                        Collections.shuffle(winners);
+                    }
                 }
+                Player winner = winners.get(0);
+
+
+                winnerListing.add("WINNER IS : " + winner.getName()
+                        + "!  Needed " + winner.getQuota() + " points, "
+                        + "pulled " + winner.getScoreForEvent() + " today, for a " + ((winner.getTotal() > 0) ? "+ " : "- ")
+                        + winner.getTotal() + " total.");
+                winnerListing.add(" Pays : $" + calculateWinnerTakesAllWinnings(eventPlayers));
+                event.setEventWinners(winnerListing);
+
+            } else {
+
+                pickTeams(event, eventPlayers);
+
             }
-            Player winner = winners.get(0);
-
-
-            winnerListing.add("WINNER IS : "+winner.getName()
-                    +"!  Needed "+winner.getQuota()+" points, "
-                    + "pulled "+winner.getScoreForEvent() + " today, for a "+ ((winner.getTotal()>0)?"+ ":"- ")
-                    + winner.getTotal()+" total.");
-            winnerListing.add(" Pays : $"+calculateWinnerTakesAllWinnings(eventPlayers));
-            event.setEventWinners(winnerListing);
-
-        } else {
-
-            pickTeams(event, eventPlayers);
-
         }
         List<String> displayMessages = new ArrayList<>();
         //first timers
@@ -496,7 +512,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
         if(!withdrawn.isEmpty()){
             for(Player p: withdrawn){
-                displayMessages.add("WITHREW FROM EVENT (not included in team pairings): "+p.getName());
+                displayMessages.add("WITHDREW FROM EVENT (not included in team pairings): "+p.getName());
             }
         }
         if(!displayMessages.isEmpty())

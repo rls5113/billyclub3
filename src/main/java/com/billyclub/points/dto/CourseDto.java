@@ -19,7 +19,10 @@ public class CourseDto {
     private String name;
     @NotEmpty(message = "Course phone number should not be empty")
     private String phone;
+    @NotEmpty(message = "Course address should not be empty")
+    private String address;
     @NotNull(message = "Max Players Per group is required for waiting list operations.")
     private Integer maxPlayersPerGroup;
     private List<Event> events = new ArrayList<>();
+//    private Integer order;
 }

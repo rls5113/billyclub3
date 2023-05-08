@@ -10,18 +10,8 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 125px 150px;
+        padding: 80px 5px;
     }
-
-    .playerPanel {
-        font-size: small;
-    }
-
-    .btn-sml {
-        text-align-all: inherit;
-        font-size: small;
-    }
-
 </style>
 
 <div class="container">
@@ -52,7 +42,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-sm-5">
 
                                         <div class="mb-3">
                                             <i>
@@ -108,22 +98,21 @@
                                         </div>
 
 
-                                        <div>
+
                                             <a th:href="@{/reset-password}" class="btn-sml btn btn-primary">Change Password</a>
 <!--                                            <a data-bs-toggle="modal"-->
 <!--                                               data-bs-target="#userPickListModal" class="btn-sml btn btn-primary ">Change Password</a>-->
 
                                         </div>
-                                    </div>
 
-                                    <div class="col-8">
-                                        <table class="table table-striped table-bordered table-hover table-light">
+                                    <div class="col-sm-3">
+                                        <table class="table-sm table-striped table-bordered table-hover table-light">
                                             <thead class="table-header">
                                             <tr>
-                                                <th>Role</th>
+                                                <th>Roles</th>
                                             </tr>
                                             </thead>
-                                            <tbody class="playerPanel">
+                                            <tbody>
                                             <tr th:each="role : *{roles}">
 
 
@@ -133,6 +122,7 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
 
                                 </div>
                             </div>

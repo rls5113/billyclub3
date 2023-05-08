@@ -10,7 +10,7 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 125px 150px;
+        padding: 80px 5px;
     }
     .panel {
         float: left;
@@ -57,7 +57,6 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
-
                                         <div class="mb-3">
                                             <i>
                                                 <div th:text="*{id}"></div>
@@ -142,13 +141,10 @@
                                             </p>
 
                                         </div>
-
-
-                                        <div>
-                                            <button type="button" class="btn btn-secondary">Close</button>
-                                            <button type="submit" style="float:right;" class="btn btn-primary">Add Event</button>                                        </div>
+                                        <div class="mb-3">
+                                            <a type="button" class="btn btn-secondary" th:href="@{/events/current}">Cancel</a>
+                                            <button type="submit" class="btn btn-primary">Save</button>
                                         </div>
-
                                 </div>
                             </div>
                     </div>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Template for HTML email (registration)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<p th:text="#{greeting(${name})}">
+    Hello, Peter Static!
+</p>
+<p>
+    Thank you for registering to play in the billy club group.  If you are new, just enter an upcoming event and show up
+    at the start time.  If you have been around a while, an administrator will set your points from
+    the old system, then you can enter upcoming events.  Hope you enjoy playing in our group.You have requested to reset your password on
+</p>
+<p>Click this link to login and enter events: </p>
+<p><b><a th:href="${link}">Login to billyclubgolf</a></b></p>
+
+<p>
+    Regards, <br />
+    &emsp; <em>Billy</em>
+</p>
+</body>
+</html>

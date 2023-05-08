@@ -10,20 +10,20 @@
 <body layout:fragment="body">
 <style>
     .main {
-        /*padding: 20px 10px;*/
-        margin: 8%;
+        padding: 80px 5px;
     }
 
 </style>
 <div class="main">
 
     <div class="card">
-        <div class="card-header  bg-primary">
+        <div class="card-header bg-primary">
             <h3 class="text-center text-light" th:text="${current}?'Current Events':'Past Events'"></h3>
         </div>
         <div class="card-body">
-            <a class="nav-link btn btn-sm btn-primary text-light" th:href="@{/events/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add Event</a>
-            <table class="table table-striped table-bordered table-hover table-light">
+            <a class="nav-link btn btn-sm btn-primary text-light" th:if="${current}"
+               th:href="@{/events/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add Event <i class="fa-solid fa-plus"></i></a>
+            <table class="table-sm table-responsive-sm table-striped table-bordered table-hover table-light">
                 <thead class="table-header">
                     <tr>
                         <th>Date</th>
@@ -31,19 +31,21 @@
                         <th>Course</th>
                         <th># Tee Times</th>
                         <th># Players</th>
+                        <th># Wait List</th>
                         <th>Status</th>
-                        <th style="width: 5%;">Actions</th>
+                        <th style="width: 12%;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="event: ${events}">
+                    <tr th:each="event: ${events}" class="d-sm-table-row">
                         <td th:text="${{event.eventDate}}"></td>
                         <td th:text="${{event.startTime}}"></td>
                         <td th:text="${{event.course.name}}"></td>
                         <td th:text="${event.numOfTimes}"></td>
                         <td th:text="${event.players.size}"></td>
+                        <td th:text="${event.numberWaitlist}"></td>
                         <td th:text="${event.status}"></td>
-                        <td><a class="nav-link btn-sm btn-primary text-light" th:href="@{/events/{id}(id=${event.id})}">Details</a></td>
+                        <td><a class="nav-link btn-sm btn-primary text-light" th:href="@{/events/{id}(id=${event.id}, current=${current})}">Details <i class="fa-solid fa-circle-info"></i></a></td>
                     </tr>
                 </tbody>
             </table>
