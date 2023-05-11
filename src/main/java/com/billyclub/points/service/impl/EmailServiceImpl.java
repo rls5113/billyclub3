@@ -44,10 +44,10 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendForgotPasswordEmail(String recipientName, String recipientEmail, String link, Locale locale) throws MessagingException {
-        if(!sendMail)   {
-            LOGGER.info("SEND EMAIL (Forgot Password) is turned OFF!");
-            return;
-        }
+//        if(!sendMail)   {
+//            LOGGER.info("SEND EMAIL (Forgot Password) is turned OFF!");
+//            return;
+//        }
         final Context ctx = new Context(locale);
         ctx.setVariable("name", recipientName);
         ctx.setVariable("resetDate", new Date());

@@ -11,7 +11,7 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 80px 5px;
+        /*padding: 80px 5px;*/
     }
     .scatPanel table {
         float: left;
@@ -20,8 +20,7 @@
     }
 </style>
 
-<div class="container" style="border: 0px solid yellow">
-    <div class="main">
+    <div class="main" style="border: 0px solid yellow">
         <form
                 method="post"
                 th:action="@{/events/{id}/addMe(id=${event.id})}" th:object="${event}"
@@ -164,9 +163,10 @@
                                         </table>
                                     </div>
                                    <div class="col-sm-7 alert alert-info">
-                                        <table class="table table-striped table-bordered table-hover table-light">
+                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
                                             <thead class="table-header">
                                             <tr>
+                                                <th>#</th>
                                                 <th>Players</th>
                                                 <th>Quota</th>
                                                 <th th:if="${! event.status.name().equals('OPEN')}">Points</th>
@@ -181,7 +181,7 @@
                                             <tbody class="playerPanel">
                                             <tr th:each="player : ${eventPlayers}" class="d-sm-table-row">
 
-
+                                                <td th:text="${playerStat.index +1}+')'"></td>
                                                 <td th:text="${player.name}"><span th:text="${player.id}"></span></td>
                                                 <td th:text="${player.quota}"/>
                                                 <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.scoreForEvent}"/>
@@ -208,8 +208,8 @@
                                         </table>
                                     </div>
 <br>
-                                    <div class="col-7 alert alert-danger" style="float: right" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN')}">
-                                        <table class="table table-striped table-bordered table-hover table-light">
+                                    <div class="col-sm-7 alert alert-danger" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN')}">
+                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
                                             <thead class="table-header">
                                             <tr>
                                                 <th>Wait List</th>
@@ -251,7 +251,6 @@
 
 
     </div>
-</div>
 <script>
     $(document).on("click",".btn-modal-postscore", function(){
         $('.modal-postscore-row').toggle(true);

@@ -9,7 +9,7 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 80px 5px;
+        /*padding: 80px 5px;*/
     }
     .red {
         color:red;
@@ -23,6 +23,7 @@
             <div th:if="${param.error}">
                 <div class="alert alert-danger">Invalid Email or Password.</div>
             </div>
+
             <div th:if="${param.logout}">
                 <div class="alert alert-success">You have been logged out.</div>
             </div>

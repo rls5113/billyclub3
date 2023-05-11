@@ -7,28 +7,30 @@
 <head >
   <!-- Required meta tags -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
 
+  <link th:href="@{/css/reset.css}" rel="stylesheet"  />
   <link th:href="@{/css/bootstrap.css}" rel="stylesheet"  />
-  <link th:href="@{/css/styles.css}" rel="stylesheet" />
+  <link th:href="@{/css/style.css}" rel="stylesheet" />
 
   <title layout:title-pattern="$CONTENT_TITLE">Billy Club Points</title>
 
   <script th:src="@{/js/jquery-3.6.3.min.js}"></script>
   <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-  <script th:src="@{/js/scripts.js}"></script>
+<!--  <script th:src="@{/js/scripts.js}"></script>-->
   <script src="https://kit.fontawesome.com/fda5db5ece.js" crossorigin="anonymous"></script>
 
 </head>
-<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top" th:fragment="header">
-  <div class="container" style="border: 0px solid purple">
-    <img src="/assets/favicon.ico" width="60px" height="60px" class="img-thumbnail">
+<div class="container"style="border: 0px solid red">
+<nav th:fragment="header" class="navbar navbar-expand-md navbar-light bg-light"  style="border: 0px solid purple">
+  <div class="navbar" style="border: 0px solid greenyellow">
+    <img src="/assets/favicon.jpg" width="60px" height="60px" class="img-thumbnail">
     <div>
-    <span><a class="navbar-brand" th:href="@{/}">Billy Club Points Game</a></span>
-    <div sec:authorize="isAuthenticated()" style="font-size: x-small" >Logged in as:&nbsp; <span sec:authentication="name"></span> </div>
-    <div sec:authorize="isAuthenticated()" style="font-size: x-small" >Authorities:&nbsp; <span sec:authentication="principal.authorities"></span> </div>
+      <span><a class="navbar-brand" th:href="@{/}">Billy Club Points Game</a></span>
+      <div sec:authorize="isAuthenticated()" style="font-size: x-small" >Logged in as:&nbsp; <span sec:authentication="name"></span> </div>
+      <div sec:authorize="isAuthenticated()" style="font-size: x-small" >Authorities:&nbsp; <span sec:authentication="principal.authorities"></span> </div>
     </div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -59,7 +61,7 @@
 
 
 <!-- Footer-->
-<footer class="bg-dark py-4 mt-auto">
+<footer class="bg-dark py-3">
   <div class="container px-5">
     <div class="row align-items-center justify-content-between flex-column flex-sm-row">
       <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; NearPerfect Software Solutions</div></div>
@@ -73,5 +75,5 @@
     </div>
   </div>
 </footer>
-
+</div>
 </html>

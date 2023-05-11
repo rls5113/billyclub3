@@ -10,8 +10,8 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 80px 5px;
-        text-align-all: center;
+        /*padding: 80px 5px;*/
+        /*text-align-all: center;*/
     }
 
 </style>
@@ -25,26 +25,26 @@
             <table class="table table-striped table-bordered table-hover table-light">
                 <thead class="table-header">
                     <tr>
+                        <th>Actions</th>
                         <th>Name</th>
                         <th>Username</th>
                         <th>Email</th>
                         <th>Current Points</th>
                         <th>Active ?</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="user: ${users}">
-                        <td th:text="${user.name}"></td>
-                        <td th:text="${user.username}"></td>
-                        <td th:text="${user.email}"></td>
-                        <td th:text="${user.points}"></td>
-                        <td th:text="${user.active}"></td>
                         <td>
                             <a th:href="@{/users/{userid}/edit(userid=${user.id})}"
                                th:if="${loginUser.name == user.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
                                class="btn-sml btn btn-primary btn-modal-edituser">Edit</a>
                         </td>
+                        <td th:text="${user.name}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.points}"></td>
+                        <td th:text="${user.active}"></td>
                     </tr>
                 </tbody>
             </table>

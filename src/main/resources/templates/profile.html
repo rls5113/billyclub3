@@ -10,7 +10,7 @@
 <body layout:fragment="body">
 <style>
     .main {
-        padding: 80px 5px;
+        /*padding: 80px 5px;*/
     }
 </style>
 
@@ -26,15 +26,6 @@
             <div class="row">
 
                 <div class="col-md-12">
-                    <div th:if="${param.error}">
-                        <div class="alert alert-danger">Invalid Email and Password.</div>
-                    </div>
-                    <div th:if="${param.logout}">
-                        <div class="alert alert-success">You have been logged out.</div>
-                    </div>
-                    <div th:if="${param.success}">
-                        <div class="alert alert-info">You've successfully created a user account! Now login.</div>
-                    </div>
                     <div>
                         <div class="card">
                             <div class="card-header  bg-primary">
