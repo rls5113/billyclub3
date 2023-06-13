@@ -15,7 +15,10 @@ build/
 .sts4-cache
 bin/
 !**/src/main/**/bin/
-src/main/resources/application*.properties
+src/main/resources/application.properties
+src/main/resources/application-dev.properties
+src/main/resources/application-qa.properties
+src/main/resources/application-prod.properties
 !**/src/test/**/bin/
 /tmp/**
 **.db

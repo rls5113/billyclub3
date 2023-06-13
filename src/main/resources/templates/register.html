@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html
         xmlns:th="http://thymeleaf.org"
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -13,25 +12,19 @@
     }
     .red {
         color:red;
+        font-weight: bold;
     }
 
 
 </style>
-<section>
     <div class="main">
-        <form method="post" role="form" th:action="@{/register/save}" th:object="${user}">
+        <form id="register-form" method="post" role="form" th:action="@{/register/save}" th:object="${user}">
 
         <div class="row col-md-6 offset-md-3">
             <div class="card">
-            <div th:if="${param.success}">
-                <div class="alert alert-info">You've successfully registered
-                    to our app!</div>
-            </div>
             <div th:if="${#fields.hasAnyErrors()}">
                 <div class="alert alert-danger">
-                    <ul>
-                        <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
-                    </ul>
+                    Please fix the errors, to complete registration.
                 </div>
             </div>
             <div class="card-header bg-primary">
@@ -47,10 +40,10 @@
                                placeholder="Enter username"
                                th:field="*{username}"
                                type="text" autofocus/>
-                        <p th:errors="*{username}" class="text-danger"
-                           th:if="${#fields.hasErrors('username')}">
+                        <p th:errors="*{firstName}" class="error"
+                           th:if="${#fields.hasErrors('firstName')}">
                         </p>
-                    </div>
+                     </div>
 
                     <div class="form-group mb-3">
                         <label class="form-label">First Name<span class="red">*</span></label>
@@ -61,7 +54,7 @@
                                th:field="*{firstName}"
                                type="text"
                         />
-                        <p th:errors="*{firstName}" class="text-danger"
+                        <p th:errors="*{firstName}" class="error"
                            th:if="${#fields.hasErrors('firstName')}">
                         </p>
                     </div>
@@ -75,7 +68,7 @@
                                th:field="*{lastName}"
                                type="text"
                         />
-                        <p th:errors="*{lastName}" class="text-danger"
+                        <p th:errors="*{lastName}" class="error"
                            th:if="${#fields.hasErrors('lastName')}">
                         </p>
                     </div>
@@ -88,7 +81,7 @@
                                th:field="*{email}"
                                type="email"
                         />
-                        <p th:errors="*{email}" class="text-danger"
+                        <p th:errors="*{email}" class="error"
                            th:if="${#fields.hasErrors('email')}">
                         </p>
                     </div>
@@ -101,7 +94,7 @@
                                th:field="*{password}"
                                type="password"
                         />
-                        <p th:errors="*{password}" class="text-danger"
+                        <p th:errors="*{password}" class="error"
                            th:if="${#fields.hasErrors('password')}">
                         </p>
                     </div>
@@ -115,6 +108,34 @@
         </div>
         </form>
     </div>
-</section>
+<script>
+    $(document).ready(function() {
+
+        $("#register-form").validate({
+            rules:{
+                username: "required",
+                firstName: "required",
+                lastName: "required",
+                email: {
+                    required: true,
+                    email: true
+                },
+                password: "required"
+            },
+            messages: {
+                username: "Username should not be empty.",
+                firstName: "First Name should not be empty. ",
+                lastName: "Last Name should not be empty.",
+                email: "Please enter a valid Email address.",
+                password: "Password should not be empty."
+
+            },
+            submitHandler: function (form){
+                form.submit();
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

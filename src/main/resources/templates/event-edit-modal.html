@@ -1,4 +1,4 @@
-<form th:action="@{/events/{id}/edit(id=${event.id})}" method="post" th:object="${event}">
+<form th:action="@{/events/{id}/edit(id=${event.id})}" method="post" th:object="${event}" id="edit-event-modal-form">
 
 <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel"
      aria-hidden="true">
@@ -32,16 +32,25 @@
                                    th:field="*{eventDate}"
                                    style="font-weight: bolder"
                             />
+                            <p th:errors="*{eventDate}" class="error"
+                               th:if="${#fields.hasErrors('eventDate')}">
+                            </p>
+
+
                         </div>
                         <div class="mb-3">
                             <label for="startTime" class="control-label">Start Time</label>
-                            <input type="time"
+                            <input type="text"
                                    id="startTime"
                                    name="startTime"
                                    class="form-control"
                                    placeholder="Start Time"
                                    th:field="*{startTime}"
+                                   required
                             />
+                            <p th:errors="*{startTime}" class="error"
+                               th:if="${#fields.hasErrors('startTime')}">
+                            </p>
                         </div>
                         <div class="mb-3">
                             <label for="numOfTimes" class="control-label"># of Tee Times</label>
@@ -51,6 +60,7 @@
                                    class="form-control"
                                    placeholder="# of Times"
                                    th:field="*{numOfTimes}"
+                                   required
                             />
                         </div>
                         <div class="mb-3">
@@ -60,7 +70,6 @@
                                             th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
                                 </select>
                         </div>
-                    </tr>
                 </div>
             </div>
             <div class="modal-footer mb-3">

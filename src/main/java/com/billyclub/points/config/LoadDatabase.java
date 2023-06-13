@@ -33,7 +33,7 @@ class LoadDatabase {
         System.out.println("loading data: ROLES");
         return args -> {
 
-            log.debug("Running load DATA");
+            log.info("Running load DATA");
 //            Role role1 = roleRepo.save(new Role(null, "ROLE_USER",null));
 //            Role role2 = roleRepo.save(new Role(null, "ROLE_ADMIN",null));
 //  ADMIN

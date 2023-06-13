@@ -9,6 +9,9 @@ import com.billyclub.points.repository.RoleRepository;
 import com.billyclub.points.repository.UserRepository;
 import com.billyclub.points.service.UserService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,12 +20,14 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
@@ -54,6 +59,14 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserDto addUser(UserDto userDto) {
+//        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+//        if(!violations.isEmpty()){
+//            StringBuilder sb = new StringBuilder();
+//            for (ConstraintViolation<UserDto> v: violations){
+//                sb.append(v.getMessage());
+//            }
+//            throw new ConstraintViolationException("Error occurred: "+sb.toString(),violations);
+//        }
         userDto.setActive(Boolean.TRUE);
         userDto.setPoints(0);
         User user = saveUser(userDto);

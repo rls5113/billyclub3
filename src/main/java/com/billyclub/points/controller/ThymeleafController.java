@@ -31,7 +31,7 @@ public class ThymeleafController {
     private EmailService emailService;
     private final CourseService courseService;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ThymeleafController.class);
+    private static final Logger log = LoggerFactory.getLogger(ThymeleafController.class);
     private Long eventId;
     private MultiPlayerScoresMapDto multiPlayerScores;
 
@@ -61,6 +61,7 @@ public class ThymeleafController {
 
     @GetMapping("/events/{id}")
     public String getEventDetails(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
+        log.info("Event Details: ID= "+id);
         String currentParam = request.getParameter("current");
         if(currentParam == null)    model.addAttribute("current", Boolean.TRUE);
         else                        model.addAttribute("current", Boolean.valueOf(currentParam));
@@ -117,6 +118,8 @@ public class ThymeleafController {
         List<UserDto> usersNotInEvent = new ArrayList<>();
         usersNotInEvent.addAll(eventUsers);
         usersNotInEvent.removeAll(filtered);
+        usersNotInEvent.sort(Comparator.comparing(UserDto::getFirstName,Comparator.naturalOrder()));
+
         model.addAttribute("userPickList", usersNotInEvent);
 
         //model object for multi user checkbox values
@@ -130,14 +133,14 @@ public class ThymeleafController {
         model.addAttribute("HOLES", holes);
 
         model.addAttribute("courses",courseService.findAll());
-
-
+        log.info("Event Details: exit");
         return "event-detail";
     }
 
     @PostMapping("/events/{eventId}/addMe")
     public String addMeToEvent(@PathVariable("eventId") Long eventId, Model model) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Add to Event ("+eventId+"): entering "+username);
         User user = userService.findByUsername(username);
         Event event = eventService.findById(eventId);
         if (!event.isPlayerInEvent(user.getName())) {
@@ -155,6 +158,7 @@ public class ThymeleafController {
     @GetMapping("/events/{eventId}/removeMe/{playerId}")
     public String removeMeFromEvent(@PathVariable("eventId") Long eventId,
                                     @PathVariable("playerId") Long playerId, Model model, HttpServletRequest request) {
+        log.info("Remove From Event ("+eventId+"): removing "+playerId);
         Event event = eventService.removePlayerFromEvent(eventId, playerId);
         String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
 
@@ -170,6 +174,7 @@ public class ThymeleafController {
                         link);
             }
         } catch (MessagingException e) {
+            log.info("Remove From Event ("+eventId+"): waitlist email failed");
             System.out.println("Failed to send email. " + e.getMessage());
 //            throw new RuntimeException(e);
         }
@@ -180,6 +185,7 @@ public class ThymeleafController {
     @PostMapping("/events/{eventId}/addPlayersToEvent")
     public String addPlayersToEvent(@PathVariable("eventId") Long eventId,
                                     @ModelAttribute("selectedUsers") MultiUserValuesDto selected) {
+        log.info("Add multiple players to Event ("+eventId+"): enter");
         Event event = eventService.findById(eventId);
         if (selected.getMultiUsersCheckboxes().length > 0) {
             for (String s : selected.getMultiUsersCheckboxes()) {
@@ -189,6 +195,7 @@ public class ThymeleafController {
                 event = eventService.addPlayerToEvent(event.getId(), newPlayer.getId());
             }
         }
+        log.info("Add multiple players to Event ("+eventId+"): exit");
         return "redirect:/events/" + eventId;
     }
 
@@ -199,6 +206,8 @@ public class ThymeleafController {
                                    @Valid @ModelAttribute("playerScore") PlayerScoresHolderDto playerScore,
                                    BindingResult result, Model model
     ) {
+        log.info("Post Players Score ("+eventId+"): enter playerId "+playerId);
+
         if (result.hasErrors()) {
             return "postScoreModal";
         }
@@ -260,9 +269,16 @@ public class ThymeleafController {
         return "redirect:/events/" + eventId;
     }
     @PostMapping("/events/{eventId}/edit")
-//    @Transactional
-    public String saveEventDetail(@PathVariable("eventId") Long eventId,@Valid @ModelAttribute("event") EventDto eventDto,
+    @Transactional
+    public String editEventDetail(@PathVariable("eventId") Long eventId, @Valid @ModelAttribute("event") EventDto eventDto,
                                   BindingResult result, Model model, HttpServletRequest request) {
+        log.info("Save Event ("+eventId+"): enter");
+        if (result.hasErrors()) {
+            model.addAttribute("event", eventDto);
+            model.addAttribute("errors",result.getAllErrors());
+            return "redirect:/events/"+eventId+"?#editEventModal";
+        }
+
         Event eventToEdit = eventService.findById(eventId);
         eventToEdit = eventService.transfer(eventDto, eventToEdit);
         String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId()+"?current=true";
@@ -280,6 +296,7 @@ public class ThymeleafController {
                             request.getLocale(),
                             link);
                 } catch (MessagingException e) {
+                    log.info("Save Event ("+eventId+"): waitlist email failed");
                     System.out.println("Failed to send email. " + e.getMessage());
                 }
             }
@@ -287,8 +304,9 @@ public class ThymeleafController {
             eventToEdit = eventService.save(eventToEdit);
 
             switch (eventDto.getStatus()) {
-                case CANCELLED, FROST_DELAY, RAIN_DELAY -> {
+                case CANCELED, FROST_DELAY, RAIN_DELAY -> {
                     try {
+                        System.out.println("Save Event ("+eventId+"): sending status changed email");
                         List<User> statusRecipients =  eventToEdit.getPlayers().stream()
                                 .map(p -> userService.findByFullname(p.getName()))
                                 .collect(Collectors.toList());
@@ -299,6 +317,7 @@ public class ThymeleafController {
                                 request.getLocale());
                     } catch (MessagingException e) {
                         System.out.println("Failed to send email. " + e.getMessage());
+                        log.info("Save Event ("+eventId+"): failed to send status changed email");
 //                        throw new RuntimeException(e);
                     }
                     break;
@@ -306,6 +325,7 @@ public class ThymeleafController {
                 default -> {break;}
             }
         }
+        log.info("Save Event ("+eventId+"): exit");
         return "redirect:/events/" + eventId;
     }
 
@@ -317,23 +337,35 @@ public class ThymeleafController {
         return "event-add";
     }
     @PostMapping("/events/add")
-    public String postNewEvent(@ModelAttribute("event") @Valid EventDto eventDto, HttpServletRequest request){
+    public String postNewEvent(@Valid @ModelAttribute("event")  EventDto eventDto, BindingResult result, HttpServletRequest request, Model model){
+        log.info("Add Event : enter");
+        if (result.hasErrors()) {
+            model.addAttribute("event", eventDto);
+            model.addAttribute("courses",courseService.findAll());
+            return "event-add";
+        }
+
         Event event = eventService.add(eventService.toEntity(eventDto));
-        //generate pw reset link
+        //generate link
         String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
+//        List<User> recipients = Arrays.asList(userService.findByUsername("rstuart"));  // use to isolate to me
         List<User> recipients = userService.findAllByActive().stream()
                 .map(u -> userService.toEntity(u))
                 .collect(Collectors.toList());
         //send email
+        log.info("Add Event : sending new event email");
+
         try {
             emailService.sendNewEventEmail(recipients,
                     event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                     event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
                     event.getCourse().getName(), link, request.getLocale());
-        } catch (MessagingException e) {
+        } catch (Exception e) {
+            log.info("Add Event : failed to send new event email");
             System.out.println("Failed to send email. " + e.getMessage());
 //            throw new RuntimeException(e);
         }
+        log.info("Add Event : exit");
         return "redirect:/events/current";
     }
 
@@ -343,12 +375,14 @@ public class ThymeleafController {
     }
 
     private Event changeEventStatus(Long eventId, EventStatus eventStatus) {
+        log.info("Change Event status: enter");
         Event event = eventService.findById(eventId);
         if (event.getStatus() != eventStatus && event.getStatus() != EventStatus.COMPLETED) {
             if(event.isAllScoresIn())   eventStatus = EventStatus.COMPLETED;
             event.setStatus(eventStatus);
             eventService.save(event);
         }
+        log.info("Change Event status: enter");
         return event;
     }
     @GetMapping("/courses")
@@ -368,6 +402,7 @@ public class ThymeleafController {
 
     @PostMapping("/courses/add")
     public String postAddCourse(@Valid @ModelAttribute("course") CourseDto course, BindingResult result, Model model) {
+        log.info("Add new course: enter");
         Course newCourse = courseService.save(courseService.toEntity(course));
         return "redirect:/courses";
     }
@@ -384,12 +419,14 @@ public class ThymeleafController {
             @PathVariable("courseId") Long courseId,
             @Valid @ModelAttribute("course") CourseDto course,
             BindingResult result, Model model) {
+        log.info("Edit Course: enter");
         Course courseToEdit = courseService.findById(courseId);
         if (result.hasErrors()) {
             return "course-add-edit";
         }
         BeanUtils.copyProperties(course, courseToEdit);
         courseService.save(courseToEdit);
+        log.info("Edit Course: exit");
         return "redirect:/courses?success";
     }
     @GetMapping("/users")
@@ -414,6 +451,7 @@ public class ThymeleafController {
 
     @PostMapping("/users/{userid}/edit")
     public String postUserChanges(@PathVariable("userid") Long userId, @ModelAttribute("user") UserDto userDto){
+        log.info("Edit User: enter");
         User userToEdit = userService.findById(userId);
         userToEdit = userService.transfer(userDto, userToEdit);
         User me = userService.save(userToEdit);
@@ -421,6 +459,7 @@ public class ThymeleafController {
     }
     @GetMapping("/users/{userid}/addAsAdmin")
     public String addToAdminRole(@PathVariable("userid") Long userId){
+        log.info("Add as Admin: userId: "+userId);
         User userToEdit = userService.findById(userId);
         userToEdit.getRoles().add( userService.findByName("ROLE_ADMIN"));
         User me = userService.save(userToEdit);

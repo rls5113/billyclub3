@@ -33,8 +33,11 @@ public class Event {
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     @NotNull
+    @Temporal(TemporalType.DATE)
     private LocalDate eventDate;
     @NotNull
+    @DateTimeFormat(pattern = "hh:mm a")
+    @Temporal(TemporalType.TIME)
     private LocalTime startTime;
     @NotNull
     private Integer numOfTimes;

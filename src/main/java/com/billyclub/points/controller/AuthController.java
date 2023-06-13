@@ -11,6 +11,8 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import net.bytebuddy.utility.RandomString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.thymeleaf.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -31,6 +34,7 @@ public class AuthController {
 
     private UserService userService;
     private EmailService emailService;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     public AuthController(UserService userService, EmailService emailService) {
@@ -63,12 +67,19 @@ public class AuthController {
     // handler method to handle register user form submit request
     @PostMapping("/register/save")
     public String registration(@Valid @ModelAttribute("user") UserDto user,
-                               HttpServletRequest request,
                                BindingResult result,
+                               HttpServletRequest request,
                                Model model){
+        log.info("Registering new user ...");
+        if (result.hasErrors()) {
+            model.addAttribute("user", user);
+            return "register";
+        }
+
         try {
             User existingEmail = userService.findByEmail(user.getEmail());
             if (existingEmail != null) {
+                log.info("Register: Email exists");
                 result.rejectValue("email", null, "There is already an account registered with that email");
             }
 
@@ -78,34 +89,49 @@ public class AuthController {
         try {
             User existingUser = userService.findByUsername(user.getUsername());
             if (existingUser != null) {
+                log.info("Register: Username exists");
                 result.rejectValue("username", null, "There is already an account registered with that username");
             }
 
         }catch (ResourceNotFoundException e) {
             //expected
         }
-        if (result.hasErrors()) {
+        try {
+            User existingUser = userService.findByFullname(user.getName());
+            if (existingUser != null) {
+                log.info("Register: First and Last Name exists");
+                result.rejectValue("firstName", null, "There is already an account registered with this exact first and last name.");
+                result.rejectValue("lastName", null, "There is already an account registered with this exact first and last name.");
+            }
 
+        }catch (ResourceNotFoundException e) {
+            //expected
+        }
+        if (result.hasErrors()) {
             model.addAttribute("user", user);
-            return "register?errors";
+            return "register";
         }
 
+        UserDto newUser = userService.addUser(user);
+        model.addAttribute("user", newUser);
+        log.info("Register: exit");
         try {
             //generate pw reset link
             String link = ServletUtility.getSiteURL(request)+"/login";
             List<User> admins = userService.findAdminUsers();
             //send email
+            log.info("Register: send email");
             emailService.sendRegistrationEmail(admins, user.getEmail(), link, request.getLocale(), user.getName());
         } catch (ResourceNotFoundException e) {
+            log.error("Register: resource not found");
             model.addAttribute("error",e.getMessage());
-            return "redirect:/register?error";
-        } catch (MessagingException e) {
+            return "register";
+        } catch (Exception e) {
+            log.error("Register: Email error!!");
             model.addAttribute("error","Error while sending email" + e.getMessage());
-            return "redirect:/register?error";
+            return "register";
         }
 
-        UserDto newUser = userService.addUser(user);
-        model.addAttribute("user", newUser);
         return "redirect:/login?success";
     }
 
@@ -115,22 +141,26 @@ public class AuthController {
     }
     @PostMapping("/forgot-password")
     public String postForgotPassword(HttpServletRequest request, Model model) {
+        log.info("Forgot Password: enter");
         String email = request.getParameter("email");
         String token = RandomString.make(45);
         try {
             User user = userService.updateResetPasswordToken(token,email);
             //generate pw reset link
             String link = ServletUtility.getSiteURL(request)+"/reset-password?token="+ token;
+            link = link.replace("forgot-password/","");
             //send email
             sendForgotPasswordEmail(user.getName(), email, link, request.getLocale());
         } catch (ResourceNotFoundException e) {
             model.addAttribute("error",e.getMessage());
+            log.error("Forgot Email failed, resource not found. "+ e.getStackTrace());
             return "forgot-password";
         } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("Forgot Email failed. MessagingException " + e.getStackTrace());
             model.addAttribute("error","Error while sending email" + e.getMessage());
             return "redirect:/forgot-password?error";
         }
-
+        log.info("Forgot Password: email sent, part 1 completed");
         return "redirect:/forgot-password?success";
     }
 
@@ -160,6 +190,7 @@ public class AuthController {
     public String postResetPassword(@Valid @ModelAttribute("pwpair") ResetPasswordDto dto,
                                     BindingResult result, Model model, HttpServletRequest request
                                     ) {
+        log.info("Forgot Password: part 2 enter");
 //        String password = request.getParameter("password");
         String password = dto.getPassword();
         String confirmPassword = dto.getConfirmPassword();
@@ -190,7 +221,7 @@ public class AuthController {
                 return "reset-password";
             }
         }
-
+        log.info("Forgot Password: part 2 exit");
         return "redirect:/login?changepass";
     }
   }

@@ -4,65 +4,102 @@
     clear: both;
   }
 
-
-  button {
-    width: 150px;
-    background-color: #4aaaa5;
+  form .error {
+    color: red;
     font-weight: bold;
-    color: white;
-
   }
-  @media screen and (min-width: 980px) {
-    /* The body's bg color will be #333 */
+  table {
+    width: 95%;
+  }
+  th {
+    font-weight: bold;
+    text-decoration: underline;
+  }
+  td {
+    text-align: center;
+  }
+
+  .video-div {
+    width: 560px;
+    height: 315px;
+    max-width: 560px;
+    max-height: 315px;
+    min-width: 560px;
+    min-height: 315px;
+  }
+
+  .highlight-winner {
+    background-color: yellow;
+    font-weight: bolder;
+  }
+  /*button {*/
+  /*  width: length;*/
+  /*}*/
+
+  button,
+  [type=button],
+  [type=reset],
+  [type=submit] {
+    -webkit-appearance: button;
+  }
+  a {
+    border: red 0px solid;
+    padding: 5px;
+  }
+  .btn-group {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle
+  }
+  .form-check-input {
+    border: 1px solid black;
+  }
+  @media  (min-width: 996px) {
     body {
-      background-color: #e40b0b;
+      /*background-color: #e40b0b;*/
     }
     header {
       /*width: 1100px;*/
     }
-    img {
-      /*width:70%;*/
-      /*height:70%;*/
-      /*margin: 15px;*/
-
-    }
-    /* #portfolioGrid > figure {
-      padding: .25em;
-    } */
-
-    .imgBanner {
-      /*font-size: larger;*/
-      /*width: 286px;*/
-      /*height: 23px;*/
-      /*top: -65px;*/
-    }
-
-    /* The wrapper's width will be 600px */
+     /* The wrapper's width will be 600px */
     .container {
       /*width: 1100px;*/
     }
+    .table {
+      width: auto;
+      font-size: 15px;
+    }
+
   }
-  @media screen and (max-width: 768px) {
+  @media (min-width: 640px)and (max-width: 996px) {
     /* The body's bg color will be #333 */
     body {
-      background-color: #111aee;
+      /*background-color: #111aee;*/
     }
     header {
       /*width: 600px;*/
     }
-    #left {
-      /* width: 75px; */
-      /*font-size:20px;*/
-    }
-    /* The wrapper's width will be 600px */
     .container {
       /*width: 600px;*/
+    }
+    .table {
+      width: auto;
+      font-size: 13px;
+    }
+    .btn {
+      padding:2px 4px;
+      line-height: 1;
+      font-size: small;
+
+    }
+    #smailsHat {
+      display: none;
     }
   }
   @media screen and (max-width: 640px) {
     /* The body's bg color will be #333 */
     body {
-      background-color: #f8e508;
+      /*background-color: #f8e508;*/
     }
     header {
       /*width: 400px;*/
@@ -71,4 +108,24 @@
     .container {
       /*width: 400px;*/
     }
+    .table-responsive-sm {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch
+    }
+    .table {
+      width: auto;
+      font-size: 10px;
+    }
+    .btn {
+      padding:2px 4px;
+      /*font-size:0.85rem;*/
+      line-height: 1;
+      /*height: 0.85rem;*/
+      font-size: smaller;
+    }
+    #smailsHat {
+      display: none;
+    }
+
   }
+

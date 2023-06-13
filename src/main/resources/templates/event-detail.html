@@ -45,12 +45,13 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-sm-5">
-                                        <a class="nav-link btn btn-sm bg-secondary text-light" th:href="${current}?@{/events/current}:@{/events/past}">To List</a>
+                                        <a class="btn btn-sm bg-secondary text-light" th:href="${current}?@{/events/current}:@{/events/past}"
+                                        th:text="${current}?'To Current Event List':'To Past Event List'">To Event List</a>
                                         <div th:text="${event.id}" style="font-style: italic"/>
                                         <div class="mb-3">
                                             <label for="course" class="control-label">Course</label>
                                             <div class="mb-3">
-                                                <select name="course" id="course" th:field="*{course}" class="form-control input-" disabled>
+                                                <select name="course" id="course" th:field="*{course}" class="form-select" disabled>
                                                     <option th:each="courseOpt : ${courses}"
                                                             th:value="${courseOpt.id}" th:text="${courseOpt.name}"></option>
                                                 </select>
@@ -106,7 +107,7 @@
                                                     type="submit" class="btn btn-primary">Add me to Event <i class="fa-solid fa-user-plus"></i></button>
 
                                             <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
-                                               th:if="${event.isAllScoresIn}"
+                                               th:if="${event.isAllScoresIn}" id="calc-scores"
                                                class="btn btn-primary">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
 
                                             <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
@@ -116,14 +117,15 @@
                                             <a sec:authorize="false and hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
                                                data-bs-target="#postMultipleScoresModal" class="btn btn-primary">Post for All in Event</a>
 
-                                            <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
+                                            <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal" id="edit-event"
                                                data-bs-target="#editEventModal" class="btn btn-primary ">Edit Event <i class="fa-solid fa-pen"></i></a>
 
                                         </div>
                                     </div> <!-- end row -->
 
                                     <div class="col-sm-7 alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
-                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
+                                        <table class="col-2 table table-striped table-bordered table-hover table-light"
+                                               th:class="${event.status.name().equals('COMPLETED')}? 'col-2 table table-bordered table-hover table-light'">
                                             <thead class="table-header">
                                             <tr>
                                                 <th th:text="${(eventPlayers.size lt 8)?'Winner Takes All':'Team Results'}"></th>
@@ -131,13 +133,14 @@
                                             </thead>
                                             <tbody>
                                             <tr th:each=" s : *{eventWinners}">
-                                                <td th:text="${s}"/>
+                                                <td th:if="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold; background-color: yellow"/>
+                                                <td th:unless="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold;"/>
                                             </tr>
                                             </tbody>
                                         </table>
                                     </div>
                                     <div class="col-sm-7 scatPanel alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
-                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
+                                        <table class="col-2 table table-bordered table-hover table-light">
                                             <thead class="table-header">
                                             <tr>
                                                 <th>Scat winners</th>
@@ -145,7 +148,7 @@
                                             </thead>
                                             <tbody>
                                             <tr th:each=" s : *{scatWinners}">
-                                                <td th:text="${s}"/>
+                                                <td th:text="${s}" style="text-align: start; background-color: yellow"/>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -157,7 +160,7 @@
                                             </thead>
                                             <tbody class="playerPanel">
                                             <tr th:each=" s : *{scatSummary}">
-                                                <td th:text="${s}"/>
+                                                <td th:text="${s}" style="text-align: start"/>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -190,12 +193,13 @@
                                                 <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.total}"/>
                                                 <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.adjustment}"/>
                                                 <td th:if="${event.status.name().equals('OPEN')}" th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a)')}"/>
-                                                <td th:if="${! event.status.name().equals('COMPLETED')}">
+                                                <td th:if="${! (event.status.name().equals('COMPLETED') or event.status.name().equals('CANCELED'))}">
                                                     <a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id})}"
-                                                       th:if="(${event.status.name().equals('OPEN')} and ${loginUser.name == player.name}) or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                                                       th:if=" ${!event.status.name().equals('POSTING')} and ((${event.status.name().equals('OPEN')} and ${loginUser.name == player.name}) or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
                                                        class="btn btn-danger">Delete <i class="fa-solid fa-trash-can"> </i></a>
 
-                                                    <a th:if="(${event.status.name().equals('STARTED')} or ${event.status.name().equals('POSTING')})   and (${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
+                                                    <a th:if="(${event.status.name().equals('STARTED')} or ${event.status.name().equals('POSTING')})
+                                                                and (${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
                                                             data-bs-toggle="modal" data-bs-target="#postScoreModal" class="btn btn-success btn-modal-postscore"
                                                             th:attr="data-player-id=${player.id}" >Post<i class="fa-solid fa-arrow-up-from-bracket"></i></a>
 
@@ -246,15 +250,51 @@
 
         <div layout:insert="~{postScoreModal}"></div>
         <div layout:insert="~{event-edit-modal}"></div>
+<!--        <div layout:insert="~{calculate-video-modal}"></div>-->
 
 <!--        <div layout:insert="~{postMultipleScoresModal}"></div>-->
 
 
     </div>
 <script>
+    $(document).ready(function() {
+
+        if(window.location.href.indexOf('#editEventModal') != -1) {
+            $('#editEventModal').modal('show');
+        }
+        $("#edit-event-modal-form").validate({
+            rules:{
+                course: "required",
+                eventDate: "required",
+                startTime: "required",
+                numOfTimes: "required",
+                status: "required"
+            },
+            messages: {
+                course: "Course should not be empty.",
+                eventDate: "Event Date should not be empty. ",
+                startTime: "Start Time should not be empty.",
+                numOfTimes: "# Tee Times should not be empty.",
+                status: "Status should not be empty."
+
+            },
+            submitHandler: function (form){
+                form.submit();
+            }
+        });
+        var url = $('#we-are-waiting').attr('src');
+        $('#videoPlayerModal').on('hide.bs.modal', function(){
+            $('#we-are-waiting').attr('src','');
+        });
+        $('#videoPlayerModal').on('show.bs.modal', function(){
+            $('#we-are-waiting').attr('src',url);
+        });
+
+    });
     $(document).on("click",".btn-modal-postscore", function(){
         $('.modal-postscore-row').toggle(true);
         var playerid = $(this).data('player-id');
+        console.log('postscore->  player-id: '+playerid);
         $('.modal-postscore-row form')
             .filter(':not(form[action$='+playerid+'])')
             .parent().toggle(false);
@@ -266,5 +306,17 @@
             $('.form-check-input').prop('checked', false);
         }
     });
+
+    // $(document).on("click","#calc-scores", function(){
+    //     $('#videoPlayerModal').show();
+    //     $('#we-are-waiting').play();
+    //   });
+
+    $('.modal').on('shown.bs.modal', function (){
+        $(this).find('[autofocus]').focus();
+    });
+
+
+
 </script>
 </body>

@@ -51,6 +51,7 @@ public class SpringSecurityConfig {
                 );
         //enables h2 console frames for viewing
         http.headers().frameOptions().disable();
+//        http.requiresChannel((channel)-> channel.anyRequest().requiresSecure());
         return http.build();
     }
 

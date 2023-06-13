@@ -2,7 +2,7 @@
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-dark-subtle">
                 <h1 class="modal-title fs-5" id="postScoreModalLabel">Post Score</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -17,17 +17,17 @@
                         <div class="mb-auto">
                             <span>
                                 <input class="form-control-lg" type="text"
-                                       id="score" name="score" th:field="${modalValues.scoreForEvent}" maxlength="2" size="2" required autofocus/>
-                                <label class="form-label-bold" for="score" th:text="${player.name}"/>
+                                       id="score" name="score" th:field="${modalValues.scoreForEvent}" maxlength="2" size="2" required autofocus />
+                                <label class="form-label fw-bold" for="score" th:text="${player.name}"/>
                             </span>
-                            <span>
+                            <span style="float: right">
                                 <input class="form-check-input" type="checkbox" id="withdraw" name="withdrawal" th:checked="${modalValues.withdrawal}"/>
-                                <label class="form-check-label form-label-bold" for="withdraw"> WITHDRAWN ?</label>
+                                <label class="form-check-label" for="withdraw"> WITHDRAWN ?</label>
                             </span>
                         </div>
                             <hr>
                             <div class="mb-auto" >
-                            <div class="form-label-bold">Birdies</div>
+                            <div class="form-label fw-bold">Birdies</div>
                             <div class="form-check-inline" th:each="hole : ${HOLES}">
                                 <input class="form-check-input" type="checkbox" th:value="${hole}"
                                        id="birds" th:field="${modalValues.birdies}">
@@ -36,18 +36,18 @@
                         </div>
                             <hr>
                             <div class="mb-auto" >
-                                <div class="form-label-bold">Eagles</div>
+                                <div class="form-label fw-bold">Eagles</div>
                                 <div class="form-check-inline" th:each="hole : ${HOLES}">
                                     <input class="form-check-input" type="checkbox" th:value="${hole}"
-                                           id="birds" th:field="${modalValues.eagles}">
-                                    <label class="form-check-label" for="birds" th:text="${hole}"/>
+                                           id="eagles" th:field="${modalValues.eagles}">
+                                    <label class="form-check-label" for="eagles" th:text="${hole}"/>
                                 </div>
                             </div>
 
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Post Score</button>
+                        <button type="submit" class="btn btn-primary" style="float: right;">Post Score</button>
                     </div>
                     </form>
                 </div>

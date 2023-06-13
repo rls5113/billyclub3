@@ -1,6 +1,8 @@
 package com.billyclub.points.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,10 +26,11 @@ public class User {
     @Column(name="id",updatable = false, nullable = false)
     private Long id;
 
-    @Column(nullable=false, unique=true)
+    @Column(unique=true)
+    @NotNull(message="Account username cannot be null.")
     private String username;
 
-    @Column(nullable=false)
+    @Column(nullable=false, unique=true)
     private String name;
 
     @Column(nullable=false, unique=true)
@@ -44,7 +47,7 @@ public class User {
     private Boolean active;
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @ToString.Exclude
     @JoinTable(
             name="users_roles",

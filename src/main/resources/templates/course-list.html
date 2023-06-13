@@ -24,7 +24,7 @@
             <div th:if="${param.success}">
                 <div class="alert alert-info">Changes saved.</div>
             </div>
-            <a class="nav-link btn btn-primary text-light" th:href="@{/courses/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add New Course  <i class="fa-solid fa-plus"></i></a>
+            <a class="btn btn-primary text-light" th:href="@{/courses/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add New Course  <i class="fa-solid fa-plus"></i></a>
             <table class="table table-striped table-bordered table-hover table-light">
                 <thead class="table-header">
                     <tr>
@@ -36,7 +36,7 @@
                 </thead>
                 <tbody>
                     <tr th:each="course: ${courses}">
-                        <td><a class="nav-link btn-sm btn-primary text-light" th:href="@{/courses/{id}(id=${course.id})}">Edit  <i class="fa-solid fa-pen"></i></a></td>
+                        <td><a class="btn btn-primary text-light" th:href="@{/courses/{id}(id=${course.id})}">Edit  <i class="fa-solid fa-pen"></i></a></td>
                         <td th:text="${{course.name}}"></td>
                         <td th:text="${course.phone}"></td>
                         <td th:text="${course.maxPlayersPerGroup}"></td>

@@ -23,7 +23,7 @@ import java.util.Locale;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmailServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
@@ -44,10 +44,10 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendForgotPasswordEmail(String recipientName, String recipientEmail, String link, Locale locale) throws MessagingException {
-//        if(!sendMail)   {
-//            LOGGER.info("SEND EMAIL (Forgot Password) is turned OFF!");
-//            return;
-//        }
+        if(!sendMail)   {
+            log.info("SEND EMAIL (Forgot Password) is turned OFF!");
+            return;
+        }
         final Context ctx = new Context(locale);
         ctx.setVariable("name", recipientName);
         ctx.setVariable("resetDate", new Date());
@@ -66,7 +66,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendRegistrationEmail(List<User> admins, String recipientEmail, String link, Locale locale, String recipientName) throws MessagingException {
         if(!sendMail)   {
-            LOGGER.info("SEND EMAIL (Registration) is turned OFF!");
+            log.info("SEND EMAIL (Registration) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
@@ -91,7 +91,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendNewEventEmail(List<User> recipients, String eventDate, String startTime, String course, String link, Locale locale) throws MessagingException {
         if(!sendMail)   {
-            LOGGER.info("SEND EMAIL (new Event) is turned OFF!");
+            log.info("SEND EMAIL (new Event) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
@@ -115,7 +115,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendMovedFromWaitlistEmail(List<User> recipients, String eventDate, String startTime, Locale locale, String link) throws MessagingException {
         if(!sendMail)   {
-            LOGGER.info("SEND EMAIL (moved from waitlist) is turned OFF!");
+            log.info("SEND EMAIL (moved from waitlist) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
@@ -140,7 +140,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendEventStatusChangedEmail(List<User> recipients, String eventStatus, String eventDate, String link, Locale locale) throws MessagingException {
         if(!sendMail)   {
-            LOGGER.info("SEND EMAIL (event status changed) is turned OFF!");
+            log.info("SEND EMAIL (event status changed) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);

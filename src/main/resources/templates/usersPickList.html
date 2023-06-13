@@ -1,10 +1,10 @@
 <form th:action="@{/events/{id}/addPlayersToEvent(id=${event.id})}" method="post" th:object="${userPickList}">
 
-<div class="modal fade" id="userPickListModal" tabindex="-1" aria-labelledby="userPickListModalLabel"
+<div class="modal modal-lg fade" id="userPickListModal" tabindex="-1" aria-labelledby="userPickListModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-light">
                 <h1 class="modal-title fs-5" id="userPickListModalLabel">User Pick List</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -22,10 +22,12 @@
                     </tr>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" id="select-all-users" class="btn btn-secondary">Select All/None</button>
+            <div class="modal-footer btn-group">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Add Selected</button>
+                <span class="btn-group" style="float: right;">
+                    <button type="button" id="select-all-users" class="btn btn-secondary">Select All/None</button>
+                    <button type="submit" class="btn btn-primary">Add Selected</button>
+                </span>
             </div>
         </div>
     </div>

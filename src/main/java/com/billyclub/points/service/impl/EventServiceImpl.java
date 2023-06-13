@@ -1,5 +1,6 @@
 package com.billyclub.points.service.impl;
 
+import com.billyclub.points.controller.AuthController;
 import com.billyclub.points.dto.EventDto;
 import com.billyclub.points.dto.TeamDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
@@ -13,6 +14,8 @@ import com.billyclub.points.service.EventService;
 import com.billyclub.points.service.PlayerService;
 import com.billyclub.points.service.UserService;
 import jakarta.mail.MessagingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,7 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     @Autowired
     private final EmailService emailService;
-
+    private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
     public EventServiceImpl(EventRepository eventRepository, PlayerServiceImpl playerService, UserService userService, EmailService emailService) {
         this.eventRepository = eventRepository;
         this.playerService = playerService;
@@ -93,13 +96,15 @@ public class EventServiceImpl implements EventService {
     public Event removePlayerFromEvent(Long eventId, Long playerId) {
         Event event = findById(eventId);
         Player player = playerService.findById(playerId);
+        boolean removedFromWaitingList = player.getIsWaiting();
         event.removePlayer(player);
-        Player nextPlayer = event.getNextPlayerWaiting();
-        if(nextPlayer != null) {
-            event.addPlayer(nextPlayer);
-            event.setEmailRecipient(nextPlayer);
-            //send notification
-         }
+        if(!removedFromWaitingList) {
+            Player nextPlayer = event.getNextPlayerWaiting();
+            if (nextPlayer != null) {
+                event.addPlayer(nextPlayer);
+                event.setEmailRecipient(nextPlayer);
+            }
+        }
         playerService.deleteById(playerId);
         return eventRepository.save(event);
     }
@@ -136,7 +141,6 @@ public class EventServiceImpl implements EventService {
         List<EventDto> list = events.stream().map((event)-> toDto(event))
                 .collect(Collectors.toList());
         list.sort((e2, e1) -> (e1.getEventDate().compareTo(e2.getEventDate())));
-//        Collections.sort(list, (e1, e2) -> (e1.getEventDate().compareTo(e2.getEventDate())));
         return list;    }
 
     @Override
@@ -172,11 +176,13 @@ public class EventServiceImpl implements EventService {
      }
 
     private void updateAdjustedScores(Event event) {
+        log.info("calculateWinners:  event "+ event.getId());
         List<Player> eventPlayers = event.getPlayers().stream()
                 .filter(p -> !p.getIsWaiting() && !p.getIsWithdrawal())
                 .collect(Collectors.toList());
 
         for (Player p : eventPlayers) {
+            System.out.println(p.getName());
             int updatedQuota = (p.getQuota() == 0) ? p.getTotal() : p.getQuota() + p.getAdjustment();
             User user = userService.findByFullname(p.getName());
             user.setPoints(updatedQuota);
@@ -190,7 +196,7 @@ public class EventServiceImpl implements EventService {
                             .findAny().orElse(null);
                     if(playerWithName != null){
                         playerWithName.setQuota(updatedQuota);
-                        System.out.println("Updating quota for "+playerWithName.getName()+" for eventId: "+event.getId());
+                        log.info("Updating quota for "+playerWithName.getName()+" for eventId: "+event.getId());
                     }
                     this.save(e);
                 }
@@ -200,6 +206,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private List<Player> getsMoneyBack(List<Player> eventPlayers){
+        log.info("getsMoneyBack:  event ");
         List<Player> losers = new ArrayList<>();
         if (eventPlayers.size() > 7 && eventPlayers.size() % 2 != 0) {
             Player lowestScore = eventPlayers.stream()
@@ -218,6 +225,7 @@ public class EventServiceImpl implements EventService {
         return losers;
     }
     private void calculateScats(Event event) {
+        log.info("calculateScats:  event "+ event.getId());
         List<Player> players = event.getPlayers().stream()
                 .filter(p -> !p.getIsWaiting())
                 .collect(Collectors.toList());
@@ -311,13 +319,14 @@ public class EventServiceImpl implements EventService {
         summary.addAll(birds.stream()
                 .filter(s -> s.contains("CUT"))
                 .collect(Collectors.toList()));
-        Collections.sort(scats, (s1, s2) -> s2.compareTo(s1));
-        Collections.sort(summary, (s1, s2) -> s2.compareTo(s1));
+        Collections.sort(scats,(s1,s2)-> Integer.valueOf(s1.substring(0,s1.indexOf(":"))).compareTo(Integer.valueOf(s2.substring(0,s2.indexOf(":")))));
+        Collections.sort(summary,(s1,s2)-> Integer.valueOf(s1.substring(0,s1.indexOf(":"))).compareTo(Integer.valueOf(s2.substring(0,s2.indexOf(":")))));
         event.setScatWinners(scats);
         event.setScatSummary(summary);
 
     }
     private List<Player> getWinnerTakesAll(List<Player> eventPlayers){
+        log.info(" getWinnerTakes all: ");
         List<Player> winners = new ArrayList<>();
         if (eventPlayers.size() < 8) {
             //code for more than one have same best score.
@@ -345,6 +354,7 @@ public class EventServiceImpl implements EventService {
         return 5 * players.size();
     }
     private void pickTeams(Event event, List<Player> eventPlayers){
+        log.info("pickTeams: ");
         int MAX_TEAMS = 12;
         //shuffle 3 times
         for(int i = 0; i <3; i++){
@@ -441,6 +451,7 @@ public class EventServiceImpl implements EventService {
         event.setEventWinners(results);
     }
     private void calculateWinners(Event event) {
+        log.info("calculateWinners:  event "+ event.getId());
         //remove new players and still on waiting list
         List<Player> eventPlayers = event.getPlayers().stream()
                 .filter(p -> !p.getIsWaiting() && !(p.getQuota() == 0) && !p.getIsWithdrawal())
@@ -498,7 +509,7 @@ public class EventServiceImpl implements EventService {
         List<String> displayMessages = new ArrayList<>();
         //first timers
         List<Player> firstTimers =  event.getPlayers().stream()
-                .filter(p -> (p.getQuota() == 0) )
+                .filter(p -> !p.getIsWaiting() && (p.getQuota() == 0) )
                 .collect(Collectors.toList());
         if(!firstTimers.isEmpty()){
             for(Player p: firstTimers){
