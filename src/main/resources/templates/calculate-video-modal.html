@@ -1,3 +1,5 @@
+<form th:action="@{#}" method="get" id="videoplayer-modal-form">
+
 <div class="modal fade" id="videoPlayerModal" tabindex="-1" aria-labelledby="videoPlayerModalLabel">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -5,16 +7,18 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
             <div class="video-div embed-responsive embed-responsive-16by9">
-                <iframe id="we-are-waiting" src="https://www.youtube.com/embed/hWJX9yUKJeQ" class="embed-responsive-item" width="560" height="315" allowfullscreen />
+<!--                <iframe id="we-are-waiting" src="https://www.youtube.com/embed/hWJX9yUKJeQ" class="embed-responsive-item" width="560" height="315" allowfullscreen />-->
+
+
+                <video autoplay controls  src="https://www.youtube.com/embed/hWJX9yUKJeQ?controls=1&amp;start=16"></video>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
-
         </div>
     </div>
-
 </div>
+</form>
 
 
 
