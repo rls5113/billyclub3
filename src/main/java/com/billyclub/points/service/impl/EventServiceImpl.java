@@ -123,6 +123,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event calculateEventScoreboard(Long eventId) {
+        try {
+            Thread.sleep(27000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Event event = findById(eventId);
         //decide winners
         calculateWinners(event);

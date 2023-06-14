@@ -99,7 +99,7 @@
                                            th:if="${event.isAllScoresIn}" id="calc-scores"
                                            class="btn btn-primary">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
 
-                                        <a data-bs-target="#videoPlayerModal" data-bs-toggle="modal" data-bs-src="https://www.youtube.com/embed/hWJX9yUKJeQ"
+                                        <a sec:authorize="false" id="play-video" data-bs-target="#videoPlayerModal" data-bs-toggle="modal" data-bs-src="https://www.youtube.com/embed/hWJX9yUKJeQ"
                                            class="btn btn-primary js-modal-btn">Play video</a>
 
                                         <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
@@ -260,7 +260,46 @@
     }
 </style>
 <script>
+
     $(document).ready(function() {
+
+        // The suffix for all the video events (for unique purposes)
+        $.video.event_suffix = '_video';
+
+        // An array with callbacks for the onYouTubeIframeAPIReady() call
+        $.video.youtube_api_ready_callbacks = [];
+
+        // The youtube iframe api url
+        $.video.youtube_iframe_api = 'https://www.youtube.com/iframe_api';
+
+        $('.video').video({
+            // options
+            attr_ready: 'data-video-ready',
+            attr_playing: 'data-video-playing',
+            attr_paused: 'data-video-paused',
+        });
+        $('.video').addVideoEvent('ready', function(e, $video, video_type) {
+            // Triggers if a video is ready.
+        });
+
+        $('.video').addVideoEvent('play', function(e, $video, video_type) {
+            // Triggers on play or resume
+        });
+
+        $('.video').addVideoEvent('pause', function(e, $video, video_type) {
+            // Triggers on pause
+        });
+
+        $('.video').addVideoEvent('finish', function(e, $video, video_type) {
+            // Triggers if a video is finished
+            $('#videoPlayerModal').modal('hide');
+        });
+
+        $('.video').addVideoEvent('destroy', function(e, $video, video_type) {
+            // Triggers if the plugin is destroyed
+
+        });
+
 
         if(window.location.href.indexOf('#editEventModal') != -1) {
             $('#editEventModal').modal('show');
@@ -285,13 +324,13 @@
                 form.submit();
             }
         });
-        var url = $('#we-are-waiting').attr('src');
-        $('#videoPlayerModal').on('hide.bs.modal', function(){
-            $('#we-are-waiting').attr('src','');
-        });
-        $('#videoPlayerModal').on('show.bs.modal', function(){
-            $('#we-are-waiting').attr('src',url);
-        });
+        // var url = $('#we-are-waiting').attr('src');
+        // $('#videoPlayerModal').on('hide.bs.modal', function(){
+        //     $('#we-are-waiting').attr('src','');
+        // });
+        // $('#videoPlayerModal').on('show.bs.modal', function(){
+        //     $('#we-are-waiting').attr('src',url);
+        // });
 
     });
     $(document).on("click",".btn-modal-postscore", function(){
@@ -308,6 +347,11 @@
         }else{
             $('.form-check-input').prop('checked', false);
         }
+    });
+
+    $(document).on("click","#calc-scores", function(){
+        $('#videoPlayerModal').modal('show');
+        $('.video').playVideo();
     });
 
     // $(document).on("click","#calc-scores", function(){
