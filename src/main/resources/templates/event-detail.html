@@ -9,6 +9,246 @@
 
 </head>
 <body layout:fragment="body">
+<div class="main" style="border: 0px solid yellow">
+    <form
+            method="post"
+            th:action="@{/events/{id}/addMe(id=${event.id})}" th:object="${event}"
+            class="form-horizontal"
+            role="form">
+
+        <div class="row" style="border: 0px solid green">
+
+            <div class="col-md-12" style="border: 0px solid red">
+                <div th:if="${#fields.hasAnyErrors()}">
+                    <div class="alert alert-danger">
+                        <ul>
+                            <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <div class="card">
+                        <div class="card-header bg-primary">
+                            <h3 class="text-center text-light">Event Detail</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <a class="btn btn-sm bg-secondary text-light" th:href="${current}?@{/events/current}:@{/events/past}"
+                                       th:text="${current}?'To Current Event List':'To Past Event List'">To Event List</a>
+                                    <div th:text="${event.id}" style="font-style: italic"/>
+                                    <div class="mb-3">
+                                        <label for="course" class="control-label">Course</label>
+                                        <div class="mb-3">
+                                            <select name="course" id="course" th:field="*{course}" class="form-select" disabled>
+                                                <option th:each="courseOpt : ${courses}"
+                                                        th:value="${courseOpt.id}" th:text="${courseOpt.name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="eventDate" class="control-label">Event Date</label>
+                                        <input type="text"
+                                               id="eventDate"
+                                               name="eventDate"
+                                               class="form-control"
+                                               placeholder="Event Date"
+                                               th:field="*{eventDate}"
+                                               style="font-weight: bolder" readonly
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="startTime" class="control-label">Start Time</label>
+                                        <input type="text"
+                                               id="startTime"
+                                               name="startTime"
+                                               class="form-control"
+                                               placeholder="Start Time"
+                                               th:field="*{startTime}"
+                                               readonly
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="numOfTimes" class="control-label"># of Tee Times</label>
+                                        <input type="text"
+                                               id="numOfTimes"
+                                               name="numOfTimes"
+                                               class="form-control"
+                                               placeholder="# of Times"
+                                               th:field="*{numOfTimes}"
+                                               readonly
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="status" class="control-label">Status</label>
+                                        <div class="mb-3">
+                                            <select name="status" id="status" th:field="*{status}" class="form-control " disabled>
+                                                <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
+                                                        th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div th:if="${! event.status.name().equals('COMPLETED')}">
+
+                                        <button sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_USER')"
+                                                th:if="${!#lists.contains(names, loginUser.name) &&
+                                                        (event.status.name().equals('OPEN') || event.status.name().equals('STARTED'))}"
+                                                type="submit" class="btn btn-primary">Add me to Event <i class="fa-solid fa-user-plus"></i></button>
+
+                                        <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
+                                           th:if="${event.isAllScoresIn}" id="calc-scores"
+                                           class="btn btn-primary">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
+
+                                        <a sec:authorize="false" id="play-video" data-bs-target="#videoPlayerModal" data-bs-toggle="modal" data-bs-src="https://www.youtube.com/embed/hWJX9yUKJeQ"
+                                           class="btn btn-primary js-modal-btn">Play video</a>
+
+                                        <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
+                                           th:if="${event.status.name().equals('OPEN') || event.status.name().equals('STARTED')}"
+                                           data-bs-target="#userPickListModal" class="btn btn-primary ">Add Players to this event <i class="fa-solid fa-users"></i></a>
+
+                                        <a sec:authorize="false and hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
+                                           data-bs-target="#postMultipleScoresModal" class="btn btn-primary">Post for All in Event</a>
+
+                                        <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal" id="edit-event"
+                                           data-bs-target="#editEventModal" class="btn btn-primary ">Edit Event <i class="fa-solid fa-pen"></i></a>
+
+                                    </div>
+                                </div> <!-- end row -->
+
+                                <div class="col-sm-7 alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
+                                    <table class="col-2 table table-striped table-bordered table-hover table-light"
+                                           th:class="${event.status.name().equals('COMPLETED')}? 'col-2 table table-bordered table-hover table-light'">
+                                        <thead class="table-header">
+                                        <tr>
+                                            <th th:text="${(eventPlayers.size lt 8)?'Winner Takes All':'Team Results'}"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each=" s : *{eventWinners}">
+                                            <td th:if="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold; background-color: yellow"/>
+                                            <td th:unless="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold;"/>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-sm-7 scatPanel alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
+                                    <table class="col-2 table table-bordered table-hover table-light">
+                                        <thead class="table-header">
+                                        <tr>
+                                            <th>Scat winners</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each=" s : *{scatWinners}">
+                                            <td th:text="${s}" style="text-align: start; background-color: yellow"/>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="col-2 table table-striped table-bordered table-hover table-light">
+                                        <thead class="table-header">
+                                        <tr>
+                                            <th>Scat losers</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="playerPanel">
+                                        <tr th:each=" s : *{scatSummary}">
+                                            <td th:text="${s}" style="text-align: start"/>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-sm-7 alert alert-info">
+                                    <table class="col-2 table table-striped table-bordered table-hover table-light">
+                                        <thead class="table-header">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Players</th>
+                                            <th>Quota</th>
+                                            <th th:if="${! event.status.name().equals('OPEN')}">Points</th>
+                                            <th th:if="${! event.status.name().equals('OPEN')}">Eagles</th>
+                                            <th th:if="${! event.status.name().equals('OPEN')}">Birds</th>
+                                            <th th:if="${! event.status.name().equals('OPEN')}">Total</th>
+                                            <th th:if="${! event.status.name().equals('OPEN')}">Adjust</th>
+                                            <th th:if="${event.status.name().equals('OPEN')}">Time Entered</th>
+                                            <th th:if="${! event.status.name().equals('COMPLETED')}">Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="playerPanel">
+                                        <tr th:each="player : ${eventPlayers}" class="d-sm-table-row">
+
+                                            <td th:text="${playerStat.index +1}+')'"></td>
+                                            <td th:text="${player.name}"><span th:text="${player.id}"></span></td>
+                                            <td th:text="${player.quota}"/>
+                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.scoreForEvent}"/>
+                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.eagles}"/>
+                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.birdies}"/>
+                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.total}"/>
+                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.adjustment}"/>
+                                            <td th:if="${event.status.name().equals('OPEN')}" th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a)')}"/>
+                                            <td th:if="${! (event.status.name().equals('COMPLETED') or event.status.name().equals('CANCELED'))}">
+                                                <a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id})}"
+                                                   th:if=" ${!event.status.name().equals('POSTING')} and ((${event.status.name().equals('OPEN')} and ${loginUser.name == player.name}) or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
+                                                   class="btn btn-danger">Delete <i class="fa-solid fa-trash-can"> </i></a>
+
+                                                <a th:if="(${event.status.name().equals('STARTED')} or ${event.status.name().equals('POSTING')})
+                                                                and (${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
+                                                   data-bs-toggle="modal" data-bs-target="#postScoreModal" class="btn btn-success btn-modal-postscore"
+                                                   th:attr="data-player-id=${player.id}" >Post<i class="fa-solid fa-arrow-up-from-bracket"></i></a>
+
+                                            </td>
+                                            <!--                                                <td sec:authentication="principal"></td>-->
+                                            <!--                                                <td th:text="${loginUser.name}"></td>-->
+                                            <!--                                                <td th:text="${playerStat.index}"></td>-->
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br>
+                                <div class="col-sm-7 alert alert-danger" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN')}">
+                                    <table class="col-2 table table-striped table-bordered table-hover table-light">
+                                        <thead class="table-header">
+                                        <tr>
+                                            <th>Wait List</th>
+                                            <th>Time Entered</th>
+                                            <th>Actions</th>
+                                            <!--                                                <th>Index</th>-->
+                                        </tr>
+                                        </thead>
+                                        <tbody class="playerPanel">
+                                        <tr th:each="player : ${waitList}">
+
+                                            <td th:text="${player.name}"/>
+                                            <td th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a)')}"/>
+                                            <td><a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id})}"
+                                                   th:if="${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                                                   class="btn btn-danger">Delete <i class="fa-solid fa-trash-can"> </i></a>
+                                            </td>
+                                            <!--                                                <td sec:authentication="principal"></td>-->
+                                            <!--                                                <td th:text="${loginUser.name}"></td>-->
+                                            <!--                                                <td th:text="${playerStat.index}"></td>-->
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- end row -->
+    </form>
+    <div layout:insert="~{calculate-video-modal}"/>
+    <div layout:insert="~{usersPickList}"></div>
+
+    <div layout:insert="~{postScoreModal}"></div>
+    <div layout:insert="~{event-edit-modal}"></div>
+
+    <!--        <div layout:insert="~{postMultipleScoresModal}"></div>-->
+
+
+</div>
+
 <style>
     .main {
         /*padding: 80px 5px;*/
@@ -19,245 +259,47 @@
         padding: 5px;
     }
 </style>
-
-    <div class="main" style="border: 0px solid yellow">
-        <form
-                method="post"
-                th:action="@{/events/{id}/addMe(id=${event.id})}" th:object="${event}"
-                class="form-horizontal"
-                role="form">
-
-            <div class="row" style="border: 0px solid green">
-
-                <div class="col-md-12" style="border: 0px solid red">
-                    <div th:if="${#fields.hasAnyErrors()}">
-                        <div class="alert alert-danger">
-                            <ul>
-                                <li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
-                            </ul>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="card">
-                            <div class="card-header bg-primary">
-                                <h3 class="text-center text-light">Event Detail</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-5">
-                                        <a class="btn btn-sm bg-secondary text-light" th:href="${current}?@{/events/current}:@{/events/past}"
-                                        th:text="${current}?'To Current Event List':'To Past Event List'">To Event List</a>
-                                        <div th:text="${event.id}" style="font-style: italic"/>
-                                        <div class="mb-3">
-                                            <label for="course" class="control-label">Course</label>
-                                            <div class="mb-3">
-                                                <select name="course" id="course" th:field="*{course}" class="form-select" disabled>
-                                                    <option th:each="courseOpt : ${courses}"
-                                                            th:value="${courseOpt.id}" th:text="${courseOpt.name}"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="eventDate" class="control-label">Event Date</label>
-                                            <input type="text"
-                                                   id="eventDate"
-                                                   name="eventDate"
-                                                   class="form-control"
-                                                   placeholder="Event Date"
-                                                   th:field="*{eventDate}"
-                                                   style="font-weight: bolder" readonly
-                                            />
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="startTime" class="control-label">Start Time</label>
-                                            <input type="text"
-                                                   id="startTime"
-                                                   name="startTime"
-                                                   class="form-control"
-                                                   placeholder="Start Time"
-                                                   th:field="*{startTime}"
-                                                   readonly
-                                            />
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="numOfTimes" class="control-label"># of Tee Times</label>
-                                            <input type="text"
-                                                   id="numOfTimes"
-                                                   name="numOfTimes"
-                                                   class="form-control"
-                                                   placeholder="# of Times"
-                                                   th:field="*{numOfTimes}"
-                                                   readonly
-                                            />
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="status" class="control-label">Status</label>
-                                            <div class="mb-3">
-                                                    <select name="status" id="status" th:field="*{status}" class="form-control " disabled>
-                                                        <option th:each="statusOpt : ${T(com.billyclub.points.model.EventStatus).values()}"
-                                                                th:value="${statusOpt.name}" th:text="${statusOpt.name}"></option>
-                                                    </select>
-                                            </div>
-                                        </div>
-                                        <div th:if="${! event.status.name().equals('COMPLETED')}">
-
-                                            <button sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_USER')"
-                                                    th:if="${!#lists.contains(names, loginUser.name) &&
-                                                        (event.status.name().equals('OPEN') || event.status.name().equals('STARTED'))}"
-                                                    type="submit" class="btn btn-primary">Add me to Event <i class="fa-solid fa-user-plus"></i></button>
-
-                                            <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
-                                               th:if="${event.isAllScoresIn}" id="calc-scores"
-                                               class="btn btn-primary">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
-
-                                            <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
-                                               th:if="${event.status.name().equals('OPEN') || event.status.name().equals('STARTED')}"
-                                               data-bs-target="#userPickListModal" class="btn btn-primary ">Add Players to this event <i class="fa-solid fa-users"></i></a>
-
-                                            <a sec:authorize="false and hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
-                                               data-bs-target="#postMultipleScoresModal" class="btn btn-primary">Post for All in Event</a>
-
-                                            <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal" id="edit-event"
-                                               data-bs-target="#editEventModal" class="btn btn-primary ">Edit Event <i class="fa-solid fa-pen"></i></a>
-
-                                        </div>
-                                    </div> <!-- end row -->
-
-                                    <div class="col-sm-7 alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
-                                        <table class="col-2 table table-striped table-bordered table-hover table-light"
-                                               th:class="${event.status.name().equals('COMPLETED')}? 'col-2 table table-bordered table-hover table-light'">
-                                            <thead class="table-header">
-                                            <tr>
-                                                <th th:text="${(eventPlayers.size lt 8)?'Winner Takes All':'Team Results'}"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr th:each=" s : *{eventWinners}">
-                                                <td th:if="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold; background-color: yellow"/>
-                                                <td th:unless="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold;"/>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="col-sm-7 scatPanel alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
-                                        <table class="col-2 table table-bordered table-hover table-light">
-                                            <thead class="table-header">
-                                            <tr>
-                                                <th>Scat winners</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr th:each=" s : *{scatWinners}">
-                                                <td th:text="${s}" style="text-align: start; background-color: yellow"/>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
-                                            <thead class="table-header">
-                                            <tr>
-                                                <th>Scat losers</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody class="playerPanel">
-                                            <tr th:each=" s : *{scatSummary}">
-                                                <td th:text="${s}" style="text-align: start"/>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                   <div class="col-sm-7 alert alert-info">
-                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
-                                            <thead class="table-header">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Players</th>
-                                                <th>Quota</th>
-                                                <th th:if="${! event.status.name().equals('OPEN')}">Points</th>
-                                                <th th:if="${! event.status.name().equals('OPEN')}">Eagles</th>
-                                                <th th:if="${! event.status.name().equals('OPEN')}">Birds</th>
-                                                <th th:if="${! event.status.name().equals('OPEN')}">Total</th>
-                                                <th th:if="${! event.status.name().equals('OPEN')}">Adjust</th>
-                                                <th th:if="${event.status.name().equals('OPEN')}">Time Entered</th>
-                                                <th th:if="${! event.status.name().equals('COMPLETED')}">Actions</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody class="playerPanel">
-                                            <tr th:each="player : ${eventPlayers}" class="d-sm-table-row">
-
-                                                <td th:text="${playerStat.index +1}+')'"></td>
-                                                <td th:text="${player.name}"><span th:text="${player.id}"></span></td>
-                                                <td th:text="${player.quota}"/>
-                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.scoreForEvent}"/>
-                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.eagles}"/>
-                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.birdies}"/>
-                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.total}"/>
-                                                <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.adjustment}"/>
-                                                <td th:if="${event.status.name().equals('OPEN')}" th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a)')}"/>
-                                                <td th:if="${! (event.status.name().equals('COMPLETED') or event.status.name().equals('CANCELED'))}">
-                                                    <a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id})}"
-                                                       th:if=" ${!event.status.name().equals('POSTING')} and ((${event.status.name().equals('OPEN')} and ${loginUser.name == player.name}) or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
-                                                       class="btn btn-danger">Delete <i class="fa-solid fa-trash-can"> </i></a>
-
-                                                    <a th:if="(${event.status.name().equals('STARTED')} or ${event.status.name().equals('POSTING')})
-                                                                and (${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')})"
-                                                            data-bs-toggle="modal" data-bs-target="#postScoreModal" class="btn btn-success btn-modal-postscore"
-                                                            th:attr="data-player-id=${player.id}" >Post<i class="fa-solid fa-arrow-up-from-bracket"></i></a>
-
-                                                </td>
-<!--                                                <td sec:authentication="principal"></td>-->
-<!--                                                <td th:text="${loginUser.name}"></td>-->
-<!--                                                <td th:text="${playerStat.index}"></td>-->
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-<br>
-                                    <div class="col-sm-7 alert alert-danger" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN')}">
-                                        <table class="col-2 table table-striped table-bordered table-hover table-light">
-                                            <thead class="table-header">
-                                            <tr>
-                                                <th>Wait List</th>
-                                                <th>Time Entered</th>
-                                                <th>Actions</th>
-<!--                                                <th>Index</th>-->
-                                            </tr>
-                                            </thead>
-                                            <tbody class="playerPanel">
-                                            <tr th:each="player : ${waitList}">
-
-                                                <td th:text="${player.name}"/>
-                                                <td th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a)')}"/>
-                                                <td><a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id})}"
-                                                       th:if="${loginUser.name == player.name} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
-                                                       class="btn btn-danger">Delete <i class="fa-solid fa-trash-can"> </i></a>
-                                                </td>
-<!--                                                <td sec:authentication="principal"></td>-->
-<!--                                                <td th:text="${loginUser.name}"></td>-->
-<!--                                                <td th:text="${playerStat.index}"></td>-->
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div><!-- end row -->
-        </form>
-        <div layout:insert="~{usersPickList}"></div>
-
-        <div layout:insert="~{postScoreModal}"></div>
-        <div layout:insert="~{event-edit-modal}"></div>
-<!--        <div layout:insert="~{calculate-video-modal}"></div>-->
-
-<!--        <div layout:insert="~{postMultipleScoresModal}"></div>-->
-
-
-    </div>
 <script>
+
     $(document).ready(function() {
+
+        // The suffix for all the video events (for unique purposes)
+        $.video.event_suffix = '_video';
+
+        // An array with callbacks for the onYouTubeIframeAPIReady() call
+        $.video.youtube_api_ready_callbacks = [];
+
+        // The youtube iframe api url
+        $.video.youtube_iframe_api = 'https://www.youtube.com/iframe_api';
+
+        $('.video').video({
+            // options
+            attr_ready: 'data-video-ready',
+            attr_playing: 'data-video-playing',
+            attr_paused: 'data-video-paused',
+        });
+        $('.video').addVideoEvent('ready', function(e, $video, video_type) {
+            // Triggers if a video is ready.
+        });
+
+        $('.video').addVideoEvent('play', function(e, $video, video_type) {
+            // Triggers on play or resume
+        });
+
+        $('.video').addVideoEvent('pause', function(e, $video, video_type) {
+            // Triggers on pause
+        });
+
+        $('.video').addVideoEvent('finish', function(e, $video, video_type) {
+            // Triggers if a video is finished
+            $('#videoPlayerModal').modal('hide');
+        });
+
+        $('.video').addVideoEvent('destroy', function(e, $video, video_type) {
+            // Triggers if the plugin is destroyed
+
+        });
+
 
         if(window.location.href.indexOf('#editEventModal') != -1) {
             $('#editEventModal').modal('show');
@@ -282,13 +324,13 @@
                 form.submit();
             }
         });
-        var url = $('#we-are-waiting').attr('src');
-        $('#videoPlayerModal').on('hide.bs.modal', function(){
-            $('#we-are-waiting').attr('src','');
-        });
-        $('#videoPlayerModal').on('show.bs.modal', function(){
-            $('#we-are-waiting').attr('src',url);
-        });
+        // var url = $('#we-are-waiting').attr('src');
+        // $('#videoPlayerModal').on('hide.bs.modal', function(){
+        //     $('#we-are-waiting').attr('src','');
+        // });
+        // $('#videoPlayerModal').on('show.bs.modal', function(){
+        //     $('#we-are-waiting').attr('src',url);
+        // });
 
     });
     $(document).on("click",".btn-modal-postscore", function(){
@@ -305,6 +347,11 @@
         }else{
             $('.form-check-input').prop('checked', false);
         }
+    });
+
+    $(document).on("click","#calc-scores", function(){
+        $('#videoPlayerModal').modal('show');
+        $('.video').playVideo();
     });
 
     // $(document).on("click","#calc-scores", function(){
