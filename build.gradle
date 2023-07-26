@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.billyclub'
-version = '0.1.1.1'
+version = '0.1.2.0'
 sourceCompatibility = '17'
 
 configurations {

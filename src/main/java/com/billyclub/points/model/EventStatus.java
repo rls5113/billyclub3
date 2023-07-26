@@ -7,5 +7,7 @@ public enum EventStatus {
     COMPLETED,
     FROST_DELAY,
     RAIN_DELAY,
-    CANCELED
+    CANCELED,
+    PREPAID
+
 }

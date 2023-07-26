@@ -30,7 +30,7 @@
 
 <div class="container">
     <div class="main" th:object="${course}">
-        <form method="post" th:action="${(mode == 'add')?'/courses/add':'/courses/'+course.id+'/edit'}" th:object="${course}" class="form-horizontal" role="form">
+        <form id="course-form" method="post" th:action="${(mode == 'add')?'/courses/add':'/courses/'+course.id+'/edit'}" th:object="${course}" class="form-horizontal" role="form">
             <div class="row">
 
                 <div class="col-md-7">
@@ -64,7 +64,7 @@
                                                id="name"
                                                name="name"
                                                class="form-control"
-                                               placeholder="Course Name"
+                                               placeholder="- enter the course name here"
                                                th:field="*{name}"
                                         />
                                         <p th:errors="*{name}" class="text-danger"
@@ -78,7 +78,7 @@
                                                id="phone"
                                                name="phone"
                                                class="form-control"
-                                               placeholder="Phone #"
+                                               placeholder="-enter the courses phone # here"
                                                th:field="*{phone}"
                                         />
                                         <p th:errors="*{phone}" class="text-danger"
@@ -92,11 +92,25 @@
                                                id="maxPlayersPerGroup"
                                                name="maxPlayersPerGroup"
                                                class="form-control"
-                                               placeholder="Max player per group"
+                                               placeholder="-enter max_group_size allowed at this course here"
                                                th:field="*{maxPlayersPerGroup}"
                                         />
                                         <p th:errors="*{maxPlayersPerGroup}" class="text-danger"
                                            th:if="${#fields.hasErrors('maxPlayersPerGroup')}">
+                                        </p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="address" class="control-label">Address</label>
+                                        <input type="text"
+                                               id="address"
+                                               name="address"
+                                               class="form-control"
+                                               placeholder="-enter address here"
+                                               th:field="*{address}"
+                                        />
+                                        <p th:errors="*{address}" class="text-danger"
+                                           th:if="${#fields.hasErrors('address')}">
                                         </p>
                                     </div>
 
@@ -116,9 +130,64 @@
     </div>
 </div>
 <script>
-    $(function() {
-        $('#eventdate').datepicker({maxDate : new Date()});
+    $(document).ready(function() {
+
+        $("#course-form").validate({
+            rules:{
+                name: {
+                    required: true,
+                    normalizer: function(value){
+                        return $.trim(value);
+                    }
+                },
+                phone: {
+                    required: true,
+                    phoneUS: true,
+                    normalizer: function(value){
+                        return $.trim(value);
+                    }
+                },
+                maxPlayersPerGroup: {
+                    required: true
+                    , digits: true
+                    , min: 4
+                    , max: 5
+                },
+                address: {
+                    required: true,
+                    normalizer: function(value){
+                        return $.trim(value);
+                    }
+                }
+
+            },
+            messages: {
+                name: {
+                    required: "Name should not be empty."
+                },
+                phone: {
+                    required: "Phone should not be empty. ",
+                    phoneUS: "Please enter a valid US phone number"
+                },
+                address: {
+                    required: "Address should not be empty."
+                },
+
+                maxPlayersPerGroup: {
+                    required: "Max players should not be empty.",
+                    digits: "Numbers only, please.",
+                    min: "Must be 4 or 5.",
+                    max: "Must be 4 or 5."
+                }
+            },
+            submitHandler: function (form){
+                // return false;
+                form.submit();
+            }
+        });
+
     });
+
 
 </script>
 </body>

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -123,11 +124,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event calculateEventScoreboard(Long eventId) {
-        try {
-            Thread.sleep(27000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Thread.sleep(27000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         Event event = findById(eventId);
         //decide winners
         calculateWinners(event);
@@ -162,7 +163,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<Player> recalculateWaitingList(Event event) {
-        List<Player> players = event.getPlayers();
+        List<Player> players = event.getPlayers().stream()
+                .sorted((t1,t2)-> t1.getTimeEntered().compareTo(t2.getTimeEntered()))
+                                        .collect(Collectors.toList());
 //        boolean timesFull = players.size() >= event.getNumOfTimes() * event.getCourse().getMaxPlayersPerGroup();
         int maxPlayers = event.getNumOfTimes() * event.getCourse().getMaxPlayersPerGroup();
         List<Player> movedFromWaitingList = new ArrayList<>();
@@ -210,7 +213,7 @@ public class EventServiceImpl implements EventService {
 
     }
 
-    private List<Player> getsMoneyBack(List<Player> eventPlayers){
+    public List<Player> getsMoneyBack(List<Player> eventPlayers){
         log.info("getsMoneyBack:  event ");
         List<Player> losers = new ArrayList<>();
         if (eventPlayers.size() > 7 && eventPlayers.size() % 2 != 0) {
@@ -360,99 +363,104 @@ public class EventServiceImpl implements EventService {
     }
     private void pickTeams(Event event, List<Player> eventPlayers){
         log.info("pickTeams: ");
-        int MAX_TEAMS = 12;
-        //shuffle 3 times
-        for(int i = 0; i <3; i++){
-            Collections.shuffle(eventPlayers);
-        }
-        //determine number of teams
-        List<TeamDto> list = new ArrayList<>();
 
-        for(int i=0;i<MAX_TEAMS;i++){
-            TeamDto dto = new TeamDto("Team "+(i+1),0);
-            list.add(dto);
-        }
-        for(int i =0; i < eventPlayers.size();i++){
-            TeamDto teamDto=null;
-            switch (i){
-                case 0,1:
-                    teamDto = list.get(0);
-                    break;
-                case 2,3:
-                    teamDto = list.get(1);
-                    break;
-                case 4,5:
-                    teamDto = list.get(2);
-                    break;
-                case 6,7:
-                    teamDto = list.get(3);
-                    break;
-                case 8,9:
-                    teamDto = list.get(4);
-                    break;
-                case 10,11:
-                    teamDto = list.get(5);
-                    break;
-                case 12,13:
-                    teamDto = list.get(6);
-                    break;
-                case 14,15:
-                    teamDto = list.get(7);
-                    break;
-                case 16,17:
-                    teamDto = list.get(8);
-                    break;
-                case 18,19:
-                    teamDto = list.get(9);
-                    break;
-                case 20,21:
-                    teamDto = list.get(10);
-                    break;
-                case 22,23:
-                    teamDto = list.get(11);
-                    break;
-            }
-            Player player = eventPlayers.get(i);
-            teamDto.getTeam().add(player.getName());
-            teamDto.setScore(teamDto.getScore() + player.getTotal());
-            player.setTeam(teamDto.getName());
-
-        }
-        List<TeamDto> filtered = list.stream()
-                        .filter(t -> !t.getTeam().isEmpty())
-                                .sorted((t1,t2)-> t2.getScore().compareTo(t1.getScore()))
-                                        .collect(Collectors.toList());
-
-        List<TeamDto> winners = new ArrayList<>();
+//        int MAX_TEAMS = 12;
+//        //shuffle 3 times
+//        for(int i = 0; i <3; i++){
+//            Collections.shuffle(eventPlayers);
+//        }
+//        //determine number of teams
+//        List<TeamDto> list = new ArrayList<>();
+//
+//        for(int i=0;i<MAX_TEAMS;i++){
+//            TeamDto dto = new TeamDto("Team "+(i+1),0);
+//            list.add(dto);
+//        }
+//        for(int i =0; i < eventPlayers.size();i++){
+//            TeamDto teamDto=null;
+//            switch (i){
+//                case 0,1:
+//                    teamDto = list.get(0);
+//                    break;
+//                case 2,3:
+//                    teamDto = list.get(1);
+//                    break;
+//                case 4,5:
+//                    teamDto = list.get(2);
+//                    break;
+//                case 6,7:
+//                    teamDto = list.get(3);
+//                    break;
+//                case 8,9:
+//                    teamDto = list.get(4);
+//                    break;
+//                case 10,11:
+//                    teamDto = list.get(5);
+//                    break;
+//                case 12,13:
+//                    teamDto = list.get(6);
+//                    break;
+//                case 14,15:
+//                    teamDto = list.get(7);
+//                    break;
+//                case 16,17:
+//                    teamDto = list.get(8);
+//                    break;
+//                case 18,19:
+//                    teamDto = list.get(9);
+//                    break;
+//                case 20,21:
+//                    teamDto = list.get(10);
+//                    break;
+//                case 22,23:
+//                    teamDto = list.get(11);
+//                    break;
+//            }
+//            Player player = eventPlayers.get(i);
+//            teamDto.getTeam().add(player.getName()+" ("+player.getTotal()+") ");
+//            teamDto.setScore(teamDto.getScore() + player.getTotal());
+//            player.setTeam(teamDto.getName());
+//
+//        }
+//        List<TeamDto> filtered = list.stream()
+//                        .filter(t -> !t.getTeam().isEmpty())
+//                                .sorted((t1,t2)-> t2.getScore().compareTo(t1.getScore()))
+//                                        .collect(Collectors.toList());
+//
+//        List<TeamDto> winners = new ArrayList<>();
         List<String> results = new ArrayList<>();
+//        results.add("Results calculated:\n"+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm")));
+        results.add("Scores posted:\n"+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm")));
+        results.add("DRAW CARDS TO DETERMINE TEAM WINNER");
 
-        TeamDto highestScore = filtered.stream()
-                .max(Comparator.comparing(TeamDto::getScore))
-                .get();
-        winners.add(highestScore);
-        //any ties
-        for(TeamDto t: filtered) {
-            if(highestScore.getScore() == t.getScore() && !highestScore.getName().equals(t.getName())){
-                winners.add(t);
-            }
-        }
-        if(winners.size()>1){
-            List<String> names = winners.stream().map(p->p.getName()).collect(Collectors.toList());
-            results.add("Tied for best score: " + names.toString());
-            for(int i =0;i<2;i++) {
-                Collections.shuffle(winners);
-            }
-        }
+
+//        TeamDto highestScore = filtered.stream()
+//                .max(Comparator.comparing(TeamDto::getScore))
+//                .get();
+//        winners.add(highestScore);
+//        //any ties
+//        for(TeamDto t: filtered) {
+//            if(highestScore.getScore() == t.getScore() && !highestScore.getName().equals(t.getName())){
+//                winners.add(t);
+//            }
+//        }
+//        if(winners.size()>1){
+//            List<String> names = winners.stream().map(p->p.getName()).collect(Collectors.toList());
+//            results.add("Tied for best score: " + names.toString());
+//            for(int i =0;i<2;i++) {
+//                Collections.shuffle(winners);
+//            }
+//        }
         int money = eventPlayers.size() * 5;
         results.add("Team money is $"+money+"    each person: $"+ money/2);
 
-        TeamDto winner = winners.get(0);
-        results.add("WINNER!  "+winner.getName() + ":   "+winner.getTeam()+"   "+winner.getScore());
-        filtered.remove(winner);
-         for(TeamDto team : filtered) {
-            results.add(team.getName() + ":   "+team.getTeam()+"   "+team.getScore());
-        }
-        results.addAll(event.getEventWinners());
+//        TeamDto winner = winners.get(0);
+//        results.add("WINNER!  "+winner.getName() + ":   "+winner.getTeam()+"         "+winner.getScore());
+//        filtered.remove(winner);
+//         for(TeamDto team : filtered) {
+//            results.add(team.getName() + ":   "+team.getTeam()+"         "+team.getScore());
+//        }
+//        results.addAll(event.getEventWinners());
         event.setEventWinners(results);
     }
     private void calculateWinners(Event event) {
@@ -470,7 +478,7 @@ public class EventServiceImpl implements EventService {
                 if (losers.size() > 1) {
                     List<String> names = losers.stream().map(p -> p.getName()).collect(Collectors.toList());
                     moneyBackList.add("Tied for worst score to get money back: " + names.toString());
-                    for (int i = 0; i < 2; i++) {
+                    for (int i = 0; i < 3; i++) {
                         Collections.shuffle(losers);
                     }
                 }
@@ -486,6 +494,7 @@ public class EventServiceImpl implements EventService {
 
             if (eventPlayers.size() < 8) {  //winner takes all
                 List<String> winnerListing = new ArrayList<>();
+                winnerListing.add("Results calculated: "+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a")));
                 List<Player> winners = this.getWinnerTakesAll(eventPlayers);
                 //if more than one, pick the winner
                 if (winners.size() > 1) {

@@ -68,7 +68,7 @@ public class ThymeleafController {
 
         model.addAttribute("loginUser", getLoggedInUser());
         Event event = eventService.findById(id);
-        if(event.isDayOf() && event.getStatus()==EventStatus.OPEN){
+        if(event.isDayOf() && (event.getStatus()==EventStatus.OPEN || event.getStatus()==EventStatus.PREPAID)){
             event = changeEventStatus(id, EventStatus.STARTED);
         }
         model.addAttribute("event", eventService.toDto(event));
@@ -349,9 +349,7 @@ public class ThymeleafController {
         //generate link
         String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
 //        List<User> recipients = Arrays.asList(userService.findByUsername("rstuart"));  // use to isolate to me
-        List<User> recipients = userService.findAllByActive().stream()
-                .map(u -> userService.toEntity(u))
-                .collect(Collectors.toList());
+        List<User> recipients = userService.findAll();
         //send email
         log.info("Add Event : sending new event email");
 
@@ -367,6 +365,33 @@ public class ThymeleafController {
         }
         log.info("Add Event : exit");
         return "redirect:/events/current";
+    }
+
+    @GetMapping("/events/{eventId}/pick-teams")
+    @Transactional
+    public String pickTeams(@PathVariable("eventId") Long eventId, Model model) {
+        Event event = eventService.findById(eventId);
+        model.addAttribute("event", event);
+        model.addAttribute("courses",courseService.findAll());
+
+        List<Player> players = event.getPlayers();
+        List<PlayerDto> eventPlayers = players.stream()
+                .map(p -> playerService.toDto(p))
+                .filter(p -> !p.getIsWaiting())
+                .sorted(Comparator.comparing(PlayerDto::getName,Comparator.naturalOrder()))
+                .collect(Collectors.toList());
+        model.addAttribute("playerList",eventPlayers);
+
+        List<TeamDto> teams = new ArrayList<>();
+        for(int i=0; i < eventPlayers.size()/2; i++){
+            teams.add(new TeamDto("Team "+(i+1),0));
+        }
+        model.addAttribute("teams",teams);
+
+        String[] cards = {"AS.png","2H.png","3C.png","4D.png","5S.png","6H.png","7C.png","8D.png","9S.png","10H.png","JC.png","QD.png","KS.png"};
+        model.addAttribute("cards", cards);
+
+        return "event-pick-teams";
     }
 
     private User getLoggedInUser() {
@@ -403,6 +428,12 @@ public class ThymeleafController {
     @PostMapping("/courses/add")
     public String postAddCourse(@Valid @ModelAttribute("course") CourseDto course, BindingResult result, Model model) {
         log.info("Add new course: enter");
+        if (result.hasErrors()) {
+            model.addAttribute("course", course);
+            model.addAttribute("mode", "add");
+            return "course-add-edit";
+        }
+
         Course newCourse = courseService.save(courseService.toEntity(course));
         return "redirect:/courses";
     }
@@ -432,7 +463,7 @@ public class ThymeleafController {
     @GetMapping("/users")
     public String listRegisteredUsers(Model model){
         List<UserDto> users = userService.findAllUsers().stream()
-                .filter((t)-> t.getActive())
+//                .filter((t)-> t.getActive())
                         .sorted((t1,t2)-> t1.getLastName().compareTo(t2.getLastName()))
                                 .collect(Collectors.toList());
 

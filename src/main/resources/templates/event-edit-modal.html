@@ -23,10 +23,10 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="eventDate" class="control-label">Event Date</label>
+                            <label for="eventdate" class="control-label">Event Date</label>
                             <input type="text"
-                                   id="eventDate"
-                                   name="eventDate"
+                                   id="eventdate"
+                                   name="eventdate"
                                    class="form-control"
                                    placeholder="Event Date"
                                    th:field="*{eventDate}"
@@ -39,10 +39,10 @@
 
                         </div>
                         <div class="mb-3">
-                            <label for="startTime" class="control-label">Start Time</label>
+                            <label for="starttime" class="control-label">Start Time</label>
                             <input type="text"
-                                   id="startTime"
-                                   name="startTime"
+                                   id="starttime"
+                                   name="starttime"
                                    class="form-control"
                                    placeholder="Start Time"
                                    th:field="*{startTime}"
@@ -61,7 +61,11 @@
                                    placeholder="# of Times"
                                    th:field="*{numOfTimes}"
                                    required
-                            />
+                             />
+                            <p th:errors="*{numOfTimes}" class="error"
+                               th:if="${#fields.hasErrors('numOfTimes')}">
+                            </p>
+
                         </div>
                         <div class="mb-3">
                             <label for="status" class="control-label">Status</label>
@@ -73,9 +77,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer mb-3">
-                <a type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Cancel</a>
-                <button type="submit" class="btn btn-primary" style="float:right;">Save</button>
+
+            <div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="float: left; margin: 15px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="float: right; margin: 15px;">Save</button>
             </div>
         </div>
     </div>

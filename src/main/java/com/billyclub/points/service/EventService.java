@@ -21,4 +21,6 @@ public interface EventService extends IService<Event, EventDto> {
 
     List<Player> recalculateWaitingList(Event event);
 
+    List<Player> getsMoneyBack(List<Player> eventPlayers);
+
 }

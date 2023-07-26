@@ -41,7 +41,7 @@
                                th:field="*{username}"
                                type="text" autofocus/>
                         <p th:errors="*{firstName}" class="error"
-                           th:if="${#fields.hasErrors('firstName')}">
+                           th:if="${#fields.hasErrors('username')}">
                         </p>
                      </div>
 
@@ -126,7 +126,7 @@
                 username: "Username should not be empty.",
                 firstName: "First Name should not be empty. ",
                 lastName: "Last Name should not be empty.",
-                email: "Please enter a valid Email address.",
+                email: "Please enter a valid Email address.###",
                 password: "Password should not be empty."
 
             },

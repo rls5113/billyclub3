@@ -20,9 +20,10 @@
 <div class="main">
     <form
             method="post"
-            th:action="@{/login}" th:object="${user}"
+            th:action="@{/login}" th:object="${login}"
             class="form-horizontal"
-            role="form">
+            role="form"
+            id="login-form">
 
     <div class="row">
         <div class="col-md-6 offset-md-3">
@@ -45,19 +46,18 @@
                     <h3 class="text-center text-light">Login Form</h3>
                 </div>
                 <div class="card-body">
-                    <form
-                            method="post"
-                            th:action="@{/login}" th:object="${user}"
-                            class="form-horizontal"
-                            role="form">
-                        <div class="mb-3">
+                         <div class="mb-3">
                             <label for="username">Username <span class="red">*</span></label>
                             <input type="text"
                                    id="username"
                                    name="username"
                                    class="form-control"
-                                   placeholder="Username" autofocus />
-                        </div>
+                                   placeholder="Username" autofocus required />
+                             <p th:errors="*{firstName}" class="error"
+                                th:if="${#fields.hasErrors('username')}">
+                             </p>
+
+                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="control-label">Password <span class="red">*</span></label>
@@ -65,19 +65,45 @@
                                    id="password"
                                    name="password"
                                    class="form-control"
-                                   placeholder="Password"/>
+                                   placeholder="Password" required />
+                            <p th:errors="*{password}" class="error"
+                               th:if="${#fields.hasErrors('password')}">
+                            </p>
+
                         </div>
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">Login</button>
-                            <a class="btn btn-primary" th:href="@{/forgot-password}" style="float: right;">Forgot password?</a>
+                            <a class="btn btn-secondary" th:href="@{/forgot-password}" style="float: right;">Forgot password?</a>
                         </div>
-                    </form>
+
                 </div>
             </div>
             </div>
         </div>
     </div>
+    </form>
 </div>
+<script>
+
+    $(document).ready(function() {
+
+        $("#login-form").validate({
+            rules:{
+                username: "required",
+                password: "required"
+            },
+            messages: {
+                username: "Username should not be empty. ",
+                password: "Password should not be empty. "
+            },
+            submitHandler: function (form){
+                form.submit();
+            }
+        });
+    });
+
+</script>
+
 </body>
 </html>

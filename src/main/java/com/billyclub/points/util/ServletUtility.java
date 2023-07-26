@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServletUtility {
     public static String getSiteURL(HttpServletRequest request) {
-        StringBuffer siteURL = request.getRequestURL().replace(0,4,"https");
-        String url = siteURL.toString();
+//        StringBuffer siteURL = request.getRequestURL().replace(0,4,"https");
+//        String url = siteURL.toString();
+        String url = request.getRequestURL().toString();
         return  url.replace(request.getServletPath(),"");
 //        String siteURL = request.getRequestURL().toString();
 //        return  siteURL.replace(request.getServletPath(),"");

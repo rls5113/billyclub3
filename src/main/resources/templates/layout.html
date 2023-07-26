@@ -14,15 +14,17 @@
   <link th:href="@{/css/reset.css}" rel="stylesheet"  />
   <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css}" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
   <link th:href="@{/css/style.css}" rel="stylesheet" />
-  <link th:href="@{/css/modal-video.min.css}" rel="stylesheet" />
+<!--  <link th:href="@{/css/modal-video.min.css}" rel="stylesheet" />-->
+  <link th:href="@{/css/jquery-ui.min.css}" rel="stylesheet" />
 
   <title layout:title-pattern="$CONTENT_TITLE">Billy Club Points</title>
   <script th:src="@{https://code.jquery.com/jquery-3.7.0.js}" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+  <script th:src="@{/js/jquery-ui.min.js}"></script>
   <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js}"></script>
   <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js}"></script>
   <script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js}" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
   <script th:src="@{https://kit.fontawesome.com/fda5db5ece.js}" crossorigin="anonymous"></script>
-  <script th:src="@{/js/jquery.video.min.js}"></script>
+<!--  <script th:src="@{/js/jquery.video.min.js}"></script>-->
 
 </head>
 <div class="container"style="border: 0px solid red">
@@ -35,9 +37,9 @@
       <div sec:authorize="isAuthenticated()" style="font-size: x-small" >Authorities:&nbsp; <span sec:authentication="principal.authorities"></span> </div>
     </div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent" style="margin: 3px;">
       <ul class="navbar-nav ms-auto mb-2 mb-sm-1">
-        <li sec:authorize="isAuthenticated()" class="nav-link dropdown">
+        <li sec:authorize="isAuthenticated()" class="dropdown">
           <a class="nav-link dropdown-toggle" id="navbarDropdownPortfolio" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Events</a>
           <ul  class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownPortfolio">
             <li><a class="dropdown-item" th:href="@{/events/current}">Current Events</a></li>

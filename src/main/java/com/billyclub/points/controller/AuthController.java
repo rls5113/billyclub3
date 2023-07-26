@@ -1,5 +1,6 @@
 package com.billyclub.points.controller;
 
+import com.billyclub.points.dto.LoginDto;
 import com.billyclub.points.dto.ResetPasswordDto;
 import com.billyclub.points.dto.UserDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
@@ -52,7 +53,9 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginForm() {
+    public String loginForm(Model model) {
+        LoginDto login = new LoginDto();
+        model.addAttribute("login",login);
         return "login";
     }
 

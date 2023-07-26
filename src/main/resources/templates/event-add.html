@@ -121,8 +121,6 @@
                                                 <option value="4"/>
                                                 <option value="5"/>
                                                 <option value="6"/>
-                                                <option value="7"/>
-                                                <option value="8"/>
                                             </datalist>
                                             <p th:errors="*{numOfTimes}" class="error"
                                                th:if="${#fields.hasErrors('numOfTimes')}">
@@ -140,11 +138,14 @@
                                             </p>
 
                                         </div>
-                                        <div class="mb-3">
-                                            <button type="submit" class="btn btn-primary">Save</button>
-                                            <a type="button" class="btn btn-secondary" style="float: right;" th:href="@{/events/current}">Cancel</a>
-                                        </div>
-                                </div>
+
+                                    <div class="mb-3 ">
+                                        <a type="button" class="btn btn-secondary" th:href="@{/events/current}"
+                                           style="float: left; margin: 15px;">Cancel</a>
+                                        <button type="submit" class="btn btn-primary" style="float: right; margin: 15px;">Save</button>
+                                    </div>
+
+                                 </div>
                             </div>
                     </div>
                 </div>
@@ -160,24 +161,52 @@
         $("#add-event-form").validate({
             rules:{
                 course: "required",
-                eventDate: "required",
+                eventDate: {
+                    required: true
+                    ,date: true
+                    ,futureOrPresent: true
+                },
                 startTime: "required",
-                numOfTimes: "required",
+                numOfTimes: {
+                    required: true
+                    , digits: true
+                    , min: 1
+                    , max: 5
+                },
                 status: "required"
             },
             messages: {
                 course: "Course should not be empty.",
-                eventDate: "Event Date should not be empty. ",
+                eventDate: {
+                    required: "Event Date should not be empty. "
+                    ,date:"Please enter a valid date (mm/dd/yyyy)."
+                    ,futureOrPresent: "Event Date cannot be in the past."
+                },
                 startTime: "Start Time should not be empty.",
-                numOfTimes: "# Tee Times should not be empty.",
+                numOfTimes: {
+                    required: "# Tee Times should not be empty."
+                    , digits: "Numbers only, please."
+                    , min: "Must be greater than 0."
+                    , max: "Must be value 1 to 5."
+                } ,
                 status: "Status should not be empty."
-
             },
             submitHandler: function (form){
+                // return false;
                 form.submit();
             }
         });
     });
+
+    $.validator.addMethod('futureOrPresent', function(value, element){
+        // alert("custom addMethod  value: "+value+"   element: "+element);
+        if(new Date(value) >= new Date()) {
+            // alert("date not in future.")
+            return true;
+        }else{
+            return false;
+        }
+    },"Event date must be today or future date. ");
 
 
 

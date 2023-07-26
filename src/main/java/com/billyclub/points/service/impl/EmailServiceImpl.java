@@ -58,6 +58,7 @@ public class EmailServiceImpl implements EmailService {
         message.setSubject("Billy Club Golf: password reset link");
         message.setFrom(FROM_EMAIL_ADDRESS);
         message.setTo(recipientEmail);
+        message.setBcc("stuartrl@comcast.net");
         final String content = this.templateEngine.process("email-forgot-password",ctx);
         message.setText(content,true);
         this.mailSender.send(mimeMessage);
@@ -129,6 +130,8 @@ public class EmailServiceImpl implements EmailService {
             message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" added from waiting list");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
+            message.setBcc("stuartrl@comcast.net");
+
             ctx.setVariable("name",user.getName());
             final String content = this.templateEngine.process("email-player-from-waitlist",ctx);
             message.setText(content, true);
@@ -154,6 +157,8 @@ public class EmailServiceImpl implements EmailService {
         for(User user: recipients){
             message.addTo(new InternetAddress(user.getEmail(), Boolean.TRUE));
         }
+        message.setBcc("stuartrl@comcast.net");
+
         String content = this.templateEngine.process("email-event-status-changed",ctx);
         message.setText(content,true);
         this.mailSender.send(mimeMessage);

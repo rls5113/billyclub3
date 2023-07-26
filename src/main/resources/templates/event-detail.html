@@ -88,29 +88,36 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div th:if="${! event.status.name().equals('COMPLETED')}">
+                                    <div th:if="${! event.status.name().equals('COMPLETED')}" class="btn">
 
                                         <button sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_USER')"
                                                 th:if="${!#lists.contains(names, loginUser.name) &&
                                                         (event.status.name().equals('OPEN') || event.status.name().equals('STARTED'))}"
-                                                type="submit" class="btn btn-primary">Add me to Event <i class="fa-solid fa-user-plus"></i></button>
+
+                                                type="submit" class="btn btn-primary bcp-btn-align">Add me to Event <i class="fa-solid fa-user-plus"></i></button>
 
                                         <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
+
                                            th:if="${event.isAllScoresIn}" id="calc-scores"
-                                           class="btn btn-primary">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
+                                           class="btn btn-primary bcp-btn-align">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
+
+                                        <a sec:authorize="hasRole('ROLE_ADMIN')"
+                                           th:href="@{/events/{eventId}/pick-teams(eventId=${event.id})}"
+                                           id="pick-teams"
+                                           class="btn btn-primary bcp-btn-align">Pick Teams<i class="fa-solid fa-user-friends"></i></a>
 
                                         <a sec:authorize="false" id="play-video" data-bs-target="#videoPlayerModal" data-bs-toggle="modal" data-bs-src="https://www.youtube.com/embed/hWJX9yUKJeQ"
-                                           class="btn btn-primary js-modal-btn">Play video</a>
+                                           class="btn btn-primary js-modal-btn bcp-btn-align" >Play video</a>
 
                                         <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
-                                           th:if="${event.status.name().equals('OPEN') || event.status.name().equals('STARTED')}"
-                                           data-bs-target="#userPickListModal" class="btn btn-primary ">Add Players to this event <i class="fa-solid fa-users"></i></a>
+                                           th:if="${event.status.name().equals('PREPAID') || event.status.name().equals('OPEN') || event.status.name().equals('STARTED')}"
+                                           data-bs-target="#userPickListModal" class="btn btn-primary bcp-btn-align" >Add Players to this event <i class="fa-solid fa-users"></i></a>
 
                                         <a sec:authorize="false and hasRole('ROLE_ADMIN')" data-bs-toggle="modal"
-                                           data-bs-target="#postMultipleScoresModal" class="btn btn-primary">Post for All in Event</a>
+                                           data-bs-target="#postMultipleScoresModal" class="btn btn-primary bcp-btn-align" >Post for All in Event</a>
 
                                         <a sec:authorize="hasRole('ROLE_ADMIN')" data-bs-toggle="modal" id="edit-event"
-                                           data-bs-target="#editEventModal" class="btn btn-primary ">Edit Event <i class="fa-solid fa-pen"></i></a>
+                                           data-bs-target="#editEventModal" class="btn btn-primary bcp-btn-align" >Edit Event <i class="fa-solid fa-pen"></i></a>
 
                                     </div>
                                 </div> <!-- end row -->
@@ -164,11 +171,11 @@
                                             <th>#</th>
                                             <th>Players</th>
                                             <th>Quota</th>
-                                            <th th:if="${! event.status.name().equals('OPEN')}">Points</th>
-                                            <th th:if="${! event.status.name().equals('OPEN')}">Eagles</th>
-                                            <th th:if="${! event.status.name().equals('OPEN')}">Birds</th>
-                                            <th th:if="${! event.status.name().equals('OPEN')}">Total</th>
-                                            <th th:if="${! event.status.name().equals('OPEN')}">Adjust</th>
+                                            <th th:if="${! (event.status.name().equals('OPEN'))}">Points</th>
+                                            <th th:if="${! (event.status.name().equals('OPEN'))}">Eagles</th>
+                                            <th th:if="${! (event.status.name().equals('OPEN'))}">Birds</th>
+                                            <th th:if="${! (event.status.name().equals('OPEN'))}">Total</th>
+                                            <th th:if="${! (event.status.name().equals('OPEN') || event.status.name().equals('COMPLETED'))}">Adjust</th>
                                             <th th:if="${event.status.name().equals('OPEN')}">Time Entered</th>
                                             <th th:if="${! event.status.name().equals('COMPLETED')}">Actions</th>
                                         </tr>
@@ -179,11 +186,11 @@
                                             <td th:text="${playerStat.index +1}+')'"></td>
                                             <td th:text="${player.name}"><span th:text="${player.id}"></span></td>
                                             <td th:text="${player.quota}"/>
-                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.scoreForEvent}"/>
-                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.eagles}"/>
-                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.birdies}"/>
-                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.total}"/>
-                                            <td th:if="${! event.status.name().equals('OPEN')}" th:text="${player.adjustment}"/>
+                                            <td th:if="${! (event.status.name().equals('OPEN'))}" th:text="${player.scoreForEvent}"/>
+                                            <td th:if="${! (event.status.name().equals('OPEN'))}" th:text="${player.eagles}"/>
+                                            <td th:if="${! (event.status.name().equals('OPEN'))}" th:text="${player.birdies}"/>
+                                            <td th:if="${! (event.status.name().equals('OPEN'))}" th:text="${player.total}"/>
+                                            <td th:if="${! (event.status.name().equals('OPEN') || event.status.name().equals('COMPLETED'))}" th:text="${player.adjustment}"/>
                                             <td th:if="${event.status.name().equals('OPEN')}" th:text="${#temporals.format(player.timeEntered,'MM/dd/yyyy hh:mm (a)')}"/>
                                             <td th:if="${! (event.status.name().equals('COMPLETED') or event.status.name().equals('CANCELED'))}">
                                                 <a th:href="@{/events/{eventId}/removeMe/{playerId}(eventId=${event.id}, playerId=${player.id})}"
@@ -238,7 +245,7 @@
             </div>
         </div><!-- end row -->
     </form>
-    <div layout:insert="~{calculate-video-modal}"/>
+<!--    <div layout:insert="~{calculate-video-modal}"/>-->
     <div layout:insert="~{usersPickList}"></div>
 
     <div layout:insert="~{postScoreModal}"></div>
@@ -263,76 +270,88 @@
 
     $(document).ready(function() {
 
-        // The suffix for all the video events (for unique purposes)
-        $.video.event_suffix = '_video';
+        // // The suffix for all the video events (for unique purposes)
+        // $.video.event_suffix = '_video';
+        //
+        // // An array with callbacks for the onYouTubeIframeAPIReady() call
+        // $.video.youtube_api_ready_callbacks = [];
+        //
+        // // The youtube iframe api url
+        // $.video.youtube_iframe_api = 'https://www.youtube.com/iframe_api';
+        //
+        // $('.video').video({
+        //     // options
+        //     attr_ready: 'data-video-ready',
+        //     attr_playing: 'data-video-playing',
+        //     attr_paused: 'data-video-paused',
+        // });
+        // $('.video').addVideoEvent('ready', function(e, $video, video_type) {
+        //     // Triggers if a video is ready.
+        // });
+        //
+        // $('.video').addVideoEvent('play', function(e, $video, video_type) {
+        //     // Triggers on play or resume
+        // });
+        //
+        // $('.video').addVideoEvent('pause', function(e, $video, video_type) {
+        //     // Triggers on pause
+        // });
+        //
+        // $('.video').addVideoEvent('finish', function(e, $video, video_type) {
+        //     // Triggers if a video is finished
+        //     $('#videoPlayerModal').modal('hide');
+        // });
+        //
+        // $('.video').addVideoEvent('destroy', function(e, $video, video_type) {
+        //     // Triggers if the plugin is destroyed
+        //
+        // });
 
-        // An array with callbacks for the onYouTubeIframeAPIReady() call
-        $.video.youtube_api_ready_callbacks = [];
+        // if(window.location.href.indexOf('#editEventModal') != -1) {
+        //     // alert("showing modal");
+        //     $('#editEventModal').modal('show');
+        // }
 
-        // The youtube iframe api url
-        $.video.youtube_iframe_api = 'https://www.youtube.com/iframe_api';
-
-        $('.video').video({
-            // options
-            attr_ready: 'data-video-ready',
-            attr_playing: 'data-video-playing',
-            attr_paused: 'data-video-paused',
-        });
-        $('.video').addVideoEvent('ready', function(e, $video, video_type) {
-            // Triggers if a video is ready.
-        });
-
-        $('.video').addVideoEvent('play', function(e, $video, video_type) {
-            // Triggers on play or resume
-        });
-
-        $('.video').addVideoEvent('pause', function(e, $video, video_type) {
-            // Triggers on pause
-        });
-
-        $('.video').addVideoEvent('finish', function(e, $video, video_type) {
-            // Triggers if a video is finished
-            $('#videoPlayerModal').modal('hide');
-        });
-
-        $('.video').addVideoEvent('destroy', function(e, $video, video_type) {
-            // Triggers if the plugin is destroyed
-
-        });
-
-
-        if(window.location.href.indexOf('#editEventModal') != -1) {
-            $('#editEventModal').modal('show');
-        }
         $("#edit-event-modal-form").validate({
             rules:{
                 course: "required",
-                eventDate: "required",
+                eventDate: {
+                    required: true
+                    ,date: true
+                    ,futureOrPresent: true
+                },
                 startTime: "required",
-                numOfTimes: "required",
+                numOfTimes: {
+                    required: true
+                    , digits: true
+                    , min: 1
+                    , max: 7
+                },
                 status: "required"
             },
             messages: {
                 course: "Course should not be empty.",
-                eventDate: "Event Date should not be empty. ",
+                eventDate: {
+                    required: "Event Date should not be empty. "
+                    ,date:"Please enter a valid date (mm/dd/yyyy)"
+                    ,futureOrPresent: "Event Date cannot be in the past."
+                },
                 startTime: "Start Time should not be empty.",
-                numOfTimes: "# Tee Times should not be empty.",
+                numOfTimes: {
+                    required: "# Tee Times should not be empty."
+                    , digits: "Numbers only, please."
+                    , min: "Must be greater than 0."
+                    , max: "Must be value 1 to 7."
+                } ,
                 status: "Status should not be empty."
-
             },
             submitHandler: function (form){
+                // return false;
                 form.submit();
             }
         });
-        // var url = $('#we-are-waiting').attr('src');
-        // $('#videoPlayerModal').on('hide.bs.modal', function(){
-        //     $('#we-are-waiting').attr('src','');
-        // });
-        // $('#videoPlayerModal').on('show.bs.modal', function(){
-        //     $('#we-are-waiting').attr('src',url);
-        // });
-
     });
+
     $(document).on("click",".btn-modal-postscore", function(){
         $('.modal-postscore-row').toggle(true);
         var playerid = $(this).data('player-id');
@@ -350,18 +369,22 @@
     });
 
     $(document).on("click","#calc-scores", function(){
-        $('#videoPlayerModal').modal('show');
-        $('.video').playVideo();
+        // $('#videoPlayerModal').modal('show');
+        // $('.video').playVideo();
     });
-
-    // $(document).on("click","#calc-scores", function(){
-    //     $('#videoPlayerModal').show();
-    //     $('#we-are-waiting').play();
-    //   });
 
     $('.modal').on('shown.bs.modal', function (){
         $(this).find('[autofocus]').focus();
     });
+
+    $.validator.addMethod('futureOrPresent', function(value, element){
+        if(new Date(value) >= new Date()) {
+            // alert("date not in future.")
+            return true;
+        }else{
+            return false;
+        }
+    },"Event date must be today or future date. ");
 
 
 

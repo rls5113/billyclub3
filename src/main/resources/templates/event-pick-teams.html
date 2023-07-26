@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        layout:decorate="~{layout}">
+<head>
+    <title>Pick Teams</title>
+</head>
+<body layout:fragment="body">
+<style>
+ .drag-player {
+     margin: 2px;
+     padding: 5px;
+     font-weight: bold;
+     background-color: #aaaaaa;
+     border: black 2px double;
+     /*height: 0.95rem;*/
+ }
+ /*.drag-player div.dragging {*/
+ /*    -moz-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);*/
+ /*    -webkit-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);*/
+ /*    box-shadow: 0 0 .5em rgba(0, 0, 0, .8);*/
+ /*}*/
+ /*.dragging {*/
+ /*    background-color: #d1ffbd;*/
+ /*}*/
+ .dragging {
+     background-color: #fef983;
+ }
+ .reverted {
+     background-color: #ffb8cd;
+ }
+ .dropped {
+     background-color: #207431;
+ }
+ .drop-player {
+     margin: 4px;
+     padding: 4px;
+     font-weight: bold;
+     background-color: #ffffff;
+     border: black 1px dashed;
+ }
+ .team {
+     margin: 10px;
+     padding: 10px;
+     font-weight: bold;
+     background-color: #aaaaaa;
+     height: 101px;
+ }
+ .team-total {
+     font-weight: bold;
+     text-align: center;
+     vertical-align: middle;
+     font-size: xx-large;
+ }
+
+</style>
+
+<div class="container">
+    <form
+            id="add-event-form"
+            method="post"
+            th:action="@{/events/{eventId}/pick-teams(eventId=${event.id})}" th:object="${event}"
+            class="form-horizontal"
+            role="form">
+
+            <div class="card">
+                <div class="card-header  bg-primary">
+                    <h3 class="text-center text-light">Pick Teams</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row" style="font-weight: bold; margin-bottom: 20px;">
+                        <span class="col-3" th:text="*{id}"></span>
+                        <span class="col-3" th:text="*{course.name}"></span>
+                        <span class="col-3" th:text="${#temporals.format(event.eventDate,'MM/dd/yyyy')}"></span>
+                        <span class="col-3" th:text="${#temporals.format(event.startTime,'hh:mm (a)')}"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 bg-primary-subtle" id="playerlist">
+                            <div  th:each="player : ${playerList}">
+                                <div th:attr="data-total=${player.total}"
+                                     th:id="${#ids.seq('player')}"
+                                     class="drag-player rounded-3 ui-widget-content"
+                                     th:text="${player.name} + '   ( '+ ${player.total}+' )'"></div>
+                            </div>
+                        </div>
+                        <div class="col-8 bg-primary-subtle" id="teamlist">
+                            <div  th:each="team : ${teams}">
+                                <div th:attr="data-score=${team.score}"
+                                     th:id="${#ids.seq('team')}"
+                                     class="row team rounded-3">
+
+                                        <div class="col-3">
+                                            <img th:src="@{'/assets/'+${cards[teamStat.index]}}" height="80px" />
+                                        </div>
+                                        <div class="col-6">
+                                            <div th:id="p1" class="col-12 drop-player rounded-3 ">player 1 drop</div>
+                                            <div th:id="p2" class="col-12 drop-player rounded-3">player 2 drop</div>
+                                        </div>
+                                        <div class="col-3 dragging team-total" th:text="${team.score}">team total</div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+
+                <div class=" btn-group">
+                    <a class="btn btn-secondary" th:href="@{/events/{eventId}(eventId=${event.id})}">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+        </div>
+</form>
+</div>
+<script>
+    $(document).ready(function() {
+
+
+        $( function() {
+
+            $( ".drag-player" ).draggable({
+                cursor: 'move',
+                revert: true,
+                snap: ".drop-player",
+                snapMode: "inner",
+
+                start: function (event, ui){
+                    // alert("i am started    ui = "+ui.value);
+                    $(this).addClass('dragging');
+
+                },
+                // drag: function (event, ui){
+                //     // alert("i am started    ui = "+ui.value);
+                //     $(this).addClass('dragging');
+                //
+                // },
+                stop: function (event, ui){
+                    $(this).toggleClass('dropped',400,'dragging');
+                    // $(this).addClass('dropped');
+                }
+            });
+
+            $( ".drop-player" ).droppable({
+                accept: ".drag-player",
+                drop: function( event, ui ) {
+                    ui.draggable.css('background-color','#207431');
+                    var id = ui.draggable.attr('id');
+                    var playertotal = ui.draggable.data('total');
+                    var teamscore = $(this).parent().parent().data('score');
+                    // alert("i am dropped id:"+id+"   total:"+playertotal+"   team score:"+teamscore);
+                    $(this).parent().parent().data('score', playertotal + teamscore);
+
+                    $(this).parent().parent().children().slice(2).html(playertotal + teamscore);
+                     ui.draggable.revert(false);
+
+                }
+            });
+            $("#teamlist").
+                filter(":first-child")
+                .sortable("option","items","> div > div");
+            // $(".team").draggable();
+            // $(".team").sortable();
+
+        });
+
+    });
+
+
+
+</script>
+</body>

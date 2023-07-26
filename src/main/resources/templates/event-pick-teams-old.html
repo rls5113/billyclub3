@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        layout:decorate="~{layout}">
+<head>
+    <title>Pick Teams</title>
+</head>
+<body layout:fragment="body">
+<style>
+ .picker {
+     margin: 10px;
+     padding: 10px;
+     width: 85%;
+     font-weight: bold;
+ }
+</style>
+
+<div class="container">
+    <form
+            id="add-event-form"
+            method="post"
+            th:action="@{/events/{eventId}/pick-teams(eventId=${event.id})}" th:object="${event}"
+            class="form-horizontal"
+            role="form">
+
+        <div class="row col-12">
+
+            <div class="card">
+                <div class="card-header  bg-primary">
+                    <h3 class="text-center text-light">Pick Teams</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row" style="font-weight: bold; margin-bottom: 20px;">
+                        <div class="col-3" th:text="*{id}"></div>
+                        <div class="col-3" th:text="*{course.name}"></div>
+                        <div class="col-3" th:text="${#temporals.format(event.eventDate,'MM/dd/yyyy')}"></div>
+                        <div class="col-3" th:text="${#temporals.format(event.startTime,'hh:mm (a)')}"></div>
+                    </div>
+                    <table class="col-12 table table-striped table-bordered table-hover table-light" style="width: 100%;">
+                        <tbody>
+                        <tr>
+                            <td class="col-2"><img src="/assets/AS.png" class="img-thumbnail"></td>
+                            <td class="col-8 bg-transparent">
+                                <table class="table table-bordered bg-transparent" style="width: 100%;">
+                                    <tr>
+                                        <td>
+                                            <select name="pick1" id="pick1" th:field="${playerList}" class="form-control picker">
+                                                <option selected value="-"> -- Select a Player -- </option>
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.total}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select name="pick2" id="pick2" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                </td>
+                            <td class="col-2">total</td>
+                        </tr>
+
+                        <tr>
+                            <td class="col-2"><img src="/assets/2H.png" class="img-thumbnail"></td>
+                            <td class="col-8 bg-transparent">
+                                <table class="table table-bordered bg-transparent" style="width: 100%;">
+                                    <tr>
+                                        <td>
+                                            <select name="pick3" id="pick3" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select name="pick4" id="pick4" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                </td>
+                            <td class="col-2" id="team1-total">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col-2"><img src="/assets/3C.png" class="img-thumbnail"></td>
+                            <td class="col-8 bg-transparent">
+                                <table class="table table-bordered bg-transparent" style="width: 100%;">
+                                    <tr>
+                                        <td>
+                                            <select name="pick5" id="pick5" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select name="pick6" id="pick6" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                </td>
+                            <td class="col-2">total</td>
+                        </tr>
+                        <tr>
+                            <td class="col-2"><img src="/assets/4D.png" class="img-thumbnail"></td>
+                            <td class="col-8 bg-transparent">
+                                <table class="table table-bordered bg-transparent" style="width: 100%;">
+                                    <tr>
+                                        <td>
+                                            <select name="pick7" id="pick7" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select name="pick8" id="pick8" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                </td>
+                            <td class="col-2">total</td>
+                        </tr>
+                        <tr>
+                            <td class="col-2"><img src="/assets/5S.png" class="img-thumbnail"></td>
+                            <td class="col-8 bg-transparent">
+                                <table class="table table-bordered bg-transparent" style="width: 100%;">
+                                    <tr>
+                                        <td>
+                                            <select name="pick9" id="pick9" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select name="pick10" id="pick10" th:field="${playerList}" class="form-control picker">
+                                                <option th:each="playerOpt : ${playerList}"
+                                                        th:value="${playerOpt.id}" th:text="${playerOpt.name+'  ( '+playerOpt.total+' )'}"></option>
+                                            </select>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                </td>
+                            <td class="col-2">total</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class=" btn-group">
+                    <a class="btn btn-secondary" th:href="@{/events/{eventId}(eventId=${event.id})}">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div><!-- end row -->
+</form>
+</div>
+<script>
+
+    $(document).on('change','.picker', function(){
+         var pick1 = $('#pick1').filter(':selected').val();
+        console.log('pick1: '+pick1);
+        // var pick2 = $('select#pick2').filter(':selected').val();
+        // console.log('pick2: '+pick2);
+        // var pick3 = $('select#pick3').filter(':selected').val();
+        // console.log('pick3: '+pick3);
+        // var pick4 = $('select#pick4').filter(':selected').val();
+        // console.log('pick4: '+pick4);
+        // var pick5 = $('select#pick5').filter(':selected').val();
+        // console.log('pick5: '+pick5);
+        // var pick6 = $('select#pick6').filter(':selected').val();
+        // console.log('pick6: '+pick6);
+        // var pick7 = $('select#pick7').filter(':selected').val();
+        // console.log('pick7: '+pick7);
+        // var pick8 = $('select#pick8').filter(':selected').val();
+        // console.log('pick9: '+pick8);
+        // var pick9 = $('select#pick9').filter(':selected').val();
+        // console.log('pick9: '+pick9);
+        // var pick10 = $('select#pick10').filter(':selected').val();
+        // console.log('pick10: '+pick10);
+    });
+
+
+
+</script>
+</body>

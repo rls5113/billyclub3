@@ -45,7 +45,9 @@
                                name="username"
                                placeholder="Enter username"
                                th:field="*{username}"
-                               type="text" readonly />
+                               type="text" readonly
+                               th:readonly="${!#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                        />
                         <p th:errors="*{username}" class="text-danger"
                            th:if="${#fields.hasErrors('username')}">
                         </p>
@@ -58,7 +60,7 @@
                                name="firstName"
                                placeholder="Enter first name"
                                th:field="*{firstName}"
-                               type="text"
+                               type="text" readonly
                         />
                         <p th:errors="*{firstName}" class="text-danger"
                            th:if="${#fields.hasErrors('firstName')}">
@@ -72,7 +74,7 @@
                                name="lastName"
                                placeholder="Enter last name"
                                th:field="*{lastName}"
-                               type="text"
+                               type="text" readonly
                         />
                         <p th:errors="*{lastName}" class="text-danger"
                            th:if="${#fields.hasErrors('lastName')}">
@@ -114,7 +116,7 @@
                                placeholder="Enter points"
                                th:field="*{points}"
                                type="text"
-                               th:disabled="${!#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                               th:readonly="${!#authorization.expression('hasRole(''ROLE_ADMIN'')')}"
                         />
                         <p th:errors="*{points}" class="text-danger"
                            th:if="${#fields.hasErrors('points')}">
@@ -138,11 +140,11 @@
 
                     <div class="form-group mb-3">
                         <a class="btn btn-secondary" th:href="@{/users}" >Cancel</a>
+                        <button class="btn btn-primary" type="submit">Save</button>
                         <a sec:authorize="hasRole('ROLE_ADMIN')"
                                 th:href="@{/users/{userid}/addAsAdmin(userid=${user.id})}"
-                           class="btn-sml btn btn-primary">Add as ADMIN</a>
+                           class="btn-sml btn btn-secondary" style="float:right;">Add as ADMIN</a>
 
-                        <button class="btn btn-primary" type="submit" style="float:right;">Save</button>
                     </div>
 
             </div>
