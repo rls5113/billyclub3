@@ -19,7 +19,7 @@ public interface EventService extends IService<Event, EventDto> {
 
     Event transfer(EventDto source, Event target) ;
 
-    List<Player> recalculateWaitingList(Event event);
+    List<Player> recalculateWaitingList(Event event, boolean addTeeTimes);
 
     List<Player> getsMoneyBack(List<Player> eventPlayers);
 

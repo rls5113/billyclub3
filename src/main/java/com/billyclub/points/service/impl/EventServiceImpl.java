@@ -1,8 +1,6 @@
 package com.billyclub.points.service.impl;
 
-import com.billyclub.points.controller.AuthController;
 import com.billyclub.points.dto.EventDto;
-import com.billyclub.points.dto.TeamDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.Event;
 import com.billyclub.points.model.EventStatus;
@@ -13,7 +11,6 @@ import com.billyclub.points.service.EmailService;
 import com.billyclub.points.service.EventService;
 import com.billyclub.points.service.PlayerService;
 import com.billyclub.points.service.UserService;
-import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -157,30 +154,33 @@ public class EventServiceImpl implements EventService {
         target.setNumOfTimes(source.getNumOfTimes());
         target.setStatus(source.getStatus());
         target.setCourse(source.getCourse());
+        target.setCustomTeamMoney(source.getCustomTeamMoney());
+        target.setCustomScatMoney(source.getCustomScatMoney());
 
         return target;
     }
 
     @Override
-    public List<Player> recalculateWaitingList(Event event) {
+    public List<Player> recalculateWaitingList(Event event, boolean addTeeTimes) {
         List<Player> players = event.getPlayers().stream()
                 .sorted((t1,t2)-> t1.getTimeEntered().compareTo(t2.getTimeEntered()))
                                         .collect(Collectors.toList());
 //        boolean timesFull = players.size() >= event.getNumOfTimes() * event.getCourse().getMaxPlayersPerGroup();
         int maxPlayers = event.getNumOfTimes() * event.getCourse().getMaxPlayersPerGroup();
-        List<Player> movedFromWaitingList = new ArrayList<>();
+        List<Player> moversList = new ArrayList<>();
         for(int i=0;i<players.size();i++){
             Player player = players.get(i);
-            Boolean onWaitlist = player.getIsWaiting();
+//            Boolean onWaitlist = player.getIsWaiting();
             if(i < maxPlayers)     {
                 player.setIsWaiting(Boolean.FALSE);
-                if(onWaitlist)  movedFromWaitingList.add(player);
+                if(addTeeTimes)  moversList.add(player);
             }
             else  {
                 player.setIsWaiting(Boolean.TRUE);
+                if(!addTeeTimes) moversList.add(player);
             }
         }
-        return movedFromWaitingList;
+        return moversList;
      }
 
     private void updateAdjustedScores(Event event) {
@@ -314,11 +314,11 @@ public class EventServiceImpl implements EventService {
         scats.addAll(birds.stream()
                 .filter(s -> !s.contains("CUT"))
                 .collect(Collectors.toList()));
-
-        int scatWorth = (scats.size() == 0) ? 0 : players.size() * 5 / scats.size() ;
+        double money = (event.getCustomScatMoney() != null) ? event.getCustomScatMoney() : 5 * players.size();
+        double scatWorth = (scats.size() == 0) ? 0 : money / scats.size() ;
         for(int i = 0; i < scats.size();i++) {
             StringBuilder s = new StringBuilder(scats.get(i));
-            s.append("  $"+ scatWorth);
+            s.append("  $"+ String.format("%.2f", scatWorth));
             scats.set(i, s.toString());
         }
         List<String> summary = eagles.stream()
@@ -354,12 +354,13 @@ public class EventServiceImpl implements EventService {
         }
         return winners;
     }
-    private int calculateWinnerTakesAllWinnings(List<Player> eventPlayers){
+    private double calculateWinnerTakesAllWinnings(List<Player> eventPlayers, Double money){
 
             List<Player> players = eventPlayers.stream()
                     .filter(p -> !p.getIsWaiting())
                     .collect(Collectors.toList());
-        return 5 * players.size();
+
+        return money * players.size();
     }
     private void pickTeams(Event event, List<Player> eventPlayers){
         log.info("pickTeams: ");
@@ -451,8 +452,8 @@ public class EventServiceImpl implements EventService {
 //                Collections.shuffle(winners);
 //            }
 //        }
-        int money = eventPlayers.size() * 5;
-        results.add("Team money is $"+money+"    each person: $"+ money/2);
+        double money = eventPlayers.size() * ((event.getCustomTeamMoney() != null) ? event.getCustomTeamMoney() : 5);
+        results.add("Team money is $"+String.format("%.2f", money)+"    each person: $"+ String.format("%.2f", money/2));
 
 //        TeamDto winner = winners.get(0);
 //        results.add("WINNER!  "+winner.getName() + ":   "+winner.getTeam()+"         "+winner.getScore());
@@ -484,8 +485,8 @@ public class EventServiceImpl implements EventService {
                 }
                 Player getsMoneyBack = losers.get(0);
 
-                getsMoneyBack.setTeam("Five dollars back");
-                moneyBackList.add(getsMoneyBack.getName() + " - Five dollars back. Total: " + getsMoneyBack.getTotal());
+                getsMoneyBack.setTeam("Low score money back");
+                moneyBackList.add(getsMoneyBack.getName() + " - Low score money back. Total: " + getsMoneyBack.getTotal());
                 event.getEventWinners().addAll(moneyBackList);
                 //remove from list for teams
                 eventPlayers.remove(getsMoneyBack);
@@ -511,7 +512,8 @@ public class EventServiceImpl implements EventService {
                         + "!  Needed " + winner.getQuota() + " points, "
                         + "pulled " + winner.getScoreForEvent() + " today, for a " + ((winner.getTotal() > 0) ? "+ " : "- ")
                         + winner.getTotal() + " total.");
-                winnerListing.add(" Pays : $" + calculateWinnerTakesAllWinnings(eventPlayers));
+                double money = (event.getCustomTeamMoney() != null) ? event.getCustomTeamMoney() : 5;
+                winnerListing.add(" Pays : $" + String.format("%.2f", calculateWinnerTakesAllWinnings(eventPlayers, money)));
                 event.setEventWinners(winnerListing);
 
             } else {

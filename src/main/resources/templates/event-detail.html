@@ -79,6 +79,31 @@
                                                readonly
                                         />
                                     </div>
+
+                                    <div class="mb-3">
+                                    <div class="mb-1">
+                                        <label for="customTeamMoney" class="control-label">Custom $ Team</label>
+                                        <input type="text"
+                                               id="customTeamMoney"
+                                               name="customTeamMoney"
+                                               class="form-control"
+                                               th:field="*{customTeamMoney}"
+                                               readonly
+                                        />
+                                    </div>
+                                    <div class="mb-1">
+                                        <label for="customScatMoney" class="control-label">Custom $ Scat</label>
+                                        <input type="text"
+                                               id="customScatMoney"
+                                               name="customScatMoney"
+                                               class="form-control"
+                                               th:field="*{customScatMoney}"
+                                               readonly
+                                        />
+                                    </div>
+                                    </div>
+
+
                                     <div class="mb-3">
                                         <label for="status" class="control-label">Status</label>
                                         <div class="mb-3">
@@ -101,7 +126,7 @@
                                            th:if="${event.isAllScoresIn}" id="calc-scores"
                                            class="btn btn-primary bcp-btn-align">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
 
-                                        <a sec:authorize="hasRole('ROLE_ADMIN')"
+                                        <a sec:authorize="false and hasRole('ROLE_ADMIN')"
                                            th:href="@{/events/{eventId}/pick-teams(eventId=${event.id})}"
                                            id="pick-teams"
                                            class="btn btn-primary bcp-btn-align">Pick Teams<i class="fa-solid fa-user-friends"></i></a>
@@ -211,7 +236,7 @@
                                     </table>
                                 </div>
                                 <br>
-                                <div class="col-sm-7 alert alert-danger" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN')}">
+                                <div class="col-sm-7 alert alert-danger" th:if="${waitList.size gt 0} and ${event.status.name().equals('OPEN') || event.status.name().equals('PREPAID')}">
                                     <table class="col-2 table table-striped table-bordered table-hover table-light">
                                         <thead class="table-header">
                                         <tr>
@@ -270,6 +295,7 @@
 
     $(document).ready(function() {
 
+        $('#eventdate').datepicker({ dateFormat:'mm/dd/yy', minDate : '0'});
         // // The suffix for all the video events (for unique purposes)
         // $.video.event_suffix = '_video';
         //

@@ -107,10 +107,10 @@ public class EmailServiceImpl implements EmailService {
         message.setFrom(FROM_EMAIL_ADDRESS);
         for(User user: recipients){
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
+            final String content = this.templateEngine.process("email-new-event",ctx);
+            message.setText(content,true);
+            this.mailSender.send(mimeMessage);
         }
-        final String content = this.templateEngine.process("email-new-event",ctx);
-        message.setText(content,true);
-        this.mailSender.send(mimeMessage);
 
     }
     @Override
@@ -127,13 +127,40 @@ public class EmailServiceImpl implements EmailService {
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" added from waiting list");
+            message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" added FROM waiting list");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             message.setBcc("stuartrl@comcast.net");
 
             ctx.setVariable("name",user.getName());
             final String content = this.templateEngine.process("email-player-from-waitlist",ctx);
+            message.setText(content, true);
+            this.mailSender.send(mimeMessage);
+        }
+
+
+    }
+    @Override
+    public void sendMovedToWaitlistEmail(List<User> recipients, String eventDate, String startTime, Locale locale, String link) throws MessagingException {
+        if(!sendMail)   {
+            log.info("SEND EMAIL (moved from waitlist) is turned OFF!");
+            return;
+        }
+        final Context ctx = new Context(locale);
+        ctx.setVariable("eventDate", eventDate);
+        ctx.setVariable("startTime", startTime);
+        ctx.setVariable("link",link);
+
+        for(User user: recipients){
+            final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+            message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" added TO waiting list");
+            message.setFrom(FROM_EMAIL_ADDRESS);
+            message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
+            message.setBcc("stuartrl@comcast.net");
+
+            ctx.setVariable("name",user.getName());
+            final String content = this.templateEngine.process("email-player-to-waitlist",ctx);
             message.setText(content, true);
             this.mailSender.send(mimeMessage);
         }

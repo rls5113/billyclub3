@@ -138,6 +138,34 @@
                                             </p>
 
                                         </div>
+                                    <div class="mb-3">
+                                        <label for="custom-team-money" class="control-label">Custom Team Money</label>
+                                        <input type="text"
+                                               id="custom-team-money"
+                                               name="custom-team-money"
+                                               class="form-control"
+                                               placeholder="Enter amount if not $5 per man"
+                                               th:field="*{customTeamMoney}"
+                                        />
+                                        <p th:errors="*{customTeamMoney}" class="error"
+                                           th:if="${#fields.hasErrors('customTeamMoney')}">
+                                        </p>
+
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="custom-scat-money" class="control-label">Custom Scat Money</label>
+                                        <input type="text"
+                                               id="custom-scat-money"
+                                               name="custom-scat-money"
+                                               class="form-control"
+                                               placeholder="Enter amount if not $5 per man"
+                                               th:field="*{customScatMoney}"
+                                        />
+                                        <p th:errors="*{customScatMoney}" class="error"
+                                           th:if="${#fields.hasErrors('customScatMoney')}">
+                                        </p>
+
+                                    </div>
 
                                     <div class="mb-3 ">
                                         <a type="button" class="btn btn-secondary" th:href="@{/events/current}"
@@ -156,7 +184,7 @@
 <script>
     $(document).ready(function() {
 
-        $('#eventdate').datepicker({maxDate : new Date()});
+        $('#eventdate').datepicker({ dateFormat:'yy-mm-dd', minDate : '0'});
 
         $("#add-event-form").validate({
             rules:{
@@ -200,8 +228,9 @@
 
     $.validator.addMethod('futureOrPresent', function(value, element){
         // alert("custom addMethod  value: "+value+"   element: "+element);
+        console.log("futureOrPresent:    value= "+value+"     element= "+element);
         if(new Date(value) >= new Date()) {
-            // alert("date not in future.")
+            console.log("date IS in future.");
             return true;
         }else{
             return false;

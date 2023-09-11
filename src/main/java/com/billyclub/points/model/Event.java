@@ -41,6 +41,8 @@ public class Event {
     private LocalTime startTime;
     @NotNull
     private Integer numOfTimes;
+    private Double customTeamMoney;
+    private Double customScatMoney;
 
     private EventStatus status;
     @JsonManagedReference
@@ -55,7 +57,7 @@ public class Event {
     private List<String> scatSummary = new ArrayList<>();
 
 //    @JsonManagedReference
-@JsonBackReference
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;

@@ -67,6 +67,39 @@
                             </p>
 
                         </div>
+
+                        <div class="mb-3">
+                            <label for="custom-team-money" class="control-label">Custom Team Money</label>
+                            <input type="text"
+                                   id="custom-team-money"
+                                   name="custom-team-money"
+                                   class="form-control"
+                                   th:field="*{customTeamMoney}"
+                            />
+                            <p th:errors="*{customTeamMoney}" class="error"
+                               th:if="${#fields.hasErrors('customTeamMoney')}">
+                            </p>
+
+                        </div>
+                        <div class="mb-3">
+                            <label for="custom-scat-money" class="control-label">Custom Scat Money</label>
+                            <input type="text"
+                                   id="custom-scat-money"
+                                   name="custom-scat-money"
+                                   class="form-control"
+                                   th:field="*{customScatMoney}"
+                            />
+                            <p th:errors="*{customScatMoney}" class="error"
+                               th:if="${#fields.hasErrors('customScatMoney')}">
+                            </p>
+
+                        </div>
+
+
+
+
+
+
                         <div class="mb-3">
                             <label for="status" class="control-label">Status</label>
                                 <select name="status" id="status" th:field="*{status}" class="form-control ">

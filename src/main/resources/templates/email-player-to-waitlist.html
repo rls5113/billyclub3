@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Template for HTML email (moved from waitlist)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<p th:text="#{greeting(${name})}">
+    Hello, Peter Static!
+</p>
+<blockquote>
+    Tee times have been given back to the course.  You have moved to the waiting list for event on <span th:text="${eventDate}">12/28/2012</span>.
+    Apologies for this inconvenience.  Follow this link to check the changes.
+</blockquote>
+<p>Click this link to go directly to the event...  after logging in. </p>
+<p><b><a th:href="${link}">Sorry, you are on wait list for event on <span th:text="${eventDate}">12/28/2012</span> at <span th:text="${startTime}">06:00 AM</span>!</a></b></p>
+
+<p>
+    Regards, <br />
+    &emsp; <em>Billy</em>
+</p>
+</body>
+</html>

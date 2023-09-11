@@ -280,17 +280,35 @@ public class ThymeleafController {
         }
 
         Event eventToEdit = eventService.findById(eventId);
+
+        boolean numberOfTeeTimesLess = eventDto.getNumOfTimes() < eventToEdit.getNumOfTimes();
+        boolean numberOfTeeTimesMore = eventDto.getNumOfTimes() > eventToEdit.getNumOfTimes();
+
         eventToEdit = eventService.transfer(eventDto, eventToEdit);
         String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId()+"?current=true";
 
         if (eventToEdit.getStatus() != EventStatus.COMPLETED) {
             //reprocess waiting list if number of tee times changed
-            boolean numberOfTeeTimesChanged = eventDto.getNumOfTimes() == eventToEdit.getNumOfTimes();
-            if(numberOfTeeTimesChanged){
-                List<Player> list = eventService.recalculateWaitingList(eventToEdit);
+//            boolean numberOfTeeTimesChanged = eventDto.getNumOfTimes() != eventToEdit.getNumOfTimes();
+            if(numberOfTeeTimesMore){
+                List<Player> list = eventService.recalculateWaitingList(eventToEdit, numberOfTeeTimesMore );
                 List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
                 try {
                     emailService.sendMovedFromWaitlistEmail(recipients,
+                            eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                            eventToEdit.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
+                            request.getLocale(),
+                            link);
+                } catch (MessagingException e) {
+                    log.info("Save Event ("+eventId+"): waitlist email failed");
+                    System.out.println("Failed to send email. " + e.getMessage());
+                }
+            }
+            else if(numberOfTeeTimesLess){
+                List<Player> list = eventService.recalculateWaitingList(eventToEdit, false);
+                List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
+                try {
+                    emailService.sendMovedToWaitlistEmail(recipients,
                             eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                             eventToEdit.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
                             request.getLocale(),

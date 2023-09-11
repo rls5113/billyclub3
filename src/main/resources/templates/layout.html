@@ -50,6 +50,7 @@
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/profiles}">Profile</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/users}">User List</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/courses}">Course List</a></li>
+        <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" href="mailto:stuartrl@comcast.net?subject=Billy Club Support - I need help!&body=< Tell me about your issue >">Support</a></li>
         <li sec:authorize="!isAuthenticated()"><a class="btn btn-primary text-light" th:href="@{/login}">Login</a></li>
         <li sec:authorize="!isAuthenticated()"><a class="btn btn-primary text-light" th:href="@{/register}">Register</a></li>
         <li sec:authorize="isAuthenticated()" ><a class="btn btn-primary text-light" th:href="@{/logout}" >Logout</a></li>

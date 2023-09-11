@@ -48,5 +48,7 @@ public class EventDto {
     private List<String> scatSummary;
     private Course course;
     private int numberWaitlist;
+    private Double customTeamMoney;
+    private Double customScatMoney;
 
 }
