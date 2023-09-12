@@ -461,7 +461,7 @@ public class EventServiceImpl implements EventService {
 //         for(TeamDto team : filtered) {
 //            results.add(team.getName() + ":   "+team.getTeam()+"         "+team.getScore());
 //        }
-//        results.addAll(event.getEventWinners());
+        results.addAll(event.getEventWinners());
         event.setEventWinners(results);
     }
     private void calculateWinners(Event event) {
@@ -478,15 +478,15 @@ public class EventServiceImpl implements EventService {
                 List<String> moneyBackList = new ArrayList<>();
                 if (losers.size() > 1) {
                     List<String> names = losers.stream().map(p -> p.getName()).collect(Collectors.toList());
-                    moneyBackList.add("Tied for worst score to get money back: " + names.toString());
+                    moneyBackList.add("Tied for worst score: " + names.toString());
                     for (int i = 0; i < 3; i++) {
                         Collections.shuffle(losers);
                     }
                 }
                 Player getsMoneyBack = losers.get(0);
 
-                getsMoneyBack.setTeam("Low score money back");
-                moneyBackList.add(getsMoneyBack.getName() + " - Low score money back. Total: " + getsMoneyBack.getTotal());
+                getsMoneyBack.setTeam("Odd man money back");
+                moneyBackList.add(getsMoneyBack.getName() + " - ODD man money back. Worst score: " + getsMoneyBack.getTotal());
                 event.getEventWinners().addAll(moneyBackList);
                 //remove from list for teams
                 eventPlayers.remove(getsMoneyBack);
@@ -501,7 +501,7 @@ public class EventServiceImpl implements EventService {
                 if (winners.size() > 1) {
                     List<String> names = winners.stream().map(p -> p.getName()).collect(Collectors.toList());
                     winnerListing.add("Tied for best score: " + names.toString());
-                    for (int i = 0; i < 2; i++) {
+                    for (int i = 0; i < 7; i++) {
                         Collections.shuffle(winners);
                     }
                 }
@@ -533,7 +533,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        //first timers
+        //quitters
         List<Player> withdrawn =  event.getPlayers().stream()
                 .filter(p -> (p.getIsWithdrawal()) )
                 .collect(Collectors.toList());

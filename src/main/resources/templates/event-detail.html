@@ -81,7 +81,7 @@
                                     </div>
 
                                     <div class="mb-3">
-                                    <div class="mb-1">
+                                    <div class="mb-1"  th:if="${!#strings.isEmpty(event.customTeamMoney)}">
                                         <label for="customTeamMoney" class="control-label">Custom $ Team</label>
                                         <input type="text"
                                                id="customTeamMoney"
@@ -91,7 +91,7 @@
                                                readonly
                                         />
                                     </div>
-                                    <div class="mb-1">
+                                    <div class="mb-1"  th:if="${!#strings.isEmpty(event.customScatMoney)}">
                                         <label for="customScatMoney" class="control-label">Custom $ Scat</label>
                                         <input type="text"
                                                id="customScatMoney"
