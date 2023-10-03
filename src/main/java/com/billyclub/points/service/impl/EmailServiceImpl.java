@@ -101,11 +101,11 @@ public class EmailServiceImpl implements EmailService {
         ctx.setVariable("course", course);
         ctx.setVariable("link",link);
 
-        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-        message.setSubject("Billy Club Golf: "+course+" on "+eventDate+" @ "+startTime+"  new event created");
-        message.setFrom(FROM_EMAIL_ADDRESS);
         for(User user: recipients){
+            final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
+            message.setSubject("Billy Club Golf: "+course+" on "+eventDate+" @ "+startTime+"  new event created");
+            message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             final String content = this.templateEngine.process("email-new-event",ctx);
             message.setText(content,true);

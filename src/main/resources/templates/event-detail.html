@@ -126,7 +126,7 @@
                                            th:if="${event.isAllScoresIn}" id="calc-scores"
                                            class="btn btn-primary bcp-btn-align">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
 
-                                        <a sec:authorize="false and hasRole('ROLE_ADMIN')"
+                                        <a sec:authorize="hasRole('ROLE_ADMIN')"
                                            th:href="@{/events/{eventId}/pick-teams(eventId=${event.id})}"
                                            id="pick-teams"
                                            class="btn btn-primary bcp-btn-align">Pick Teams<i class="fa-solid fa-user-friends"></i></a>

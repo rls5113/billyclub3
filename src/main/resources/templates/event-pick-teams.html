@@ -86,10 +86,11 @@
                             </div>
                         </div>
                         <div class="col-8 bg-primary-subtle" id="teamlist">
-                            <div  th:each="team : ${teams}">
                                 <div th:attr="data-score=${team.score}"
                                      th:id="${#ids.seq('team')}"
-                                     class="row team rounded-3">
+                                     class="row team rounded-3"
+                                     th:each="team : ${teams}">
+
 
                                         <div class="col-3">
                                             <img th:src="@{'/assets/'+${cards[teamStat.index]}}" height="80px" />
@@ -99,10 +100,7 @@
                                             <div th:id="p2" class="col-12 drop-player rounded-3">player 2 drop</div>
                                         </div>
                                         <div class="col-3 dragging team-total" th:text="${team.score}">team total</div>
-
-
                                 </div>
-                            </div>
                         </div>
                     </div>
 
@@ -121,15 +119,20 @@
 
         $( function() {
 
+            let dragged = null;
+
             $( ".drag-player" ).draggable({
                 cursor: 'move',
-                revert: true,
+                revert: 'invalid',
+                revertDuration: 200,
                 snap: ".drop-player",
                 snapMode: "inner",
+                connectToSortable: '.row',
 
                 start: function (event, ui){
                     // alert("i am started    ui = "+ui.value);
                     $(this).addClass('dragging');
+                    dragged = $(this);
 
                 },
                 // drag: function (event, ui){
@@ -151,19 +154,45 @@
                     var playertotal = ui.draggable.data('total');
                     var teamscore = $(this).parent().parent().data('score');
                     // alert("i am dropped id:"+id+"   total:"+playertotal+"   team score:"+teamscore);
+
                     $(this).parent().parent().data('score', playertotal + teamscore);
+                    $(this).parent().parent().attr('data-score', playertotal + teamscore);
+
+                    // console.log( $(this));
+                    // console.log( $(this).parent().parent());
 
                     $(this).parent().parent().children().slice(2).html(playertotal + teamscore);
-                     ui.draggable.revert(false);
+                    $(this).parent().parent().children().slice(1).children().find($(this)).replaceWith(dragged);
+
+                    // sortTeams();
 
                 }
             });
-            $("#teamlist").
-                filter(":first-child")
-                .sortable("option","items","> div > div");
-            // $(".team").draggable();
-            // $(".team").sortable();
+            function sortTeams() {
+                var list = $('#teamlist');
+                var teams = list.find('.team').sort(function(a,b){
+                    var me = $(a).data('score');
+                    console.log('a:'+me);
+                    var me1 = $(b).data('score');
+                    console.log('b:'+me1);
+                    console.log('a:'+me+'  b:'+me1+'  b-a:'+ me1-me);
+                    //     // console.log($(a).data('score') - $(b).data('score'));
+                        return $(b).data('score') - $(a).data('score');
+                    });
+                // var teams = list.find('div').sort(function(a,b){
+                //     // console.log($(a).attr('data-score') - $(b).attr('data-score'));
+                //     return $(a).attr('data-score') - $(b).attr('data-score');
+                // });
+                // console.log(list);
+                list.replaceWith(teams);
+                    // .filter(":first-child");
+                    // .sortable({reverse: true});
+                // $(".team").draggable();
+                // $(".team").sortable();
+                // console.log(list);
+                console.log(teams);
 
+            }
         });
 
     });

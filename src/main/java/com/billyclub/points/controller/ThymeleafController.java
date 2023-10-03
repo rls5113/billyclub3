@@ -396,7 +396,7 @@ public class ThymeleafController {
         List<PlayerDto> eventPlayers = players.stream()
                 .map(p -> playerService.toDto(p))
                 .filter(p -> !p.getIsWaiting())
-                .sorted(Comparator.comparing(PlayerDto::getName,Comparator.naturalOrder()))
+                .sorted(Comparator.comparing(PlayerDto::getTotal,Comparator.reverseOrder()))
                 .collect(Collectors.toList());
         model.addAttribute("playerList",eventPlayers);
 
@@ -410,6 +410,15 @@ public class ThymeleafController {
         model.addAttribute("cards", cards);
 
         return "event-pick-teams";
+    }
+    @PostMapping("/events/{eventId}/pick-teams")
+    @Transactional
+    public String pickTeams(@PathVariable("eventId") Long eventId, @ModelAttribute("teams") ArrayList<TeamDto> teams,
+                                  BindingResult result, Model model, HttpServletRequest request) {
+        Event event = eventService.findById(eventId);
+        log.info(teams.toString());
+
+        return "redirect:/events/" + eventId;
     }
 
     private User getLoggedInUser() {
