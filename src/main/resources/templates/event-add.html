@@ -184,7 +184,7 @@
 <script>
     $(document).ready(function() {
 
-        $('#eventdate').datepicker({ dateFormat:'yy-mm-dd', minDate : '0'});
+        // $('#eventdate').datepicker({ dateFormat:'yy-mm-dd', minDate : '0'});
 
         $("#add-event-form").validate({
             rules:{
@@ -192,7 +192,7 @@
                 eventDate: {
                     required: true
                     ,date: true
-                    ,futureOrPresent: true
+                    // ,futureOrPresent: true
                 },
                 startTime: "required",
                 numOfTimes: {
@@ -208,7 +208,7 @@
                 eventDate: {
                     required: "Event Date should not be empty. "
                     ,date:"Please enter a valid date (mm/dd/yyyy)."
-                    ,futureOrPresent: "Event Date cannot be in the past."
+                    // ,futureOrPresent: "Event Date cannot be in the past."
                 },
                 startTime: "Start Time should not be empty.",
                 numOfTimes: {
@@ -227,15 +227,38 @@
     });
 
     $.validator.addMethod('futureOrPresent', function(value, element){
-        // alert("custom addMethod  value: "+value+"   element: "+element);
-        console.log("futureOrPresent:    value= "+value+"     element= "+element);
-        if(new Date(value) >= new Date()) {
-            console.log("date IS in future.");
+        const date = new Date(value);
+        const now = new Date();
+        console.log('datepicker: '+ date);
+        console.log('futureOrPresent.date: '+ date);
+        console.log('futureOrPresent.now:  '+ now);
+        console.log('futureOrPresent.date: '+ date.getMonth()+'  '+date.getDay()+'  '+date.getFullYear()+'  '+date.getDate());
+        console.log('futureOrPresent.now:  '+ now.getMonth()+'  '+now.getDay()+'  '+now.getFullYear()+'  '+now.getDate());
+        const yearfuture = now.getFullYear() < date.getFullYear();
+        const monthfuture = now.getMonth() < date.getMonth();
+        const dayfuture = now.getDate() < date.getDate();
+        const yearequal = now.getFullYear() == date.getFullYear();
+        const monthequal = now.getMonth() == date.getMonth();
+        const dayequal = now.getDate() == date.getDate();
+        console.log('yearfuture   '+yearfuture);
+        console.log('yearequal   '+yearequal);
+        console.log('monthfuture   '+monthfuture);
+        console.log('monthequal   '+monthequal);
+        console.log('dayfuture   '+dayfuture);
+        console.log('dayequal   '+dayequal);
+
+        if((yearequal && monthequal && dayequal) ) {
+            console.log("date IS EQUAL");
+            return true;
+        }else if(yearfuture || (yearequal && (monthfuture || dayfuture))) {
+            console.log("date IS in future");
             return true;
         }else{
+            console.log("INVALID");
             return false;
         }
     },"Event date must be today or future date. ");
+
 
 
 

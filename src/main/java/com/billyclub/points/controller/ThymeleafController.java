@@ -28,7 +28,7 @@ public class ThymeleafController {
     private final UserService userService;
     private final PlayerService playerService;
 
-    private EmailService emailService;
+    private final EmailService emailService;
     private final CourseService courseService;
 
     private static final Logger log = LoggerFactory.getLogger(ThymeleafController.class);
@@ -162,16 +162,19 @@ public class ThymeleafController {
         Event event = eventService.removePlayerFromEvent(eventId, playerId);
         String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
 
+        Map params = new HashMap<String, String>();
+        params.put("eventStatus", event.getStatus().name());
+        params.put("eventDate", event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
+        params.put("startTime", event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")));
+        params.put("link", link);
+
         try {
             List<User> recipients = new ArrayList<>();
             if(event.getEmailRecipient()!=null) {
                 User user = userService.findByFullname(event.getEmailRecipient().getName());
                 recipients.add(user);
-                emailService.sendMovedFromWaitlistEmail(recipients,
-                        event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
-                        event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
-                        request.getLocale(),
-                        link);
+                emailService.sendMovedFromWaitlistEmail(recipients, params, request.getLocale()
+                );
             }
         } catch (MessagingException e) {
             log.info("Remove From Event ("+eventId+"): waitlist email failed");
@@ -287,6 +290,11 @@ public class ThymeleafController {
         eventToEdit = eventService.transfer(eventDto, eventToEdit);
         String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId()+"?current=true";
 
+        Map params = new HashMap<String, String>();
+        params.put("eventStatus", eventToEdit.getStatus().name());
+        params.put("eventDate", eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
+        params.put("link", link);
+
         if (eventToEdit.getStatus() != EventStatus.COMPLETED) {
             //reprocess waiting list if number of tee times changed
 //            boolean numberOfTeeTimesChanged = eventDto.getNumOfTimes() != eventToEdit.getNumOfTimes();
@@ -294,11 +302,9 @@ public class ThymeleafController {
                 List<Player> list = eventService.recalculateWaitingList(eventToEdit, numberOfTeeTimesMore );
                 List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
                 try {
-                    emailService.sendMovedFromWaitlistEmail(recipients,
-                            eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
-                            eventToEdit.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
-                            request.getLocale(),
-                            link);
+
+                    emailService.sendMovedFromWaitlistEmail(recipients, params, request.getLocale());
+
                 } catch (MessagingException e) {
                     log.info("Save Event ("+eventId+"): waitlist email failed");
                     System.out.println("Failed to send email. " + e.getMessage());
@@ -308,11 +314,9 @@ public class ThymeleafController {
                 List<Player> list = eventService.recalculateWaitingList(eventToEdit, false);
                 List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
                 try {
-                    emailService.sendMovedToWaitlistEmail(recipients,
-                            eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
-                            eventToEdit.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
-                            request.getLocale(),
-                            link);
+
+                    emailService.sendMovedToWaitlistEmail(recipients, params, request.getLocale());
+
                 } catch (MessagingException e) {
                     log.info("Save Event ("+eventId+"): waitlist email failed");
                     System.out.println("Failed to send email. " + e.getMessage());
@@ -328,11 +332,9 @@ public class ThymeleafController {
                         List<User> statusRecipients =  eventToEdit.getPlayers().stream()
                                 .map(p -> userService.findByFullname(p.getName()))
                                 .collect(Collectors.toList());
-                        emailService.sendEventStatusChangedEmail(statusRecipients,
-                                eventToEdit.getStatus().name(),
-                                eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
-                                link,
-                                request.getLocale());
+
+                        emailService.sendEventStatusChangedEmail(statusRecipients, params, request.getLocale());
+
                     } catch (MessagingException e) {
                         System.out.println("Failed to send email. " + e.getMessage());
                         log.info("Save Event ("+eventId+"): failed to send status changed email");
@@ -371,11 +373,17 @@ public class ThymeleafController {
         //send email
         log.info("Add Event : sending new event email");
 
+        Map params = new HashMap<String, String>();
+        params.put("course", event.getCourse().getName());
+        params.put("eventStatus", event.getStatus().name());
+        params.put("eventDate", event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
+        params.put("startTime", event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")));
+        params.put("link", link);
+
         try {
-            emailService.sendNewEventEmail(recipients,
-                    event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
-                    event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")),
-                    event.getCourse().getName(), link, request.getLocale());
+
+            emailService.sendNewEventEmail(recipients, params, request.getLocale());
+
         } catch (Exception e) {
             log.info("Add Event : failed to send new event email");
             System.out.println("Failed to send email. " + e.getMessage());

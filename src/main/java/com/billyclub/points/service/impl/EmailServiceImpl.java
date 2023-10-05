@@ -19,6 +19,7 @@ import org.thymeleaf.context.Context;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -90,21 +91,23 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendNewEventEmail(List<User> recipients, String eventDate, String startTime, String course, String link, Locale locale) throws MessagingException {
+    public void sendNewEventEmail(List<User> recipients, Map params, Locale locale) throws MessagingException {
         if(!sendMail)   {
             log.info("SEND EMAIL (new Event) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", eventDate);
+        ctx.setVariable("eventDate", params.get("eventDate"));
+        String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
+        String course = (String) params.get("course");
         ctx.setVariable("course", course);
-        ctx.setVariable("link",link);
+        ctx.setVariable("link", params.get("link"));
 
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+course+" on "+eventDate+" @ "+startTime+"  new event created");
+            message.setSubject("Billy Club Golf: "+course+" on "+ params +" @ "+startTime+"  new event created");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             final String content = this.templateEngine.process("email-new-event",ctx);
@@ -114,20 +117,21 @@ public class EmailServiceImpl implements EmailService {
 
     }
     @Override
-    public void sendMovedFromWaitlistEmail(List<User> recipients, String eventDate, String startTime, Locale locale, String link) throws MessagingException {
+    public void sendMovedFromWaitlistEmail(List<User> recipients, Map params, Locale locale) throws MessagingException {
         if(!sendMail)   {
             log.info("SEND EMAIL (moved from waitlist) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", eventDate);
+        ctx.setVariable("eventDate", params.get("eventDate"));
+        String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
-        ctx.setVariable("link",link);
+        ctx.setVariable("link", params.get("link"));
 
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" added FROM waiting list");
+            message.setSubject("Billy Club Golf: "+ params +" "+startTime+" added FROM waiting list");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             message.setBcc("stuartrl@comcast.net");
@@ -141,20 +145,22 @@ public class EmailServiceImpl implements EmailService {
 
     }
     @Override
-    public void sendMovedToWaitlistEmail(List<User> recipients, String eventDate, String startTime, Locale locale, String link) throws MessagingException {
+    public void sendMovedToWaitlistEmail(List<User> recipients, Map params, Locale locale) throws MessagingException {
         if(!sendMail)   {
             log.info("SEND EMAIL (moved from waitlist) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", eventDate);
+        ctx.setVariable("eventDate", params.get("eventDate"));
+        String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
-        ctx.setVariable("link",link);
+        ctx.setVariable("link", params.get("link"));
+
 
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+eventDate+" "+startTime+" added TO waiting list");
+            message.setSubject("Billy Club Golf: "+ params +" "+startTime+" added TO waiting list");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             message.setBcc("stuartrl@comcast.net");
@@ -168,18 +174,18 @@ public class EmailServiceImpl implements EmailService {
 
     }
     @Override
-    public void sendEventStatusChangedEmail(List<User> recipients, String eventStatus, String eventDate, String link, Locale locale) throws MessagingException {
+    public void sendEventStatusChangedEmail(List<User> recipients, Map params, Locale locale) throws MessagingException {
         if(!sendMail)   {
             log.info("SEND EMAIL (event status changed) is turned OFF!");
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", eventDate);
-        ctx.setVariable("link",link);
+        ctx.setVariable("eventDate", params.get("eventDate"));
+        ctx.setVariable("link", params.get("link"));
 
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-        message.setSubject("Billy Club Golf: Event status changed to "+eventStatus);
+        message.setSubject("Billy Club Golf: Event status changed to "+ params.get("eventStatus"));
         message.setFrom(FROM_EMAIL_ADDRESS);
         for(User user: recipients){
             message.addTo(new InternetAddress(user.getEmail(), Boolean.TRUE));
