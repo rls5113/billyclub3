@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -97,7 +94,8 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", params.get("eventDate"));
+        String eventDate = (String) params.get("eventDate");
+        ctx.setVariable("eventDate", eventDate);
         String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
         String course = (String) params.get("course");
@@ -107,7 +105,7 @@ public class EmailServiceImpl implements EmailService {
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+course+" on "+ params +" @ "+startTime+"  new event created");
+            message.setSubject("Billy Club Golf: "+course+" on "+ eventDate +" @ "+startTime+"  new event created");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             final String content = this.templateEngine.process("email-new-event",ctx);
@@ -123,7 +121,8 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", params.get("eventDate"));
+        String eventDate = (String) params.get("eventDate");
+        ctx.setVariable("eventDate", eventDate);
         String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
         ctx.setVariable("link", params.get("link"));
@@ -131,7 +130,7 @@ public class EmailServiceImpl implements EmailService {
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+ params +" "+startTime+" added FROM waiting list");
+            message.setSubject("Billy Club Golf: "+ eventDate +" "+startTime+" added FROM waiting list");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             message.setBcc("stuartrl@comcast.net");
@@ -168,7 +167,9 @@ public class EmailServiceImpl implements EmailService {
             ctx.setVariable("name",user.getName());
             final String content = this.templateEngine.process("email-player-to-waitlist",ctx);
             message.setText(content, true);
-            this.mailSender.send(mimeMessage);
+            if(!sendMail) {
+                this.mailSender.send(mimeMessage);
+            }
         }
 
 
