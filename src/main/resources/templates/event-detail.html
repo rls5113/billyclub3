@@ -406,23 +406,23 @@
     $.validator.addMethod('futureOrPresent', function(value, element){
         const date = new Date(value);
         const now = new Date();
-        // console.log('datepicker: '+ date);
-        // console.log('futureOrPresent.date: '+ date);
-        // console.log('futureOrPresent.now:  '+ now);
-        // console.log('futureOrPresent.date: '+ date.getMonth()+'  '+date.getDay()+'  '+date.getFullYear()+'  '+date.getDate());
-        // console.log('futureOrPresent.now:  '+ now.getMonth()+'  '+now.getDay()+'  '+now.getFullYear()+'  '+now.getDate());
+        console.log('datepicker: '+ date);
+        console.log('futureOrPresent.date: '+ date);
+        console.log('futureOrPresent.now:  '+ now);
+        console.log('futureOrPresent.date: '+ date.getMonth()+'  '+date.getDay()+'  '+date.getFullYear()+'  '+date.getDate());
+        console.log('futureOrPresent.now:  '+ now.getMonth()+'  '+now.getDay()+'  '+now.getFullYear()+'  '+now.getDate());
         const yearfuture = now.getFullYear() < date.getFullYear();
         const yearequal = now.getFullYear() == date.getFullYear();
         const monthfuture = now.getMonth() < date.getMonth();
         const monthequal = now.getMonth() == date.getMonth();
         const dayfuture = now.getDate() < date.getDate();
         const dayequal = now.getDate() == date.getDate();
-        // console.log('yearfuture   '+yearfuture);
-        // console.log('yearequal   '+yearequal);
-        // console.log('monthfuture   '+monthfuture);
-        // console.log('monthequal   '+monthequal);
-        // console.log('dayfuture   '+dayfuture);
-        // console.log('dayequal   '+dayequal);
+        console.log('yearfuture   '+yearfuture);
+        console.log('yearequal   '+yearequal);
+        console.log('monthfuture   '+monthfuture);
+        console.log('monthequal   '+monthequal);
+        console.log('dayfuture   '+dayfuture);
+        console.log('dayequal   '+dayequal);
 
         if((yearequal && monthequal && dayequal) ) {
             console.log("date IS EQUAL");

@@ -168,19 +168,19 @@ public class ThymeleafController {
         params.put("startTime", event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")));
         params.put("link", link);
 
-        try {
-            List<User> recipients = new ArrayList<>();
-            if(event.getEmailRecipient()!=null) {
-                User user = userService.findByFullname(event.getEmailRecipient().getName());
-                recipients.add(user);
-                emailService.sendMovedFromWaitlistEmail(recipients, params, request.getLocale()
-                );
-            }
-        } catch (MessagingException e) {
-            log.info("Remove From Event ("+eventId+"): waitlist email failed");
-            System.out.println("Failed to send email. " + e.getMessage());
-//            throw new RuntimeException(e);
-        }
+//        try {
+//            List<User> recipients = new ArrayList<>();
+//            if(event.getEmailRecipient()!=null) {
+//                User user = userService.findByFullname(event.getEmailRecipient().getName());
+//                recipients.add(user);
+//                emailService.sendMovedFromWaitlistEmail(recipients, params, request.getLocale()
+//                );
+//            }
+//        } catch (MessagingException e) {
+//            log.info("Remove From Event ("+eventId+"): waitlist email failed");
+//            System.out.println("Failed to send email. " + e.getMessage());
+////            throw new RuntimeException(e);
+//        }
 
         return "redirect:/events/" + event.getId();
     }
@@ -301,26 +301,26 @@ public class ThymeleafController {
             if(numberOfTeeTimesMore){
                 List<Player> list = eventService.recalculateWaitingList(eventToEdit, numberOfTeeTimesMore );
                 List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
-                try {
-
-                    emailService.sendMovedFromWaitlistEmail(recipients, params, request.getLocale());
-
-                } catch (MessagingException e) {
-                    log.info("Save Event ("+eventId+"): waitlist email failed");
-                    System.out.println("Failed to send email. " + e.getMessage());
-                }
+//                try {
+//
+//                    emailService.sendMovedFromWaitlistEmail(recipients, params, request.getLocale());
+//
+//                } catch (MessagingException e) {
+//                    log.info("Save Event ("+eventId+"): waitlist email failed");
+//                    System.out.println("Failed to send email. " + e.getMessage());
+//                }
             }
             else if(numberOfTeeTimesLess){
                 List<Player> list = eventService.recalculateWaitingList(eventToEdit, false);
                 List<User> recipients = list.stream().map(p -> userService.findByFullname(p.getName())).collect(Collectors.toList());
-                try {
-
-                    emailService.sendMovedToWaitlistEmail(recipients, params, request.getLocale());
-
-                } catch (MessagingException e) {
-                    log.info("Save Event ("+eventId+"): waitlist email failed");
-                    System.out.println("Failed to send email. " + e.getMessage());
-                }
+//                try {
+//
+//                    emailService.sendMovedToWaitlistEmail(recipients, params, request.getLocale());
+//
+//                } catch (MessagingException e) {
+//                    log.info("Save Event ("+eventId+"): waitlist email failed");
+//                    System.out.println("Failed to send email. " + e.getMessage());
+//                }
             }
 
             eventToEdit = eventService.save(eventToEdit);

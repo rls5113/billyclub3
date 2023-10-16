@@ -125,6 +125,8 @@ public class EmailServiceImpl implements EmailService {
         ctx.setVariable("eventDate", eventDate);
         String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
+        String course = (String) params.get("course");
+        ctx.setVariable("course", course);
         ctx.setVariable("link", params.get("link"));
 
         for(User user: recipients){
@@ -150,16 +152,19 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
         final Context ctx = new Context(locale);
-        ctx.setVariable("eventDate", params.get("eventDate"));
+        String eventDate = (String) params.get("eventDate");
+        ctx.setVariable("eventDate", eventDate);
         String startTime = (String) params.get("startTime");
         ctx.setVariable("startTime", startTime);
+        String course = (String) params.get("course");
+        ctx.setVariable("course", course);
         ctx.setVariable("link", params.get("link"));
 
 
         for(User user: recipients){
             final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, "UTF-8");
-            message.setSubject("Billy Club Golf: "+ params +" "+startTime+" added TO waiting list");
+            message.setSubject("Billy Club Golf: "+ eventDate +" "+startTime+" added TO waiting list");
             message.setFrom(FROM_EMAIL_ADDRESS);
             message.addTo(new InternetAddress(user.getEmail(),Boolean.TRUE));
             message.setBcc("stuartrl@comcast.net");
