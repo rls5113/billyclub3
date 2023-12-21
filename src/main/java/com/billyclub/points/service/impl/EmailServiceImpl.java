@@ -15,6 +15,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.*;
 
@@ -42,10 +43,10 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendForgotPasswordEmail(String recipientName, String recipientEmail, String link, Locale locale) throws MessagingException {
-        if(!sendMail)   {
-            log.info("SEND EMAIL (Forgot Password) is turned OFF!");
-            return;
-        }
+//        if(!sendMail)   {
+//            log.info("SEND EMAIL (Forgot Password) is turned OFF!");
+//            return;
+//        }
         final Context ctx = new Context(locale);
         ctx.setVariable("name", recipientName);
         ctx.setVariable("resetDate", new Date());
@@ -56,7 +57,9 @@ public class EmailServiceImpl implements EmailService {
         message.setSubject("Billy Club Golf: password reset link");
         message.setFrom(FROM_EMAIL_ADDRESS);
         message.setTo(recipientEmail);
-        message.setBcc("stuartrl@comcast.net");
+        if(!StringUtils.equals("stuartrl@comcast.net",recipientEmail)) {
+            message.setBcc("stuartrl@comcast.net");
+        }
         final String content = this.templateEngine.process("email-forgot-password",ctx);
         message.setText(content,true);
         this.mailSender.send(mimeMessage);

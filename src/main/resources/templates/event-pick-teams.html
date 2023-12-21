@@ -9,6 +9,10 @@
 </head>
 <body layout:fragment="body">
 <style>
+    .playerPanel {
+        vertical-align: center;
+        /*margin-top: 70px;*/
+    }
  .drag-player {
      margin: 2px;
      padding: 5px;
@@ -57,11 +61,11 @@
 
 </style>
 
-<div class="container">
+<!--<div class="container">-->
     <form
-            id="add-event-form"
+            id="event-pickteams-form"
             method="post"
-            th:action="@{/events/{eventId}/pick-teams(eventId=${event.id})}" th:object="${event}"
+            th:action="@{/events/{eventId}/pick-teams(eventId=${event.id})}" th:object="${wrapper}"
             class="form-horizontal"
             role="form">
 
@@ -69,15 +73,19 @@
                 <div class="card-header  bg-primary">
                     <h3 class="text-center text-light">Pick Teams</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body" >
                     <div class="row" style="font-weight: bold; margin-bottom: 20px;">
-                        <span class="col-3" th:text="*{id}"></span>
-                        <span class="col-3" th:text="*{course.name}"></span>
+                        <span class="col-3" th:text="${event.id}"></span>
+                        <span class="col-3" th:text="${event.course.name}"></span>
                         <span class="col-3" th:text="${#temporals.format(event.eventDate,'MM/dd/yyyy')}"></span>
                         <span class="col-3" th:text="${#temporals.format(event.startTime,'hh:mm (a)')}"></span>
                     </div>
-                    <div class="row">
-                        <div class="col-4 bg-primary-subtle" id="playerlist">
+                    <div class="row" style="font-weight: bold; margin-bottom: 20px;" th:each=" s : ${moneybackList}">
+                            <span th:if="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold; background-color: yellow"/>
+                            <span th:unless="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold;"/>
+                    </div>
+                    <div class="playerPanel row">
+                        <div class="col-3 bg-primary-subtle playerPanel" id="playerlist">
                             <div  th:each="player : ${playerList}">
                                 <div th:attr="data-total=${player.total}"
                                      th:id="${#ids.seq('player')}"
@@ -85,22 +93,28 @@
                                      th:text="${player.name} + '   ( '+ ${player.total}+' )'"></div>
                             </div>
                         </div>
-                        <div class="col-8 bg-primary-subtle" id="teamlist">
-                                <div th:attr="data-score=${team.score}"
-                                     th:id="${#ids.seq('team')}"
-                                     class="row team rounded-3"
-                                     th:each="team : ${teams}">
+                        <div class="col-9 bg-primary-subtle" id="teamlist">
+                                <div th:attr="data-score=${team.score}"  th:id="${#ids.seq('t')}"
+                                     class="row team rounded-3"  th:each="team : *{teams}"  >
+
+                                    <div class="col-3">
+                                        <img th:src="@{'/assets/'+${cards[teamStat.index]}}" height="80px" />
+                                    </div>
+                                    <div class="col-6" >
+                                        <div th:id="p1" class="col-12 drop-player rounded-3">player 1 drop</div>
+                                        <div th:id="p2" class="col-12 drop-player rounded-3">player 2 drop</div>
+                                    </div>
+                                    <div class="col-3 dragging team-total" th:field="*{teams[__${teamStat.index}__].score}">0</div>
+<!--                                    <input type="text"  th:field="*{{teams[__${teamStat.index}__]}}"/>-->
+                                    <input type="hidden"  th:field="*{teams[__${teamStat.index}__].name}"/>
+                                    <input type="hidden"  th:field="*{teams[__${teamStat.index}__].team}"  required/>
+                                    <input type="hidden"  th:field="*{teams[__${teamStat.index}__].score}" />
+                                    <p th:errors="*{teams[__${teamStat.index}__].team}">
+                                    </p>
 
 
-                                        <div class="col-3">
-                                            <img th:src="@{'/assets/'+${cards[teamStat.index]}}" height="80px" />
-                                        </div>
-                                        <div class="col-6">
-                                            <div th:id="p1" class="col-12 drop-player rounded-3 ">player 1 drop</div>
-                                            <div th:id="p2" class="col-12 drop-player rounded-3">player 2 drop</div>
-                                        </div>
-                                        <div class="col-3 dragging team-total" th:text="${team.score}">team total</div>
                                 </div>
+
                         </div>
                     </div>
 
@@ -108,25 +122,36 @@
 
                 <div class=" btn-group">
                     <a class="btn btn-secondary" th:href="@{/events/{eventId}(eventId=${event.id})}">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button  sec:authorize="true"  type="submit" class="btn btn-primary">Save</button>
                 </div>
         </div>
 </form>
-</div>
-<script>
+<!--</div>-->
+<script th:inline = 'javascript'>
+
     $(document).ready(function() {
 
+        // class TeamDto {
+        //     constructor(name, team, score) {
+        //         this.name = name;
+        //         this.team = team;
+        //         this.score = score;
+        //     }
+        // }
 
         $( function() {
 
             let dragged = null;
+            /*<![CDATA[*/
+            let teamsModel = [[${wrapper.teams}]];
+            /*]]>*/
 
             $( ".drag-player" ).draggable({
                 cursor: 'move',
                 revert: 'invalid',
                 revertDuration: 200,
-                snap: ".drop-player",
-                snapMode: "inner",
+                snap: '.drop-player',
+                snapMode: 'inner',
                 connectToSortable: '.row',
 
                 start: function (event, ui){
@@ -149,51 +174,61 @@
             $( ".drop-player" ).droppable({
                 accept: ".drag-player",
                 drop: function( event, ui ) {
-                    ui.draggable.css('background-color','#207431');
-                    var id = ui.draggable.attr('id');
+                    ui.draggable.css('background-color','#9ecba7');
+                    $(this).css('background-color','#9ecba7');
+                    let dragid = '#'+ui.draggable.attr('id');
+                    let playerText = ui.draggable.html();
+                    $(this).html(playerText);
+                    let dropid = event.target.id;
+                    // console.log("dragid: "+dragid);
+                    // console.log("playerText: "+playerText);
+                    // console.log("dropid: "+dropid);
+                    // debugger;
                     var playertotal = ui.draggable.data('total');
-                    var teamscore = $(this).parent().parent().data('score');
-                    // alert("i am dropped id:"+id+"   total:"+playertotal+"   team score:"+teamscore);
+                    let team = '#'+$(this).parent().parent().attr('id');
+                    // let teamDiv = $(this).parent().parent();
+                    // console.log('team: '+team);
+                    let idx = team.charAt(2) -1;
+                    let teamObj = teamsModel[idx];
+
+                    // console.log('idx: '+idx);
+                    // console.log('teamObj: '+teamObj);
+                    // console.log('teamDiv: '+teamDiv);
+                    let teamscore = $(this).parent().parent().data('score');
 
                     $(this).parent().parent().data('score', playertotal + teamscore);
-                    $(this).parent().parent().attr('data-score', playertotal + teamscore);
-
-                    // console.log( $(this));
-                    // console.log( $(this).parent().parent());
-
+                    // $(this).parent().parent().attr('data-score', playertotal + teamscore);
                     $(this).parent().parent().children().slice(2).html(playertotal + teamscore);
-                    $(this).parent().parent().children().slice(1).children().find($(this)).replaceWith(dragged);
 
-                    // sortTeams();
+
+                    // console.log('model obj: '+ JSON.stringify(teamObj));
+                    teamObj.score = playertotal + teamscore;
+                    teamObj.team.push(playerText);
+                    // console.log('model obj: '+ JSON.stringify(teamObj));
+                    $(this).parent().parent().children().slice(3).val(teamObj.name);
+                    $(this).parent().parent().children().slice(4).val(teamObj.team);
+                    $(this).parent().parent().children().slice(5).val(teamObj.score);
+                    // console.log(JSON.stringify(teamsModel));
+
+                    $(dragid).hide();
 
                 }
             });
-            function sortTeams() {
-                var list = $('#teamlist');
-                var teams = list.find('.team').sort(function(a,b){
-                    var me = $(a).data('score');
-                    console.log('a:'+me);
-                    var me1 = $(b).data('score');
-                    console.log('b:'+me1);
-                    console.log('a:'+me+'  b:'+me1+'  b-a:'+ me1-me);
-                    //     // console.log($(a).data('score') - $(b).data('score'));
-                        return $(b).data('score') - $(a).data('score');
-                    });
-                // var teams = list.find('div').sort(function(a,b){
-                //     // console.log($(a).attr('data-score') - $(b).attr('data-score'));
-                //     return $(a).attr('data-score') - $(b).attr('data-score');
-                // });
-                // console.log(list);
-                list.replaceWith(teams);
-                    // .filter(":first-child");
-                    // .sortable({reverse: true});
-                // $(".team").draggable();
-                // $(".team").sortable();
-                // console.log(list);
-                console.log(teams);
-
-            }
         });
+
+        $("#event-pickteams-form").validate(
+            {
+                rules: {
+                    teams: {required: true}
+                },
+                messages: {
+                    teams: {required: "Team should not be empty."}
+                },
+                submitHandler: function (form) {
+                    // return false;
+                    form.submit();
+                }
+            });
 
     });
 

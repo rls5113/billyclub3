@@ -1,7 +1,10 @@
 package com.billyclub.points.dto;
 
-import com.billyclub.points.model.Player;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeamDto {
@@ -18,8 +22,12 @@ public class TeamDto {
     public TeamDto(String name, Integer score) {
         this.name = name;
         this.score = score;
+        this.team = new ArrayList<>();
     }
 
-    List<String> team = new ArrayList<>();
-    Integer score;
+    @NotEmpty
+    @NotNull
+    @Size(min = 2)
+    List<String> team;
+   Integer score;
 }

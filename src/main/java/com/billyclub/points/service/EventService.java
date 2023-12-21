@@ -1,6 +1,7 @@
 package com.billyclub.points.service;
 
 import com.billyclub.points.dto.EventDto;
+import com.billyclub.points.dto.TeamsDto;
 import com.billyclub.points.model.Event;
 import com.billyclub.points.model.Player;
 
@@ -22,5 +23,7 @@ public interface EventService extends IService<Event, EventDto> {
     List<Player> recalculateWaitingList(Event event, boolean addTeeTimes);
 
     List<Player> getsMoneyBack(List<Player> eventPlayers);
+
+    Event savePickteams(Event event, TeamsDto teamsDto, List<String> moneybackList);
 
 }

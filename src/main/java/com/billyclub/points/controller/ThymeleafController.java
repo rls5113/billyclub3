@@ -2,6 +2,7 @@ package com.billyclub.points.controller;
 
 import com.billyclub.points.dto.*;
 import com.billyclub.points.model.*;
+import com.billyclub.points.model.Event;
 import com.billyclub.points.service.*;
 import com.billyclub.points.util.ServletUtility;
 import jakarta.mail.MessagingException;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
@@ -291,9 +293,13 @@ public class ThymeleafController {
         String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId()+"?current=true";
 
         Map params = new HashMap<String, String>();
+
+        params.put("course", eventToEdit.getCourse().getName());
         params.put("eventStatus", eventToEdit.getStatus().name());
         params.put("eventDate", eventToEdit.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
+        params.put("startTime", eventToEdit.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")));
         params.put("link", link);
+
 
         if (eventToEdit.getStatus() != EventStatus.COMPLETED) {
             //reprocess waiting list if number of tee times changed
@@ -393,38 +399,84 @@ public class ThymeleafController {
         return "redirect:/events/current";
     }
 
-    @GetMapping("/events/{eventId}/pick-teams")
+    @GetMapping(value = "/events/{eventId}/pick-teams")
     @Transactional
     public String pickTeams(@PathVariable("eventId") Long eventId, Model model) {
         Event event = eventService.findById(eventId);
         model.addAttribute("event", event);
         model.addAttribute("courses",courseService.findAll());
 
-        List<Player> players = event.getPlayers();
-        List<PlayerDto> eventPlayers = players.stream()
-                .map(p -> playerService.toDto(p))
-                .filter(p -> !p.getIsWaiting())
-                .sorted(Comparator.comparing(PlayerDto::getTotal,Comparator.reverseOrder()))
+        //remove new players and still on waiting list
+        List<Player> eventPlayers = event.getPlayers().stream()
+//                .map(p -> playerService.toDto(p))
+                .filter(p -> !p.getIsWaiting() && !(p.getQuota() == 0) && !p.getIsWithdrawal())
+                .sorted(Comparator.comparing(Player::getTotal,Comparator.reverseOrder()))
                 .collect(Collectors.toList());
-        model.addAttribute("playerList",eventPlayers);
-
-        List<TeamDto> teams = new ArrayList<>();
-        for(int i=0; i < eventPlayers.size()/2; i++){
-            teams.add(new TeamDto("Team "+(i+1),0));
+        if(eventPlayers.size() <= 7){
+            event = eventService.calculateEventScoreboard(eventId);
+            return "redirect:/events/" + eventId;
         }
-        model.addAttribute("teams",teams);
 
-        String[] cards = {"AS.png","2H.png","3C.png","4D.png","5S.png","6H.png","7C.png","8D.png","9S.png","10H.png","JC.png","QD.png","KS.png"};
-        model.addAttribute("cards", cards);
+        if(!eventPlayers.isEmpty()) {
+            List<Player> losers = eventService.getsMoneyBack(eventPlayers);
+            if (!losers.isEmpty()) {
+                //if more than one, pick the winner
+                List<String> moneyBackList = new ArrayList<>();
+                if (losers.size() > 1) {
+                    List<String> names = losers.stream().map(p -> p.getName()).collect(Collectors.toList());
+                    moneyBackList.add("Tied for worst score: " + names.toString());
+                    for (int i = 0; i < 3; i++) {
+                        Collections.shuffle(losers);
+                    }
+                }
+                Player getsMoneyBack = losers.get(0);
+
+                getsMoneyBack.setTeam("Odd man money back winner!");
+                moneyBackList.add(getsMoneyBack.getName() + " - ODD man money back winner! Worst score: " + getsMoneyBack.getTotal());
+                event.getEventWinners().addAll(moneyBackList);
+                //remove from list for teams
+                eventPlayers.remove(getsMoneyBack);
+                model.addAttribute("moneybackList", moneyBackList);
+
+            }
+        }
+
+        List<PlayerDto> playerDtos = eventPlayers.stream()
+                .map(p -> playerService.toDto(p))
+                .collect(Collectors.toList());
+        model.addAttribute("playerList",playerDtos);
+
+        TeamsDto teamsDTO = new TeamsDto();
+        for(int i=0; i < eventPlayers.size()/2; i++){
+            teamsDTO.add(new TeamDto("Team "+(i+1),0));
+        }
+        model.addAttribute("wrapper",teamsDTO);
+
+//        String[] cards = {"AS.png","2H.png","3C.png","4D.png","5S.png","6H.png","7C.png","8D.png","9S.png","10H.png","JC.png","QD.png","KS.png"};
+        model.addAttribute("cards", TeamDto.cards);
 
         return "event-pick-teams";
     }
     @PostMapping("/events/{eventId}/pick-teams")
     @Transactional
-    public String pickTeams(@PathVariable("eventId") Long eventId, @ModelAttribute("teams") ArrayList<TeamDto> teams,
+    public String pickTeams(@PathVariable("eventId") Long eventId, @ModelAttribute("wrapper") @Valid TeamsDto wrap,
                                   BindingResult result, Model model, HttpServletRequest request) {
+//        List<TeamDto> teams = wrap.getTeams();
+//        int i =0;
+//        for(TeamDto team: teams) {
+//            if(team.getTeam().size() != 2){
+//                result.rejectValue("teams["+i+"]", "error", "This team needs 2 players!");
+//            }
+//            i++;
+//        }
+//        if (result.hasErrors()) {
+//            model.addAttribute("wrapper", wrap);
+//            return "redirect:/events/"+eventId+"/pick-teams";
+//        }
+
         Event event = eventService.findById(eventId);
-        log.info(teams.toString());
+        event = eventService.savePickteams(event, wrap, (List<String>) model.getAttribute("moneybackList") );
+        log.info(wrap.toString());
 
         return "redirect:/events/" + eventId;
     }

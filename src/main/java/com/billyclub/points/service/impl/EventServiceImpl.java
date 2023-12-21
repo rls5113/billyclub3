@@ -1,6 +1,8 @@
 package com.billyclub.points.service.impl;
 
 import com.billyclub.points.dto.EventDto;
+import com.billyclub.points.dto.TeamDto;
+import com.billyclub.points.dto.TeamsDto;
 import com.billyclub.points.exceptions.ResourceNotFoundException;
 import com.billyclub.points.model.Event;
 import com.billyclub.points.model.EventStatus;
@@ -232,6 +234,99 @@ public class EventServiceImpl implements EventService {
         }
         return losers;
     }
+
+    @Override
+    public Event savePickteams(Event event, TeamsDto teamsDto, List<String> moneybackList) {
+        List<String> results = new ArrayList<>();
+        List<TeamDto> winners = new ArrayList<>();
+        results.add("Scores posted:\n"+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm")));
+
+        List<TeamDto> list = teamsDto.getTeams();
+        List<TeamDto> sorted = list.stream()
+                        .filter(t -> !t.getTeam().isEmpty())
+                                .sorted((t1,t2)-> t2.getScore().compareTo(t1.getScore()))
+                                        .collect(Collectors.toList());
+
+        results.add("DRAWING RESULTS");
+
+//        if(moneybackList != null && !moneybackList.isEmpty()){
+//            event.getEventWinners().addAll(moneybackList);
+//        }
+
+        TeamDto highestScore = sorted.stream()
+                .max(Comparator.comparing(TeamDto::getScore))
+                .get();
+        winners.add(highestScore);
+        //any ties
+        for(TeamDto t: sorted) {
+            if(highestScore.getScore() == t.getScore() && !highestScore.getName().equals(t.getName())){
+                winners.add(t);
+            }
+        }
+
+        List<Player> eventPlayers = event.getPlayers().stream()
+                .filter(p -> !p.getIsWaiting() && !(p.getQuota() == 0))
+                .collect(Collectors.toList());
+
+        double money = (event.getCustomTeamMoney() != null) ? event.getCustomTeamMoney() : eventPlayers.size() * 5;
+        double teammoney = money / winners.size();
+        results.add("Total money: $"+String.format("%.2f", money)+"    Team money is $"+String.format("%.2f", teammoney)+"    each person: $"+ String.format("%.2f", teammoney/2));
+
+
+        List<String> names = winners.stream().map(p->p.getName()).collect(Collectors.toList());
+        if(winners.size()>1){
+            results.add("Tied for winner score: " + names.toString());
+//            for(int i =0;i<2;i++) {
+//                Collections.shuffle(winners);
+//            }
+        }else{results.add("Winner is :"+names.toString());}
+
+        int i=0;
+        for(TeamDto team : sorted) {
+            if(winners.contains(team)) {
+                results.add("Winner " + team.getName() + ":   " + team.getTeam() + "         " + team.getScore());
+                if(i +1 == winners.size()){
+                    results.add("**********************************");
+                }
+            }else{
+                results.add(team.getName() + ":   " + team.getTeam() + "         " + team.getScore());
+            }
+            i++;
+        }
+        results.addAll(event.getEventWinners());
+        event.setEventWinners(results);
+        List<String> displayMessages = new ArrayList<>();
+        //first timers
+        List<Player> firstTimers =  event.getPlayers().stream()
+                .filter(p -> !p.getIsWaiting() && (p.getQuota() == 0) )
+                .collect(Collectors.toList());
+        if(!firstTimers.isEmpty()){
+            for(Player p: firstTimers){
+                displayMessages.add("FIRST TIMER (not included in team pairings): "+p.getName());
+            }
+        }
+
+        //quitters
+        List<Player> withdrawn =  event.getPlayers().stream()
+                .filter(p -> (p.getIsWithdrawal()) )
+                .collect(Collectors.toList());
+        if(!withdrawn.isEmpty()){
+            for(Player p: withdrawn){
+                displayMessages.add("WITHDREW FROM EVENT (not included in team pairings): "+p.getName());
+            }
+        }
+        if(!displayMessages.isEmpty())
+            event.getEventWinners().addAll(displayMessages);
+
+
+        calculateScats(event);
+        //update future events with adjusted scores
+//        updateAdjustedScores(event);
+        //set status to closed
+        event.setStatus(EventStatus.COMPLETED);
+        return save(event);
+    }
+
     private void calculateScats(Event event) {
         log.info("calculateScats:  event "+ event.getId());
         List<Player> players = event.getPlayers().stream()
@@ -516,11 +611,12 @@ public class EventServiceImpl implements EventService {
                 winnerListing.add(" Pays : $" + String.format("%.2f", calculateWinnerTakesAllWinnings(eventPlayers, money)));
                 event.setEventWinners(winnerListing);
 
-            } else {
-
-                pickTeams(event, eventPlayers);
-
             }
+//            else {
+//
+//                pickTeams(event, eventPlayers);
+//
+//            }
         }
         List<String> displayMessages = new ArrayList<>();
         //first timers
