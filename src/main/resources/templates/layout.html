@@ -50,6 +50,14 @@
             <li sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"><a class="dropdown-item" th:href="@{/events/add}">Add Event</a></li>
           </ul>
         </li>
+        <li sec:authorize="isAuthenticated()" class="dropdown">
+          <a class="nav-link dropdown-toggle" id="navbarDropdownPortfolio" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Coveralls</a>
+          <ul  class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownPortfolio">
+            <li><a class="dropdown-item" th:href="@{/coveralls/list}">Current Games</a></li>
+            <li><a class="dropdown-item" th:href="@{/coveralls/list}">Past Games</a></li>
+            <li sec:authorize="false && isAuthenticated() && hasRole('ROLE_ADMIN')"><a class="dropdown-item" th:href="@{/coveralls/add}">Add Coverall</a></li>
+          </ul>
+        </li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/profiles}">Profile</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/users}">User List</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/courses}">Course List</a></li>

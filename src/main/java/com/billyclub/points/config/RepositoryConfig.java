@@ -1,9 +1,6 @@
 package com.billyclub.points.config;
 
-import com.billyclub.points.model.Course;
-import com.billyclub.points.model.Event;
-import com.billyclub.points.model.Player;
-import com.billyclub.points.model.User;
+import com.billyclub.points.model.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

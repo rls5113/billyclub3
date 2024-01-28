@@ -24,6 +24,6 @@ public interface EventService extends IService<Event, EventDto> {
 
     List<Player> getsMoneyBack(List<Player> eventPlayers);
 
-    Event savePickteams(Event event, TeamsDto teamsDto, List<String> moneybackList);
+    Event savePickteams(Event event, TeamsDto teamsDto);
 
 }

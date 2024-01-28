@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.billyclub'
-version = '0.1.3.1'
+version = '0.2.0.0'
 sourceCompatibility = '17'
 
 configurations {
@@ -61,3 +61,8 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
 }
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
+}
+

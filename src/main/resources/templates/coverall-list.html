@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras.spring-security"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+<head>
+    <title>Birdie Coverall</title>
+</head>
+<body layout:fragment="body">
+<style>
+    /*.main {*/
+    /*    padding: 80px 5px;*/
+    /*}*/
+
+</style>
+<div class="main">
+
+    <div class="card">
+        <div class="card-header bg-primary">
+            <h3 class="text-center text-light" th:text="'BIRDIE COVERALL'"></h3>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-sm btn-primary text-light" th:if="${current}" style="margin-bottom: 10px;"
+               th:href="@{/coverall/add}" sec:authorize="hasRole('ROLE_ADMIN')">Add a New Game <i class="fa-solid fa-plus"></i></a>
+            <table class="table table-responsive-sm table-striped table-bordered table-hover table-light">
+                <thead class="table-header">
+                    <tr>
+                        <th>ID</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Money</th>
+                        <th>Status</th>
+                        <th>Winner</th>
+                        <th># Players</th>
+                        <th style="width: 12%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="coverall: ${coveralls}" class="d-sm-table-row">
+                        <td th:text="${coverall.id}"></td>
+                        <td th:text="${{coverall.startdate}}"></td>
+                        <td th:text="${{coverall.enddate}}"></td>
+                        <td th:text="${{coverall.money}}"></td>
+                        <td th:text="${coverall.status}"></td>
+                        <td th:text="${coverall.coverallWinners.size}"></td>
+                        <td th:text="${coverall.players.size}"></td>
+                        <td><a class="btn btn-sm btn-primary text-light" th:href="@{/coveralls/{id}(id=${coverall.id})}">Details <i class="fa-solid fa-circle-info"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

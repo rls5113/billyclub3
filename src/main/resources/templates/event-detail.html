@@ -123,10 +123,10 @@
 
                                         <a th:href="@{/events/{eventId}/calc-scoring(eventId=${event.id})}"
 
-                                           th:if="${event.isAllScoresIn}" id="calc-scores"
+                                           th:if="${event.isAllScoresIn && event.players.size < 8}" id="calc-scores"
                                            class="btn btn-primary bcp-btn-align">Calculate Scores <i class="fa-solid fa-calculator"></i></a>
 
-                                        <a sec:authorize="hasRole('ROLE_ADMIN')"
+                                        <a th:if="${event.isAllScoresIn && event.players.size >= 8}"
                                            th:href="@{/events/{eventId}/pick-teams(eventId=${event.id})}"
                                            id="pick-teams"
                                            class="btn btn-primary bcp-btn-align">Pick Teams<i class="fa-solid fa-user-friends"></i></a>
@@ -148,7 +148,7 @@
                                 </div> <!-- end row -->
 
                                 <div class="col-sm-7 alert alert-info" th:if="${event.status.name().equals('COMPLETED')}">
-                                    <table class="col-2 table table-striped table-bordered table-hover table-light"
+                                    <table class="col-12 table table-striped table-bordered table-hover table-light"
                                            th:class="${event.status.name().equals('COMPLETED')}? 'col-2 table table-bordered table-hover table-light'">
                                         <thead class="table-header">
                                         <tr>
@@ -160,6 +160,16 @@
                                             <td th:if="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold; background-color: yellow"/>
                                             <td th:unless="${#strings.containsIgnoreCase(s,'winner')}" th:text="${s}" style="text-align: start; font-weight: bold;"/>
                                         </tr>
+                                        <tr>
+                                            <td class="col-12" style="text-align: left">
+                                                    <span th:each="coverall : *{coveralls}">
+                                                    <a th:href="@{/coveralls/{id}(id=${coverall.id})}"
+                                                       class="btn btn-primary" th:text="${#strings.prepend(#temporals.format(coverall.startdate,'MM/dd/yyyy'),'Coverall  ')}"></a>
+                                                    </span>
+                                            </td>
+
+                                        </tr>
+
                                         </tbody>
                                     </table>
                                 </div>
@@ -271,7 +281,9 @@
         </div><!-- end row -->
     </form>
 <!--    <div layout:insert="~{calculate-video-modal}"/>-->
-    <div layout:insert="~{usersPickList}"></div>
+    <form th:action="@{/events/{id}/addPlayersToEvent(id=${event.id})}" method="post" th:object="${userPickList}">
+        <div layout:insert="~{usersPickList}"></div>
+    </form>
 
     <div layout:insert="~{postScoreModal}"></div>
     <div layout:insert="~{event-edit-modal}"></div>
@@ -344,7 +356,7 @@
                 eventDate: {
                     required: true
                     ,date: true
-                    ,futureOrPresent: true
+                    // ,futureOrPresent: true
                 },
                 startTime: "required",
                 numOfTimes: {
@@ -360,7 +372,7 @@
                 eventDate: {
                     required: "Event Date should not be empty. "
                     ,date:"Please enter a valid date (mm/dd/yyyy)"
-                    ,futureOrPresent: "Event Date cannot be in the past."
+                    // ,futureOrPresent: "Event Date cannot be in the past."
                 },
                 startTime: "Start Time should not be empty.",
                 numOfTimes: {

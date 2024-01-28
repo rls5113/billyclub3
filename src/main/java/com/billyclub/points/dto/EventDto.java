@@ -1,6 +1,7 @@
 package com.billyclub.points.dto;
 
 import com.billyclub.points.model.Course;
+import com.billyclub.points.model.Coverall;
 import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import jakarta.persistence.Temporal;
@@ -28,7 +29,7 @@ public class EventDto {
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     @Temporal(TemporalType.DATE)
     @NotNull(message = "Event Date should not be empty")
-    @FutureOrPresent(message="Event Date cannot be in the past")
+//    @FutureOrPresent(message="Event Date cannot be in the past")
     private LocalDate eventDate;
     @DateTimeFormat(pattern = "hh:mm a")
     @Temporal(TemporalType.TIME)
@@ -50,5 +51,6 @@ public class EventDto {
     private int numberWaitlist;
     private Double customTeamMoney;
     private Double customScatMoney;
+    private List<Coverall> coveralls;
 
 }

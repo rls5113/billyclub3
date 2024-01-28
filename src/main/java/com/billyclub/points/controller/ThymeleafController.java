@@ -34,8 +34,8 @@ public class ThymeleafController {
     private final CourseService courseService;
 
     private static final Logger log = LoggerFactory.getLogger(ThymeleafController.class);
-    private Long eventId;
-    private MultiPlayerScoresMapDto multiPlayerScores;
+//    private Long eventId;
+//    private MultiPlayerScoresMapDto multiPlayerScores;
 
     @Autowired
     public ThymeleafController(EventService eventService, UserService userService, PlayerService playerService, EmailService emailService, CourseService courseService) {
@@ -164,7 +164,7 @@ public class ThymeleafController {
         Event event = eventService.removePlayerFromEvent(eventId, playerId);
         String link = ServletUtility.getSiteURL(request)+"/events/"+event.getId()+"?current=true";
 
-        Map params = new HashMap<String, String>();
+        Map<String,String> params = new HashMap<>();
         params.put("eventStatus", event.getStatus().name());
         params.put("eventDate", event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
         params.put("startTime", event.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm a")));
@@ -224,32 +224,32 @@ public class ThymeleafController {
         return "redirect:/events/" + event.getId();
     }
 
-    @PostMapping("/events/{eventId}/postMultiScores")
-    @Transactional
-    public String postScoresToEvent(@PathVariable("eventId") Long eventId,
-                                    @ModelAttribute("multiPlayerScores") @Valid MultiPlayerScoresMapDto multiPlayerScores)
-    {
-        this.eventId = eventId;
-        this.multiPlayerScores = multiPlayerScores;
-        Event event = eventService.findById(eventId);
-        List<PlayerDto> eventPlayers = event.getPlayers().stream()
-                .map(p -> playerService.toDto(p))
-                .filter(p -> !p.getIsWaiting())
-                .collect(Collectors.toList());
-
-        for (PlayerDto player : eventPlayers) {
-            //get the scoreholder for player
-            Map<String, PlayerScoresHolderDto> map = multiPlayerScores.getScores();
-            PlayerScoresHolderDto holder = map.get(player.getName());
-            player.setScoreForEvent(holder.getScoreForEvent());
-            player.setBirdies(Arrays.asList(holder.getBirdies()));
-            playerService.save(playerService.toEntity(player));
-
-            //update future events for this player and save
-        }
-
-        return "redirect:/events/" + eventId;
-    }
+//    @PostMapping("/events/{eventId}/postMultiScores")
+//    @Transactional
+//    public String postScoresToEvent(@PathVariable("eventId") Long eventId,
+//                                    @ModelAttribute("multiPlayerScores") @Valid MultiPlayerScoresMapDto multiPlayerScores)
+//    {
+//        this.eventId = eventId;
+//        this.multiPlayerScores = multiPlayerScores;
+//        Event event = eventService.findById(eventId);
+//        List<PlayerDto> eventPlayers = event.getPlayers().stream()
+//                .map(p -> playerService.toDto(p))
+//                .filter(p -> !p.getIsWaiting())
+//                .collect(Collectors.toList());
+//
+//        for (PlayerDto player : eventPlayers) {
+//            //get the scoreholder for player
+//            Map<String, PlayerScoresHolderDto> map = multiPlayerScores.getScores();
+//            PlayerScoresHolderDto holder = map.get(player.getName());
+//            player.setScoreForEvent(holder.getScoreForEvent());
+//            player.setBirdies(Arrays.asList(holder.getBirdies()));
+//            playerService.save(playerService.toEntity(player));
+//
+//            //update future events for this player and save
+//        }
+//
+//        return "redirect:/events/" + eventId;
+//    }
 
 
     @GetMapping("/profiles")
@@ -292,7 +292,7 @@ public class ThymeleafController {
         eventToEdit = eventService.transfer(eventDto, eventToEdit);
         String link = ServletUtility.getSiteURL(request)+"/events/"+eventToEdit.getId()+"?current=true";
 
-        Map params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
 
         params.put("course", eventToEdit.getCourse().getName());
         params.put("eventStatus", eventToEdit.getStatus().name());
@@ -379,7 +379,7 @@ public class ThymeleafController {
         //send email
         log.info("Add Event : sending new event email");
 
-        Map params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("course", event.getCourse().getName());
         params.put("eventStatus", event.getStatus().name());
         params.put("eventDate", event.getEventDate().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
@@ -475,7 +475,7 @@ public class ThymeleafController {
 //        }
 
         Event event = eventService.findById(eventId);
-        event = eventService.savePickteams(event, wrap, (List<String>) model.getAttribute("moneybackList") );
+        event = eventService.savePickteams(event, wrap);
         log.info(wrap.toString());
 
         return "redirect:/events/" + eventId;

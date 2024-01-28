@@ -46,7 +46,7 @@ public class Event {
 
     private EventStatus status;
     @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "event")
     private List<Player> players = new ArrayList<>();
 
     @ElementCollection
@@ -61,6 +61,15 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+    @JoinTable(
+            name="events_coveralls",
+            joinColumns={@JoinColumn(name="EVENT_ID", referencedColumnName="ID")},
+            inverseJoinColumns={@JoinColumn(name="COVERALL_ID", referencedColumnName="ID")})
+    private List<Coverall> coveralls = new ArrayList<>();
+
+
     @Transient
     public boolean isAllScoresIn() {
         if(players.isEmpty()) return false;

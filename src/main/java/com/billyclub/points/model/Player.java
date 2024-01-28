@@ -3,9 +3,7 @@ package com.billyclub.points.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
@@ -16,6 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Table(name = "players")
 public class Player {
     @Id
@@ -41,10 +40,11 @@ public class Player {
     private Boolean isWithdrawal;
     private String team;
 
-    private List<String> eagles = new ArrayList<>();
-    private List<String> birdies = new ArrayList<>();
+    private List<String> eagles;
+    private List<String> birdies;
 
     @JsonBackReference
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
             @JoinColumn(name = "event_id")
     private Event event;

@@ -9,10 +9,7 @@ import com.billyclub.points.model.EventStatus;
 import com.billyclub.points.model.Player;
 import com.billyclub.points.model.User;
 import com.billyclub.points.repository.EventRepository;
-import com.billyclub.points.service.EmailService;
-import com.billyclub.points.service.EventService;
-import com.billyclub.points.service.PlayerService;
-import com.billyclub.points.service.UserService;
+import com.billyclub.points.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -37,12 +34,15 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     @Autowired
     private final EmailService emailService;
+    @Autowired
+    private final CoverallService coverallService;
     private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
-    public EventServiceImpl(EventRepository eventRepository, PlayerServiceImpl playerService, UserService userService, EmailService emailService) {
+    public EventServiceImpl(EventRepository eventRepository, PlayerServiceImpl playerService, UserService userService, EmailService emailService, CoverallService coverallService) {
         this.eventRepository = eventRepository;
         this.playerService = playerService;
         this.userService = userService;
         this.emailService = emailService;
+        this.coverallService = coverallService;
     }
 
 
@@ -135,9 +135,15 @@ public class EventServiceImpl implements EventService {
         calculateScats(event);
         //update future events with adjusted scores
         updateAdjustedScores(event);
+        //processCoveralls
+        processCoveralls(event);
         //set status to closed
         event.setStatus(EventStatus.COMPLETED);
         return save(event);
+    }
+
+    private void processCoveralls(Event event) {
+        event = coverallService.processEvent(event);
     }
 
     @Override
@@ -146,7 +152,8 @@ public class EventServiceImpl implements EventService {
         List<EventDto> list = events.stream().map((event)-> toDto(event))
                 .collect(Collectors.toList());
         list.sort((e2, e1) -> (e1.getEventDate().compareTo(e2.getEventDate())));
-        return list;    }
+        return list;
+    }
 
     @Override
     public Event transfer(EventDto source, Event target) {
@@ -236,7 +243,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event savePickteams(Event event, TeamsDto teamsDto, List<String> moneybackList) {
+    public Event savePickteams(Event event, TeamsDto teamsDto) {
         List<String> results = new ArrayList<>();
         List<TeamDto> winners = new ArrayList<>();
         results.add("Scores posted:\n"+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm")));
@@ -281,6 +288,7 @@ public class EventServiceImpl implements EventService {
 //            }
         }else{results.add("Winner is :"+names.toString());}
 
+
         int i=0;
         for(TeamDto team : sorted) {
             if(winners.contains(team)) {
@@ -291,10 +299,20 @@ public class EventServiceImpl implements EventService {
             }else{
                 results.add(team.getName() + ":   " + team.getTeam() + "         " + team.getScore());
             }
+            //add team name to player record
+            for(Player player: eventPlayers){
+                for(String teamPlayer: team.getTeam()){
+                    if(teamPlayer.contains(player.getName())){
+                        player.setTeam(team.getName());
+                    }
+                }
+            }
             i++;
         }
         results.addAll(event.getEventWinners());
         event.setEventWinners(results);
+
+
         List<String> displayMessages = new ArrayList<>();
         //first timers
         List<Player> firstTimers =  event.getPlayers().stream()
@@ -321,13 +339,16 @@ public class EventServiceImpl implements EventService {
 
         calculateScats(event);
         //update future events with adjusted scores
-//        updateAdjustedScores(event);
+        updateAdjustedScores(event);
+
+        //update coverall
+        processCoveralls(event);
         //set status to closed
         event.setStatus(EventStatus.COMPLETED);
         return save(event);
     }
 
-    private void calculateScats(Event event) {
+     private void calculateScats(Event event) {
         log.info("calculateScats:  event "+ event.getId());
         List<Player> players = event.getPlayers().stream()
                 .filter(p -> !p.getIsWaiting())
